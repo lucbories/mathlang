@@ -1,0 +1,32 @@
+{
+  "name": "mathlang",
+  "version": "1.0.0",
+  "description": "test math vm",
+  "main": "dest/mathlang.js",
+  "dependencies": {
+    "@types/node": "^11.12.1",
+    "big-integer": "^1.6.43",
+    "chevrotain": "^4.3.1",
+    "decimal.js": "^10.1.1",
+    "systemjs": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.6",
+    "@types/sinon": "^7.0.10",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "ts-node": "^8.0.3",
+    "typescript": "^3.4.1"
+  },
+  "scripts": {
+    "test": "mocha --reporter spec --require ts-node/register src/**/*.test.ts",
+    "test-compiler": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/*.test.ts",
+    "test-ast-assign": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/1-ast_builder/math_lang_parser_assign.test.ts",
+    "test-ast-number": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/1-ast_builder/math_lang_parser_number.test.ts",
+    "testjs": "mocha  dest/tests/unit/**/*.test.js",
+    "watch-test": "mocha --reporter spec --require ts-node/register --watch --watch-extensions ts src/**/*.test.ts"
+  },
+  "author": "",
+  "license": "MIT"
+}
