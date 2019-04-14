@@ -33,15 +33,16 @@ describe('MathLang if parser', () => {
         const result = {
             type:'IF_STATEMENT',
             condition: {
-                type:'NUMBER',
+                type:'INTEGER',
                 value:'12',
                 options:empty_array
             },
             then:{
                 type:'ASSIGN_STATEMENT',
                 name:'a',
+                members:<any>undefined,
                 expression: {
-                    type:'NUMBER',
+                    type:'INTEGER',
                     value:'456',
                     options:empty_array
                 }
@@ -52,7 +53,7 @@ describe('MathLang if parser', () => {
     });
 
     it('Parse if then else statement' , () => {
-        const text = 'if 12 then a=456 else a=789 end if';
+        const text = 'if 12 then a=456 else a=789.23 end if';
         const parser_result = parse(text, false);
 
         // console.log(parser_result.ast);
@@ -70,15 +71,16 @@ describe('MathLang if parser', () => {
         const result = {
             type:'IF_STATEMENT',
             condition: {
-                type:'NUMBER',
+                type:'INTEGER',
                 value:'12',
                 options:empty_array
             },
             then:{
                 type:'ASSIGN_STATEMENT',
                 name:'a',
+                members:<any>undefined,
                 expression: {
-                    type:'NUMBER',
+                    type:'INTEGER',
                     value:'456',
                     options:empty_array
                 }
@@ -86,9 +88,10 @@ describe('MathLang if parser', () => {
             else:<any>{
                 type:'ASSIGN_STATEMENT',
                 name:'a',
+                members:<any>undefined,
                 expression: {
-                    type:'NUMBER',
-                    value:'789',
+                    type:'FLOAT',
+                    value:'789.23',
                     options:empty_array
                 }
             }

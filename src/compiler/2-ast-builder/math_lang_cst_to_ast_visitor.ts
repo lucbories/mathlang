@@ -1,8 +1,9 @@
-import { MathLangCstToAstVisitorStatement } from './math_lang_visitor_statement';
+import MathLangCstToAstVisitorStatement from './math_lang_cst_to_ast_visitor_statement';
+import TYPES from '../3-program_builder/program_types';
 
 
 
-class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
+export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
     constructor() {
         super();
 
@@ -30,6 +31,7 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
 
         return {
             type: "COMPARATOR_EXPRESSION",
+            ic_type:TYPES.BOOLEAN,
             lhs: node_lhs,
             operator: node_op,
             rhs: node_rhs
@@ -49,6 +51,7 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
 
         return {
             type: "MULTDIV_EXPRESSION",
+            ic_type:this.compute_binop_type(node_op.value, node_lhs, node_rhs),
             lhs: node_lhs,
             operator: node_op,
             rhs: node_rhs
@@ -68,6 +71,7 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
 
         return {
             type: "ADDSUB_EXPRESSION",
+            ic_type:this.compute_binop_type(node_op.value, node_lhs, node_rhs),
             lhs: node_lhs,
             operator: node_op,
             rhs: node_rhs
@@ -88,6 +92,7 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
         if (node_rhs && node_op) {
             return {
                 type: "PREUNOP_EXPRESSION",
+                ic_type:this.compute_preunop_type(node_op, node_rhs),
                 rhs: node_rhs,
                 operator: node_op
             }
@@ -95,24 +100,28 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
 
         if (ctx.True) {
             return {
-                type: "TRUE"
+                type: "TRUE",
+                ic_type:TYPES.KEYWORD
             }
         }
 
         if (ctx.False) {
             return {
-                type: "FALSE"
+                type: "FALSE",
+                ic_type:TYPES.KEYWORD
             }
         }
 
         if (ctx.Null) {
             return {
-                type: "NULL"
+                type: "NULL",
+                ic_type:TYPES.KEYWORD
             }
         }
         
         return {
             type: "UNKNOW_UNARY_EXPRESSION",
+            ic_type: TYPES.ERROR,
             context:ctx
         }
     }
@@ -126,7 +135,8 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
         if (node_lhs && node_op) {
             return {
                 type: "POSTUNOP_EXPRESSION",
-                name: node_lhs,
+                ic_type:this.compute_postunop_type(node_op, node_lhs),
+                lhs: node_lhs,
                 operator: node_op
             }
         }
@@ -137,6 +147,7 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
         
         return {
             type: "UNKNOW_POSTFIX_EXPRESSION",
+            ic_type: TYPES.ERROR,
             context:ctx
         }
     }
@@ -158,6 +169,7 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
             const id = ctx.ID[0].image;
             return {
                 type: "ID_EXPRESSION",
+                ic_type:this.get_symbol_type(id),
                 name: id,
                 options: member_options
             };
@@ -171,6 +183,7 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
         
         return {
             type: "UNKNOW_MEMBER_EXPRESSION",
+            ic_type: TYPES.ERROR,
             context:ctx
         }
     }
@@ -179,21 +192,27 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
         // this.dump_ctx('MemberOptionExpression', ctx);
 
         if (ctx.BoxMemberExpression) {
+            const ast_node = this.visit(ctx.BoxMemberExpression);
             return {
                 type: "BOX_EXPRESSION",
-                node: this.visit(ctx.BoxMemberExpression)
+                ic_type:ast_node.ic_type,
+                node: ast_node
             }
         }
         if (ctx.DotMemberExpression) {
+            const ast_node = this.visit(ctx.DotMemberExpression);
             return {
                 type: "DOT_EXPRESSION",
-                node: this.visit(ctx.DotMemberExpression)
+                ic_type:ast_node.ic_type,
+                node: ast_node
             }
         }
         if (ctx.DashMemberExpression) {
+            const ast_node = this.visit(ctx.DashMemberExpression);
             return {
                 type: "DASH_EXPRESSION",
-                node: this.visit(ctx.DashMemberExpression)
+                ic_type:ast_node.ic_type,
+                node: ast_node
             }
         }
         if (ctx.Arguments) {
@@ -202,6 +221,7 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
         
         return {
             type: "UNKNOW_MEMBER_ITEM_EXPRESSION",
+            ic_type: TYPES.ERROR,
             context: ctx
         }
     }
@@ -210,20 +230,24 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
         // this.dump_ctx('AssignMemberOptionExpression', ctx);
 
         if (ctx.BoxMemberExpression) {
+            const ast_node = this.visit(ctx.BoxMemberExpression);
             return {
                 type: "BOX_EXPRESSION",
-                node: this.visit(ctx.BoxMemberExpression)
+                ic_type:ast_node.ic_type,
+                node: ast_node
             }
         }
         if (ctx.DotMemberExpression) {
             return {
                 type: "DOT_EXPRESSION",
+                ic_type:TYPES.METHOD_ID,
                 node: this.visit(ctx.DotMemberExpression)
             }
         }
         if (ctx.DashMemberExpression) {
             return {
                 type: "DASH_EXPRESSION",
+                ic_type:TYPES.ATTRIBUTE_ID,
                 node: this.visit(ctx.DashMemberExpression)
             }
         }
@@ -243,16 +267,67 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
         if (ctx.StringLiteral) {
             return {
                 type: "STRING",
+                ic_type:TYPES.STRING,
                 value:ctx.StringLiteral[0].image
             }
         }
 
-        if (ctx.NumberLiteral) {
+        if (ctx.IntegerLiteral) {
             return {
-                type: "NUMBER",
-                value:ctx.NumberLiteral[0].image
+                type: "INTEGER",
+                ic_type:TYPES.INTEGER,
+                value:ctx.IntegerLiteral[0].image
             }
         }
+
+        if (ctx.FloatLiteral) {
+            return {
+                type: "FLOAT",
+                ic_type:TYPES.FLOAT,
+                value:ctx.FloatLiteral[0].image
+            }
+        }
+
+        if (ctx.BigInteger1Literal) {
+            return {
+                type: "BIGINTEGER",
+                ic_type:TYPES.BIGINTEGER,
+                value:ctx.BigInteger1Literal[0].image
+            }
+        }
+
+        if (ctx.BigInteger2Literal) {
+            return {
+                type: "BIGINTEGER",
+                ic_type:TYPES.BIGINTEGER,
+                value:ctx.BigInteger2Literal[0].image
+            }
+        }
+
+        if (ctx.BigFloat1Literal) {
+            return {
+                type: "BIGFLOAT",
+                ic_type:TYPES.BIGFLOAT,
+                value:ctx.BigFloat1Literal[0].image
+            }
+        }
+
+        if (ctx.BigFloat2Literal) {
+            return {
+                type: "BIGFLOAT",
+                ic_type:TYPES.BIGFLOAT,
+                value:ctx.BigFloat2Literal[0].image
+            }
+        }
+
+        if (ctx.BigFloat3Literal) {
+            return {
+                type: "BIGFLOAT",
+                ic_type:TYPES.BIGFLOAT,
+                value:ctx.BigFloat3Literal[0].image
+            }
+        }
+
 
         if (ctx.ArrayLiteral) {
             return this.visit(ctx.ArrayLiteral);
@@ -278,6 +353,7 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
         const node_expr = this.visit(ctx.BinaryExpression);
         return {
             type: "PARENTHESIS_EXPRESSION",
+            ic_type:node_expr.ic_type,
             expression: node_expr
         }
     }
@@ -302,6 +378,8 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
         if (!ctx.BinaryExpression) {
             return {
                 type: "ARGS_EXPRESSION",
+                ic_type:TYPES.ARRAY,
+                ic_subtypes:[TYPES.UNKNOW],
                 items: undefined
             }
         }
@@ -311,13 +389,23 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
         }
 
         const nodes:any = [];
+        const ic_subtypes:string[] = [];
+        const ic_unique_subtypes:string[] = [];
+
         let node:any;
+        let ast_node:any;
+        let ic_type:string;
         for(node of ctx.BinaryExpression) {
-            nodes.push( this.visit(node) );
+            ast_node = this.visit(node);
+            ic_type = ast_node.ic_type;
+            ic_subtypes.push(ic_type);
+            nodes.push(ast_node);
         }
         
         return {
             type: "ARGS_EXPRESSION",
+            ic_type:TYPES.ARRAY,
+            ic_subtypes:ic_unique_subtypes.length == 1 ? ic_unique_subtypes : ic_subtypes,
             items: nodes
         }
     }
@@ -328,22 +416,25 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
         if (!ctx.ID) {
             return {
                 type: "ARGIDS_EXPRESSION",
+                ic_type:TYPES.ARRAY,
+                ic_subtypes:[TYPES.UNKNOW],
                 items: undefined
             }
         }
 
-        if ( ! Array.isArray(ctx.ID) ) {
-            ctx.ID = [ctx.ID[0].image];
-        }
-
         const nodes:any = [];
+        const ic_subtypes:string[] = [];
+
         let node:any;
         for(node of ctx.ID) {
+            ic_subtypes.push('IDENTIFIER');
             nodes.push(node.image);
         }
         
         return {
             type: "ARGIDS_EXPRESSION",
+            ic_type:TYPES.ARRAY,
+            ic_subtypes:ic_subtypes,
             items: nodes
         }
     }
@@ -354,7 +445,9 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
         if (!ctx.BinaryExpression) {
             return {
                 type: "ARRAY_EXPRESSION",
-                items: undefined
+                ic_type:TYPES.ARRAY,
+                ic_subtypes:[TYPES.UNKNOW],
+                items:<any>undefined
             }
         }
 
@@ -362,14 +455,27 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
             ctx.BinaryExpression = [ctx.BinaryExpression];
         }
 
-        const nodes:any = [];
+        const nodes:any[] = [];
+        const ic_subtypes:string[] = [];
+        const ic_unique_subtypes:string[] = [];
+
         let node:any;
+        let ast_node:any;
+        let ic_type:string;
         for(node of ctx.BinaryExpression) {
-            nodes.push( this.visit(node) );
+            ast_node = this.visit(node);
+            ic_type = ast_node.ic_type;
+            ic_subtypes.push(ic_type);
+            if ( ic_unique_subtypes.indexOf(ic_type) < 0 ) {
+                ic_unique_subtypes.push(ic_type);
+            }
+            nodes.push(ast_node);
         }
         
         return {
             type: "ARRAY_EXPRESSION",
+            ic_type:TYPES.ARRAY,
+            ic_subtypes:ic_unique_subtypes.length == 1 ? ic_unique_subtypes : ic_subtypes,
             items: nodes
         }
     }
@@ -399,6 +505,3 @@ class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStatement {
     }
 }
 
-
-
-export const math_lang_visitor = new MathLangCstToAstVisitor();

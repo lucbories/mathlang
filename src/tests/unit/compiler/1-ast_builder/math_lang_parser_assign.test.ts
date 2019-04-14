@@ -35,7 +35,7 @@ describe('MathLang assign parser', () => {
             name:'a',
             members:<any>undefined,
             expression: {
-                type:'NUMBER',
+                type:'INTEGER',
                 value:'456',
                 options:empty_array
             }
@@ -69,7 +69,7 @@ describe('MathLang assign parser', () => {
                 }
             ],
             expression: {
-                type:'NUMBER',
+                type:'INTEGER',
                 value:'456',
                 options:empty_array
             }
@@ -100,7 +100,7 @@ describe('MathLang assign parser', () => {
             expression: {
                 type:'ADDSUB_EXPRESSION',
                 lhs:{
-                    type:'NUMBER',
+                    type:'INTEGER',
                     value:'456',
                     options:empty_array
                 },
@@ -126,7 +126,7 @@ describe('MathLang assign parser', () => {
                             value:'*'
                         },
                         rhs:{
-                            type:'NUMBER',
+                            type:'INTEGER',
                             value:'8',
                             options:empty_array
                         }
@@ -166,7 +166,7 @@ describe('MathLang assign parser', () => {
             expression: {
                 type:'ADDSUB_EXPRESSION',
                 lhs:{
-                    type:'NUMBER',
+                    type:'INTEGER',
                     value:'456',
                     options:empty_array
                 },
@@ -192,7 +192,7 @@ describe('MathLang assign parser', () => {
                             value:'*'
                         },
                         rhs:{
-                            type:'NUMBER',
+                            type:'INTEGER',
                             value:'8',
                             options:empty_array
                         }
@@ -232,7 +232,7 @@ describe('MathLang assign parser', () => {
             expression: {
                 type:'ADDSUB_EXPRESSION',
                 lhs:{
-                    type:'NUMBER',
+                    type:'INTEGER',
                     value:'456',
                     options:empty_array
                 },
@@ -258,7 +258,7 @@ describe('MathLang assign parser', () => {
                             value:'*'
                         },
                         rhs:{
-                            type:'NUMBER',
+                            type:'INTEGER',
                             value:'8',
                             options:empty_array
                         }

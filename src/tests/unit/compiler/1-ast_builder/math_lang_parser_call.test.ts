@@ -68,7 +68,7 @@ describe('MathLang call parser', () => {
                     type:'ARGS_EXPRESSION',
                     items:<any>[
                         {
-                            type:'NUMBER',
+                            type:'INTEGER',
                             value:'23',
                             options:empty_array
                         }
@@ -149,7 +149,7 @@ describe('MathLang call parser', () => {
                     type:'ARGS_EXPRESSION',
                     items:<any>[
                         {
-                            type:'NUMBER',
+                            type:'INTEGER',
                             value:'23',
                             options:empty_array
                         },

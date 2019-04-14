@@ -53,15 +53,45 @@ export const Minus             = createToken({ name: "Minus",              patte
 export const Mult              = createToken({ name: "Mult",               pattern: /\*/ });
 export const Div               = createToken({ name: "Div",                pattern: /\// });
 
+
 // LITERALS
 export const StringLiteral = createToken({
     name: "StringLiteral",
     pattern: /'(:?[^\\"]|\\(:?[bfnrtv"\\/]|u[0-9a-fA-F]{4}))*'/
 });
-export const NumberLiteral = createToken({
-    name: "NumberLiteral",
-    pattern: /(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
+
+export const BigFloat1Literal = createToken({
+    name: "BigFloat1Literal",
+    pattern: /(0|[1-9]\d{10,})\.\d+([eE][+-]?\d+)?/
 });
+export const BigFloat2Literal = createToken({
+    name: "BigFloat2Literal",
+    pattern: /(0|[1-9]\d*)\.\d{10,}([eE][+-]?\d+)?/
+});
+export const BigFloat3Literal = createToken({
+    name: "BigFloat3Literal",
+    pattern: /(0|[1-9]\d*)\.\d+[eE][+-]?\d{3,}/
+});
+
+export const FloatLiteral = createToken({
+    name: "FloatLiteral",
+    pattern: /(0|[1-9]\d{0,9})\.\d{1,10}([eE][+-]?\d{1,2})?/
+});
+
+export const BigInteger1Literal = createToken({
+    name: "BigInteger1Literal",
+    pattern: /(0|[1-9]\d{10,})/
+});
+export const BigInteger2Literal = createToken({
+    name: "BigInteger2Literal",
+    pattern: /(0|[1-9]\d*)[eE][+-]?\d{3,}/
+});
+
+export const IntegerLiteral = createToken({
+    name: "IntegerLiteral",
+    pattern: /(0|[1-9]\d{0,9})([eE][+-]?\d{1,2})?/
+});
+
 export const WhiteSpace = createToken({
     name: "WhiteSpace",
     pattern: /[ \t\n\r]+/,

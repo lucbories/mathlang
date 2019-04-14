@@ -1,19 +1,12 @@
 import { math_lang_parser } from '../1-cst_builder/math_lang_parser';
+import MathLangCstToAstVisitorBase from './math_lang_cst_to_ast_visitor_base'
 
 
-const BaseVisitor = math_lang_parser.getBaseCstVisitorConstructor()
 
 
-
-export class MathLangCstToAstVisitorStatement extends BaseVisitor {
+export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVisitorBase {
     constructor() {
         super();
-    }
-
-
-    dump_ctx(label:string, ctx:any) {
-        const json = JSON.stringify(ctx);
-        console.log(label, json)
     }
 
 

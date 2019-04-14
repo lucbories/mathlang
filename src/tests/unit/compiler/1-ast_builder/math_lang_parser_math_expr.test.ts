@@ -3,6 +3,7 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import parse from '../../../../compiler/math_lang_processor';
+import TYPES from '../../../../compiler/3-program_builder/program_types'
 
 
 function dump_tree(label:string, tree:any) {
@@ -32,8 +33,10 @@ describe('MathLang math expression parser', () => {
         const empty_array:any[] = [];
         const result = {
             type:'ADDSUB_EXPRESSION',
+            ic_type:TYPES.INTEGER,
             lhs:{
-                type:'NUMBER',
+                type:'INTEGER',
+                ic_type:TYPES.INTEGER,
                 value:'12',
                 options:empty_array
             },
@@ -43,13 +46,17 @@ describe('MathLang math expression parser', () => {
             },
             rhs:{
                 type:'PARENTHESIS_EXPRESSION',
+                ic_type:TYPES.INTEGER,
                 expression: {
                     type:'MULTDIV_EXPRESSION',
+                    ic_type:TYPES.INTEGER,
                     lhs:{
                         type:'PREUNOP_EXPRESSION',
+                        ic_type:TYPES.INTEGER,
                         operator:'++',
                         rhs: {
                             type:'ID_EXPRESSION',
+                            ic_type:TYPES.INTEGER,
                             name:'b',
                             options:empty_array
                         }
@@ -59,7 +66,8 @@ describe('MathLang math expression parser', () => {
                         value:'*'
                     },
                     rhs:{
-                        type:'NUMBER',
+                        type:'INTEGER',
+                        ic_type:TYPES.INTEGER,
                         value:'8',
                         options:empty_array
                     }
@@ -88,15 +96,20 @@ describe('MathLang math expression parser', () => {
         const empty_array:any[] = [];
         const result = {
             type:'MULTDIV_EXPRESSION',
+            ic_type:TYPES.FLOAT,
             lhs:{
                 type:'PARENTHESIS_EXPRESSION',
+                ic_type:TYPES.FLOAT,
                 expression: {
                     type:'MULTDIV_EXPRESSION',
+                    ic_type:TYPES.FLOAT,
                     lhs:{
                         type:'PREUNOP_EXPRESSION',
+                        ic_type:TYPES.INTEGER,
                         operator:'--',
                         rhs: {
                             type:'ID_EXPRESSION',
+                            ic_type:TYPES.INTEGER,
                             name:'b',
                             options:empty_array
                         }
@@ -106,7 +119,8 @@ describe('MathLang math expression parser', () => {
                         value:'/'
                     },
                     rhs:{
-                        type:'NUMBER',
+                        type:'INTEGER',
+                        ic_type:TYPES.INTEGER,
                         value:'8',
                         options:empty_array
                     }
@@ -118,7 +132,8 @@ describe('MathLang math expression parser', () => {
                 value:'*'
             },
             rhs:{
-                type:'NUMBER',
+                type:'INTEGER',
+                ic_type:TYPES.INTEGER,
                 value:'56',
                 options:empty_array
             }
@@ -145,8 +160,10 @@ describe('MathLang math expression parser', () => {
         const empty_array:any[] = [];
         const result = {
             type:'MULTDIV_EXPRESSION',
+            ic_type:TYPES.FLOAT,
             lhs:{
-                type:'NUMBER',
+                type:'INTEGER',
+                ic_type:TYPES.INTEGER,
                 value:'12',
                 options:empty_array
             },
@@ -156,11 +173,14 @@ describe('MathLang math expression parser', () => {
             },
             rhs:{
                 type:'MULTDIV_EXPRESSION',
+                ic_type:TYPES.FLOAT,
                 lhs:{
                     type:'PREUNOP_EXPRESSION',
+                    ic_type:TYPES.INTEGER,
                     operator:'!',
                     rhs: {
                         type:'ID_EXPRESSION',
+                        ic_type:TYPES.INTEGER,
                         name:'b',
                         options:empty_array
                     }
@@ -170,7 +190,8 @@ describe('MathLang math expression parser', () => {
                     value:'/'
                 },
                 rhs:{
-                    type:'NUMBER',
+                    type:'INTEGER',
+                    ic_type:TYPES.INTEGER,
                     value:'78e-12',
                     options:empty_array
                 }
@@ -179,8 +200,8 @@ describe('MathLang math expression parser', () => {
         expect(ast_expr_node).eql(result);
     });
 
-    it('Parse 12*56+78 then statement' , () => {
-        const text = '12*56+78';
+    it('Parse 12*56+78++ then statement' , () => {
+        const text = '12*56+78++';
         const parser_result = parse(text, false, 'expression');
 
         // console.log(parser_result.ast);
@@ -197,10 +218,13 @@ describe('MathLang math expression parser', () => {
         const empty_array:any[] = [];
         const result = {
             type:'ADDSUB_EXPRESSION',
+            ic_type:TYPES.INTEGER,
             lhs:{
                 type:'MULTDIV_EXPRESSION',
+                ic_type:TYPES.INTEGER,
                 lhs:{
-                    type:'NUMBER',
+                    type:'INTEGER',
+                    ic_type:TYPES.INTEGER,
                     value:'12',
                     options:empty_array
                 },
@@ -209,7 +233,8 @@ describe('MathLang math expression parser', () => {
                     value:'*'
                 },
                 rhs:{
-                    type:'NUMBER',
+                    type:'INTEGER',
+                    ic_type:TYPES.INTEGER,
                     value:'56',
                     options:empty_array
                 }
@@ -219,9 +244,15 @@ describe('MathLang math expression parser', () => {
                 value:'+'
             },
             rhs:{
-                type:'NUMBER',
-                value:'78',
-                options:empty_array
+                type:'POSTUNOP_EXPRESSION',
+                ic_type:TYPES.INTEGER,
+                lhs:{
+                    type:'INTEGER',
+                    ic_type:TYPES.INTEGER,
+                    value:'78',
+                    options:empty_array
+                },
+                operator:'++'
             }
         }
         expect(ast_expr_node).eql(result);
@@ -245,8 +276,10 @@ describe('MathLang math expression parser', () => {
         const empty_array:any[] = [];
         const result = {
             type:'COMPARATOR_EXPRESSION',
+            ic_type:TYPES.BOOLEAN,
             lhs:{
                 type:'ID_EXPRESSION',
+                ic_type:TYPES.INTEGER,
                 name:'abc_UI_23',
                 options:empty_array
             },
@@ -256,10 +289,13 @@ describe('MathLang math expression parser', () => {
             },
             rhs:{
                 type:'ADDSUB_EXPRESSION',
+                ic_type:TYPES.INTEGER,
                 lhs:{
                     type:'MULTDIV_EXPRESSION',
+                    ic_type:TYPES.INTEGER,
                     lhs:{
-                        type:'NUMBER',
+                        type:'INTEGER',
+                        ic_type:TYPES.INTEGER,
                         value:'12',
                         options:empty_array
                     },
@@ -268,7 +304,8 @@ describe('MathLang math expression parser', () => {
                         value:'*'
                     },
                     rhs:{
-                        type:'NUMBER',
+                        type:'INTEGER',
+                        ic_type:TYPES.INTEGER,
                         value:'56',
                         options:empty_array
                     }
@@ -278,7 +315,8 @@ describe('MathLang math expression parser', () => {
                     value:'+'
                 },
                 rhs:{
-                    type:'NUMBER',
+                    type:'INTEGER',
+                    ic_type:TYPES.INTEGER,
                     value:'78',
                     options:empty_array
                 }
@@ -305,8 +343,10 @@ describe('MathLang math expression parser', () => {
         const empty_array:any[] = [];
         const result = {
             type:'COMPARATOR_EXPRESSION',
+            ic_type:TYPES.BOOLEAN,
             rhs:{
                 type:'ID_EXPRESSION',
+                ic_type:TYPES.INTEGER,
                 name:'a45Bc',
                 options:empty_array
             },
@@ -316,10 +356,13 @@ describe('MathLang math expression parser', () => {
             },
             lhs:{
                 type:'ADDSUB_EXPRESSION',
+                ic_type:TYPES.INTEGER,
                 lhs:{
                     type:'MULTDIV_EXPRESSION',
+                    ic_type:TYPES.INTEGER,
                     lhs:{
-                        type:'NUMBER',
+                        type:'INTEGER',
+                        ic_type:TYPES.INTEGER,
                         value:'12',
                         options:empty_array
                     },
@@ -328,7 +371,8 @@ describe('MathLang math expression parser', () => {
                         value:'*'
                     },
                     rhs:{
-                        type:'NUMBER',
+                        type:'INTEGER',
+                        ic_type:TYPES.INTEGER,
                         value:'56',
                         options:empty_array
                     }
@@ -338,7 +382,8 @@ describe('MathLang math expression parser', () => {
                     value:'+'
                 },
                 rhs:{
-                    type:'NUMBER',
+                    type:'INTEGER',
+                    ic_type:TYPES.INTEGER,
                     value:'78',
                     options:empty_array
                 }

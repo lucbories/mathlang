@@ -1,6 +1,6 @@
 
 import { math_lang_lexer, math_lang_parser } from './1-cst_builder/math_lang_parser';
-import { math_lang_visitor } from './2-ast-builder/math_lang_visitor';
+import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visitor';
 
 
 
@@ -23,15 +23,25 @@ export default function(text:string, throw_errors:boolean=true, rule_name:string
             )
         }
     } else {
-        // Visit
-        ast = math_lang_visitor.visit(cst);
+        // Build AST
+        const math_lang_cst_to_ast_visitor = new MathLangCstToAstVisitor();
+        ast = math_lang_cst_to_ast_visitor.visit(cst);
     }
 
     return {
         cst:cst,
         ast:ast,
-        ict:{},
+        ict:{
+            block:{
+                symbols:{},
+                registers:<any>[],
+                args:{},
+                instructions:<any>[]
+            },
+            symbols:{}
+        },
         lexErrors: lexResult.errors,
-        parseErrors: math_lang_parser.errors
+        parseErrors: math_lang_parser.errors,
+        ictErrors:<any>undefined
     }
 }

@@ -116,7 +116,17 @@ export class MathLangParserExpressions extends MathLangParserStatements {
             this.c5 ||
                 (this.c5 = [
                     { ALT: () => this.CONSUME(t.StringLiteral) },
-                    { ALT: () => this.CONSUME(t.NumberLiteral) },
+                    
+                    { ALT: () => this.CONSUME(t.BigInteger1Literal) },
+                    { ALT: () => this.CONSUME(t.BigInteger2Literal) },
+
+                    { ALT: () => this.CONSUME(t.IntegerLiteral) },
+                    { ALT: () => this.CONSUME(t.FloatLiteral) },
+
+                    { ALT: () => this.CONSUME(t.BigFloat1Literal) },
+                    { ALT: () => this.CONSUME(t.BigFloat2Literal) },
+                    { ALT: () => this.CONSUME(t.BigFloat3Literal) },
+
                     { ALT: () => this.SUBRULE(this.ArrayLiteral) },
                     { ALT: () => this.SUBRULE(this.ParenthesisExpression) }
                 ])

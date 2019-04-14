@@ -20,12 +20,14 @@
     "typescript": "^3.4.1"
   },
   "scripts": {
-    "test": "mocha --reporter spec --require ts-node/register src/**/*.test.ts",
-    "test-compiler": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/*.test.ts",
-    "test-ast-assign": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/1-ast_builder/math_lang_parser_assign.test.ts",
-    "test-ast-number": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/1-ast_builder/math_lang_parser_number.test.ts",
-    "testjs": "mocha  dest/tests/unit/**/*.test.js",
-    "watch-test": "mocha --reporter spec --require ts-node/register --watch --watch-extensions ts src/**/*.test.ts"
+    "test":              "mocha --reporter spec --require ts-node/register src/**/*.test.ts",
+    "test-compiler":     "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/**/*.test.ts",
+    "test-ast":          "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/1-ast_builder/*.test.ts",
+    "test-ast-assign":   "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/1-ast_builder/math_lang_parser_assign.test.ts",
+    "test-ast-number":   "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/1-ast_builder/math_lang_parser_number.test.ts",
+    "test-ast-mathexpr": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/1-ast_builder/math_lang_parser_math_expr.test.ts",
+    "testjs":            "mocha  dest/tests/unit/**/*.test.js",
+    "watch-test":        "mocha --reporter spec --require ts-node/register --watch --watch-extensions ts src/**/*.test.ts"
   },
   "author": "",
   "license": "MIT"
