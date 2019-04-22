@@ -171,13 +171,13 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
                 type: "ID_EXPRESSION",
                 ic_type:this.get_symbol_type(id),
                 name: id,
-                options: member_options
+                members: member_options
             };
         }
 
         if (ctx.PrimaryExpression) {
             const node_prim = this.visit(ctx.PrimaryExpression);
-            node_prim.options = member_options;
+            node_prim.members = member_options;
             return node_prim;
         }
         
@@ -196,7 +196,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
             return {
                 type: "BOX_EXPRESSION",
                 ic_type:ast_node.ic_type,
-                node: ast_node
+                expression: ast_node
             }
         }
         if (ctx.DotMemberExpression) {
@@ -204,7 +204,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
             return {
                 type: "DOT_EXPRESSION",
                 ic_type:ast_node.ic_type,
-                node: ast_node
+                identifier: ast_node
             }
         }
         if (ctx.DashMemberExpression) {
@@ -212,7 +212,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
             return {
                 type: "DASH_EXPRESSION",
                 ic_type:ast_node.ic_type,
-                node: ast_node
+                expression: ast_node
             }
         }
         if (ctx.Arguments) {
@@ -234,21 +234,21 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
             return {
                 type: "BOX_EXPRESSION",
                 ic_type:ast_node.ic_type,
-                node: ast_node
+                expression: ast_node
             }
         }
         if (ctx.DotMemberExpression) {
             return {
                 type: "DOT_EXPRESSION",
                 ic_type:TYPES.METHOD_ID,
-                node: this.visit(ctx.DotMemberExpression)
+                identifier: this.visit(ctx.DotMemberExpression)
             }
         }
         if (ctx.DashMemberExpression) {
             return {
                 type: "DASH_EXPRESSION",
                 ic_type:TYPES.ATTRIBUTE_ID,
-                node: this.visit(ctx.DashMemberExpression)
+                expression: this.visit(ctx.DashMemberExpression)
             }
         }
         if (ctx.ArgumentsWithIds) {
@@ -272,11 +272,19 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
             }
         }
 
-        if (ctx.IntegerLiteral) {
+        if (ctx.Integer1Literal) {
             return {
                 type: "INTEGER",
                 ic_type:TYPES.INTEGER,
-                value:ctx.IntegerLiteral[0].image
+                value:ctx.Integer1Literal[0].image
+            }
+        }
+
+        if (ctx.Integer2Literal) {
+            return {
+                type: "INTEGER",
+                ic_type:TYPES.INTEGER,
+                value:ctx.Integer2Literal[0].image
             }
         }
 
@@ -425,6 +433,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
         const nodes:any = [];
         const ic_subtypes:string[] = [];
 
+        // TODO: parse and determines function operands types
         let node:any;
         for(node of ctx.ID) {
             ic_subtypes.push('IDENTIFIER');

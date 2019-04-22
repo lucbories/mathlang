@@ -26,6 +26,7 @@ export default function(text:string, throw_errors:boolean=true, rule_name:string
         // Build AST
         const math_lang_cst_to_ast_visitor = new MathLangCstToAstVisitor();
         ast = math_lang_cst_to_ast_visitor.visit(cst);
+        const t=1;
     }
 
     return {

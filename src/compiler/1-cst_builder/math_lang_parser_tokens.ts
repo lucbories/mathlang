@@ -78,6 +78,11 @@ export const FloatLiteral = createToken({
     pattern: /(0|[1-9]\d{0,9})\.\d{1,10}([eE][+-]?\d{1,2})?/
 });
 
+export const Integer1Literal = createToken({
+    name: "Integer1Literal",
+    pattern: /(0|[1-9]\d{0,9})/
+});
+
 export const BigInteger1Literal = createToken({
     name: "BigInteger1Literal",
     pattern: /(0|[1-9]\d{10,})/
@@ -87,8 +92,8 @@ export const BigInteger2Literal = createToken({
     pattern: /(0|[1-9]\d*)[eE][+-]?\d{3,}/
 });
 
-export const IntegerLiteral = createToken({
-    name: "IntegerLiteral",
+export const Integer2Literal = createToken({
+    name: "Integer2Literal",
     pattern: /(0|[1-9]\d{0,9})([eE][+-]?\d{1,2})?/
 });
 

@@ -120,7 +120,8 @@ export class MathLangParserExpressions extends MathLangParserStatements {
                     { ALT: () => this.CONSUME(t.BigInteger1Literal) },
                     { ALT: () => this.CONSUME(t.BigInteger2Literal) },
 
-                    { ALT: () => this.CONSUME(t.IntegerLiteral) },
+                    { ALT: () => this.CONSUME(t.Integer1Literal) },
+                    { ALT: () => this.CONSUME(t.Integer2Literal) },
                     { ALT: () => this.CONSUME(t.FloatLiteral) },
 
                     { ALT: () => this.CONSUME(t.BigFloat1Literal) },
