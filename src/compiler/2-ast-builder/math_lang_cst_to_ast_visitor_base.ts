@@ -113,6 +113,18 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns result type
      */
 	get_symbol_type(name:string):string {
+        let loop_scope;
+        for(loop_scope of this._scopes_stack) {
+            if (loop_scope.symbols_consts_table.has(name)) {
+                return loop_scope.symbols_consts_table.get(name).ic_type;
+            }
+            if (loop_scope.symbols_vars_table.has(name)) {
+                return loop_scope.symbols_vars_table.get(name).ic_type;
+            }
+            if (loop_scope.symbols_opds_table.has(name)) {
+                return loop_scope.symbols_opds_table.get(name).ic_type;
+            }
+        }
         return TYPES.INTEGER;
     }
 
@@ -157,7 +169,20 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
             const opd_record:SymbolDeclarationRecord = { name:opd_decl.name, path:func_name, ic_type:opd_decl.type, is_constant:true, init_value:undefined, uses_count:0, uses_scopes:[func_name] };
             func_scope.symbols_opds_table.set(opd_decl.name, opd_record);
         }
+    }
 
+    set_function_declaration_statements(func_name:string, instructions:any[]){
+        const func_scope = this._scopes_map.get(func_name);
+        func_scope.statements = instructions;
+    }
+
+    enter_function_declaration(func_name:string){
+        const func_scope = this._scopes_map.get(func_name);
+        this._scopes_stack.push(func_scope);
+    }
+
+    leave_function_declaration(){
+        this._scopes_stack.pop();
     }
 
     /**

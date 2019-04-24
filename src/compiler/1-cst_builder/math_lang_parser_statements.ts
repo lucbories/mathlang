@@ -15,16 +15,18 @@ export class MathLangParserStatements extends Parser {
     // PROGRAN
     public program = this.RULE("program", () => {
         this.AT_LEAST_ONE( () => {
-            this.SUBRULE(this.statement);
-        })
+            this.SUBRULE(this.statement, { LABEL:"blockStatement" });
+        });
     });
 
 
     // BLOCK
     private blockStatement = this.RULE("blockStatement", () => {
+        this.CONSUME(t.Begin);
         this.MANY(() => {
-            this.SUBRULE(this.statement)
-        })
+            this.SUBRULE(this.statement, { LABEL:'blockStatement' } )
+        });
+        this.CONSUME(t.End);
     });
 
     private statement = this.RULE("statement", () => {
@@ -33,42 +35,53 @@ export class MathLangParserStatements extends Parser {
             { ALT: () => this.SUBRULE(this.whileStatement) },
             { ALT: () => this.SUBRULE(this.forStatement) },
             { ALT: () => this.SUBRULE(this.loopStatement) },
-            { ALT: () => this.SUBRULE(this.assignStatement) }
-        ])
+            { ALT: () => this.SUBRULE(this.assignStatement) },
+            { ALT: () => this.SUBRULE(this.functionStatement) },// TODO: MOVE TO PROGRAM FOR A FIRST LEVEL DECLARATION
+            { ALT: () => this.SUBRULE(this.returnStatement) },
+            { ALT: () => this.SUBRULE(this.blockStatement) }
+        ]);
     });
 
 
     // IF
     private ifStatement = this.RULE("ifStatement", () => {
-        this.CONSUME(t.If)
-        this.SUBRULE(this.expression, { LABEL:"Condition" })
-        this.CONSUME(t.Then)
-        this.SUBRULE(this.blockStatement, { LABEL:"Then" })
+        this.CONSUME(t.If);
+        this.SUBRULE(this.expression, { LABEL:"Condition" });
+        this.CONSUME(t.Then);
+        this.MANY(() => {
+            this.SUBRULE(this.statement, { LABEL:"Then" });
+        });
         this.OPTION(() => {
-            this.CONSUME(t.Else)
-            this.SUBRULE2(this.blockStatement, { LABEL:"Else" })
-        })
-        this.CONSUME(t.EndIf)
+            this.CONSUME(t.Else);
+            this.MANY2(() => {
+                this.SUBRULE2(this.statement, { LABEL:"Else" });
+            });
+        });
+        this.CONSUME(t.EndIf);
     });
 
 
     // LOOPS
     private whileStatement = this.RULE("whileStatement", () => {
-        this.CONSUME(t.While)
-        this.SUBRULE(this.expression)
-        this.CONSUME(t.Do)
-        this.SUBRULE(this.blockStatement)
-        this.CONSUME(t.EndWhile)
+        this.CONSUME(t.While);
+        this.SUBRULE(this.expression);
+        this.CONSUME(t.Do);
+        this.AT_LEAST_ONE( () => {
+            this.SUBRULE(this.statement, { LABEL:"blockStatement" });
+        });
+        this.CONSUME(t.EndWhile);
     });
 
     private forStatement = this.RULE("forStatement", () => {
-        this.CONSUME(t.For)
-        this.CONSUME(t.ID, { LABEL:"ForVar" } )
-        this.CONSUME(t.In)
-        this.SUBRULE(this.expression, { LABEL:"ForIn" })
-        this.CONSUME(t.Do)
-        this.SUBRULE(this.blockStatement)
-        this.CONSUME(t.EndFor)
+        this.CONSUME(t.For);
+        this.CONSUME(t.ID, { LABEL:"ForVar" } );
+        this.CONSUME(t.In);
+        this.SUBRULE(this.expression, { LABEL:"ForIn" });
+        this.CONSUME(t.Do);
+        this.AT_LEAST_ONE( () => {
+            this.SUBRULE(this.statement, { LABEL:"blockStatement" });
+        });
+        this.CONSUME(t.EndFor);
     });
 
     private loopStatement = this.RULE("loopStatement", () => {
@@ -91,6 +104,24 @@ export class MathLangParserStatements extends Parser {
         this.MANY( () => this.SUBRULE(this.AssignMemberOptionExpression) );
         this.CONSUME(t.Assign);
         this.SUBRULE(this.expression, { LABEL:"AssignExpr" });
+    });
+
+    // FUNCTION DECLARATION
+    private functionStatement = this.RULE("functionStatement", () => {
+        this.CONSUME(t.Function);
+        this.CONSUME2(t.ID, { LABEL:"functionName" } );
+        this.SUBRULE(this.ArgumentsWithIds);
+        this.CONSUME3(t.Return);
+        this.CONSUME4(t.ID, { LABEL:"returnedType" } );
+        this.AT_LEAST_ONE( () => {
+            this.SUBRULE(this.statement, { LABEL:"blockStatement" });
+        });
+        this.CONSUME5(t.EndFunct);
+    });
+
+    private returnStatement = this.RULE("returnStatement", () => {
+        this.CONSUME(t.Return);
+        this.SUBRULE(this.expression);
     });
 
     protected expression:any = undefined;

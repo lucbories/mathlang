@@ -1,9 +1,6 @@
-import { math_lang_parser } from '../1-cst_builder/math_lang_parser';
+
 import MathLangCstToAstVisitorBase from './math_lang_cst_to_ast_visitor_base'
 import TYPES from '../3-program_builder/program_types';
-import { stat } from 'fs';
-import { MathLangParserStatements } from '../1-cst_builder/math_lang_parser_statements';
-
 
 
 
@@ -18,7 +15,11 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
     program(ctx:any) {
         // console.log('program', ctx)
 
-        const statements = this.visit(ctx.blockStatement)
+        const statements = [];
+        let statement;
+        for(statement of ctx.blockStatement){
+            statements.push( this.visit(statement) );
+        }
         // const statements = statement ? [statement] : [];
 
         return {
@@ -32,7 +33,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
         let statements:any[] = [];
         let statement;
-        for(statement of ctx.statement){
+        for(statement of ctx.blockStatement){
             statements.push( this.visit(statement) );
         }
 
@@ -44,6 +45,10 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
     
     statement(ctx:any) {
         // console.log('statement', ctx)
+
+        if (ctx.blockStatement) {
+            return this.visit(ctx.blockStatement);
+        }
 
         if (ctx.assignStatement) {
             return this.visit(ctx.assignStatement);
@@ -69,6 +74,14 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             return this.visit(ctx.expressionStatement);
         }
 
+        if (ctx.functionStatement) {
+            return this.visit(ctx.functionStatement);
+        }
+
+        if (ctx.returnStatement) {
+            return this.visit(ctx.returnStatement);
+        }
+        
         // if (ctx.switchStatement) {
         //     return this.visit(ctx.switchStatement);
         // }
@@ -83,14 +96,26 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         // console.log('ifStatement', ctx)
 
         const node_1 = this.visit(ctx.Condition);
-        const node_2 = this.visit(ctx.Then[1]);
-        const node_3 = ctx.Else ? this.visit(ctx.Else[1]) : undefined;
+
+        let statement;
+
+        const statements_then=[];
+        for(statement of ctx.Then.slice(1)){
+            statements_then.push( this.visit(statement) );
+        }
+        
+        const statements_else=[];
+        if (ctx.Else) {
+            for(statement of ctx.Else.slice(1)){
+                statements_else.push( this.visit(statement) );
+            }
+        }
 
         return {
             type: "IF_STATEMENT",
             condition:node_1,
-            then:node_2,
-            else:node_3
+            then:statements_then,
+            else:ctx.Else ? statements_else : undefined
         }
     }
     
@@ -98,12 +123,17 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         // console.log('whileStatement', ctx)
 
         const node_1 = this.visit(ctx.expression);
-        const node_2 = this.visit(ctx.blockStatement);
+        
+        const statements = [];
+        let statement;
+        for(statement of ctx.blockStatement){
+            statements.push( this.visit(statement) );
+        }
 
         return {
             type: "WHILE_STATEMENT",
             condition:node_1,
-            block:node_2
+            block:statements
         }
     }
     
@@ -112,13 +142,18 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
         const node_var = ctx.ForVar[0].image;
         const node_in = this.visit(ctx.ForIn);
-        const node_block = this.visit(ctx.blockStatement);
+        
+        const statements = [];
+        let statement;
+        for(statement of ctx.blockStatement){
+            statements.push( this.visit(statement) );
+        }
 
         return {
             type: "FOR_STATEMENT",
             var:node_var,
             in:node_in,
-            block:node_block
+            block:statements
         }
     }
     
@@ -129,7 +164,12 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         const node_from = this.visit(ctx.LoopFrom);
         const node_to = this.visit(ctx.LoopTo);
         const node_step = this.visit(ctx.LoopStep);
-        const node_block = this.visit(ctx.blockStatement);
+        
+        const statements = [];
+        let statement;
+        for(statement of ctx.blockStatement){
+            statements.push( this.visit(statement) );
+        }
 
         return {
             type: "LOOP_STATEMENT",
@@ -137,7 +177,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             from:node_from,
             to:node_to,
             step:node_step,
-            block:node_block
+            block:statements
         }
     }
     
@@ -150,7 +190,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             type: "ASSIGN_STATEMENT",
             ic_type: expr_node.ic_type,
             name:assign_name,
-            members: <any>[],
+            members: <any>undefined,
             expression: expr_node
         }
         let loop_ctx_member;
@@ -172,7 +212,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         if (! this.has_declared_vars_symbol(assign_name)) {
             let is_constant = false;
 
-            if (assign_ast.members.length > 0) {
+            if (assign_ast.members) {
                 // FUNCTION DECLARATION
                 if (assign_ast.members.type == "ARGIDS_EXPRESSION" && assign_ast.members.ic_type == TYPES.ARRAY) {
                     const operands:any[] = [];
@@ -186,6 +226,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
                         operands.push( { opd_name:loop_name, opd_type:loop_type } )
                     }
                     this.register_function_declaration(assign_name, expr_node.ic_type, operands, expr_node);
+                    return assign_ast;
                 }
 
                 // ERROR : AN UNDECLARED SYMBOL CANNOT HAVE MEMBERS EXPRESSION (Get method, get attribute, get index, call)
@@ -206,6 +247,57 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         
 
         return assign_ast;
+    }
+    
+    functionStatement(ctx:any) {
+        // console.log('functionStatement', ctx)
+
+        const function_name = ctx.functionName[0].image;
+        const operands_decl = this.visit(ctx.ArgumentsWithIds);
+        const returned_type = ctx.returnedType[0].image;
+
+        const operands = [];
+        if (operands_decl.items) {
+            let loop_index;
+            for(loop_index=0; loop_index < operands_decl.items.length; loop_index++) {
+                operands.push( { name:operands_decl.items[loop_index], type:operands_decl.ic_subtypes[loop_index] } );
+            }
+        }
+
+        this.register_function_declaration(function_name, returned_type, operands, []);
+
+        // CHANGE SCOPE FOR FUNCTION STATEMENTS
+        this.enter_function_declaration(function_name);
+
+        const statements = [];
+        let statement;
+        for(statement of ctx.blockStatement){
+            statements.push( this.visit(statement) );
+        }
+
+        this.leave_function_declaration();
+
+        this.set_function_declaration_statements(function_name, statements);
+
+        return {
+            type: "FUNCTION_STATEMENT",
+            ic_type:returned_type,
+            name:function_name,
+            operands:operands_decl,
+            block:statements
+        }
+    }
+    
+    returnStatement(ctx:any) {
+        // console.log('returnStatement', ctx)
+
+        const node_expr = this.visit(ctx.expression);
+
+        return {
+            type:"RETURN_STATEMENT",
+            ic_type:node_expr.ic_type,
+            expression:node_expr
+        }
     }
 }
 

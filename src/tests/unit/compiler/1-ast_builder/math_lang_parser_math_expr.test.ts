@@ -30,7 +30,7 @@ describe('MathLang math expression parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_expr_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'ADDSUB_EXPRESSION',
             ic_type:TYPES.INTEGER,
@@ -38,7 +38,7 @@ describe('MathLang math expression parser', () => {
                 type:'INTEGER',
                 ic_type:TYPES.INTEGER,
                 value:'12',
-                options:empty_array
+                members:nomembers
             },
             operator: {
                 type:'BINOP',
@@ -58,7 +58,7 @@ describe('MathLang math expression parser', () => {
                             type:'ID_EXPRESSION',
                             ic_type:TYPES.INTEGER,
                             name:'b',
-                            options:empty_array
+                            members:nomembers
                         }
                     },
                     operator:{
@@ -69,10 +69,10 @@ describe('MathLang math expression parser', () => {
                         type:'INTEGER',
                         ic_type:TYPES.INTEGER,
                         value:'8',
-                        options:empty_array
+                        members:nomembers
                     }
                 },
-                options:empty_array
+                members:nomembers
             }
         }
         expect(ast_expr_node).eql(result);
@@ -93,7 +93,7 @@ describe('MathLang math expression parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_expr_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'MULTDIV_EXPRESSION',
             ic_type:TYPES.FLOAT,
@@ -111,7 +111,7 @@ describe('MathLang math expression parser', () => {
                             type:'ID_EXPRESSION',
                             ic_type:TYPES.INTEGER,
                             name:'b',
-                            options:empty_array
+                            members:nomembers
                         }
                     },
                     operator:{
@@ -122,10 +122,10 @@ describe('MathLang math expression parser', () => {
                         type:'INTEGER',
                         ic_type:TYPES.INTEGER,
                         value:'8',
-                        options:empty_array
+                        members:nomembers
                     }
                 },
-                options:empty_array
+                members:nomembers
             },
             operator: {
                 type:'BINOP',
@@ -135,7 +135,7 @@ describe('MathLang math expression parser', () => {
                 type:'INTEGER',
                 ic_type:TYPES.INTEGER,
                 value:'56',
-                options:empty_array
+                members:nomembers
             }
         }
         expect(ast_expr_node).eql(result);
@@ -146,7 +146,7 @@ describe('MathLang math expression parser', () => {
         const parser_result = parse(text, false, 'expression');
 
         // dump_tree('CST of ' + text, parser_result.cst);
-        // console.log(parser_result.ast);
+        // console.log(parser_result);
 
         expect(parser_result).to.be.an('object');
         expect(parser_result.ast).to.be.an('object');
@@ -157,7 +157,7 @@ describe('MathLang math expression parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_expr_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'MULTDIV_EXPRESSION',
             ic_type:TYPES.FLOAT,
@@ -165,7 +165,7 @@ describe('MathLang math expression parser', () => {
                 type:'INTEGER',
                 ic_type:TYPES.INTEGER,
                 value:'12',
-                options:empty_array
+                members:nomembers
             },
             operator: {
                 type:'BINOP',
@@ -182,7 +182,7 @@ describe('MathLang math expression parser', () => {
                         type:'ID_EXPRESSION',
                         ic_type:TYPES.INTEGER,
                         name:'b',
-                        options:empty_array
+                        members:nomembers
                     }
                 },
                 operator:{
@@ -193,7 +193,7 @@ describe('MathLang math expression parser', () => {
                     type:'INTEGER',
                     ic_type:TYPES.INTEGER,
                     value:'78e-12',
-                    options:empty_array
+                    members:nomembers
                 }
             }
         }
@@ -215,7 +215,7 @@ describe('MathLang math expression parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_expr_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'ADDSUB_EXPRESSION',
             ic_type:TYPES.INTEGER,
@@ -226,7 +226,7 @@ describe('MathLang math expression parser', () => {
                     type:'INTEGER',
                     ic_type:TYPES.INTEGER,
                     value:'12',
-                    options:empty_array
+                    members:nomembers
                 },
                 operator:{
                     type:'BINOP',
@@ -236,7 +236,7 @@ describe('MathLang math expression parser', () => {
                     type:'INTEGER',
                     ic_type:TYPES.INTEGER,
                     value:'56',
-                    options:empty_array
+                    members:nomembers
                 }
             },
             operator: {
@@ -250,7 +250,7 @@ describe('MathLang math expression parser', () => {
                     type:'INTEGER',
                     ic_type:TYPES.INTEGER,
                     value:'78',
-                    options:empty_array
+                    members:nomembers
                 },
                 operator:'++'
             }
@@ -273,7 +273,7 @@ describe('MathLang math expression parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_expr_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'COMPARATOR_EXPRESSION',
             ic_type:TYPES.BOOLEAN,
@@ -281,7 +281,7 @@ describe('MathLang math expression parser', () => {
                 type:'ID_EXPRESSION',
                 ic_type:TYPES.INTEGER,
                 name:'abc_UI_23',
-                options:empty_array
+                members:nomembers
             },
             operator:{
                 type:'BINOP',
@@ -297,7 +297,7 @@ describe('MathLang math expression parser', () => {
                         type:'INTEGER',
                         ic_type:TYPES.INTEGER,
                         value:'12',
-                        options:empty_array
+                        members:nomembers
                     },
                     operator:{
                         type:'BINOP',
@@ -307,7 +307,7 @@ describe('MathLang math expression parser', () => {
                         type:'INTEGER',
                         ic_type:TYPES.INTEGER,
                         value:'56',
-                        options:empty_array
+                        members:nomembers
                     }
                 },
                 operator: {
@@ -318,7 +318,7 @@ describe('MathLang math expression parser', () => {
                     type:'INTEGER',
                     ic_type:TYPES.INTEGER,
                     value:'78',
-                    options:empty_array
+                    members:nomembers
                 }
             }
         }
@@ -340,7 +340,7 @@ describe('MathLang math expression parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_expr_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'COMPARATOR_EXPRESSION',
             ic_type:TYPES.BOOLEAN,
@@ -348,7 +348,7 @@ describe('MathLang math expression parser', () => {
                 type:'ID_EXPRESSION',
                 ic_type:TYPES.INTEGER,
                 name:'a45Bc',
-                options:empty_array
+                members:nomembers
             },
             operator:{
                 type:'BINOP',
@@ -364,7 +364,7 @@ describe('MathLang math expression parser', () => {
                         type:'INTEGER',
                         ic_type:TYPES.INTEGER,
                         value:'12',
-                        options:empty_array
+                        members:nomembers
                     },
                     operator:{
                         type:'BINOP',
@@ -374,7 +374,7 @@ describe('MathLang math expression parser', () => {
                         type:'INTEGER',
                         ic_type:TYPES.INTEGER,
                         value:'56',
-                        options:empty_array
+                        members:nomembers
                     }
                 },
                 operator: {
@@ -385,7 +385,7 @@ describe('MathLang math expression parser', () => {
                     type:'INTEGER',
                     ic_type:TYPES.INTEGER,
                     value:'78',
-                    options:empty_array
+                    members:nomembers
                 }
             }
         }

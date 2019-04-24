@@ -30,15 +30,17 @@ describe('MathLang call parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_expr_node = parser_result.ast;
+        const nomembers = <any>undefined;
         const result = {
             type:'ID_EXPRESSION',
+            ic_type:'INTEGER',
             name:'f',
-            options:[
-                {
-                    type:'ARGS_EXPRESSION',
-                    items:<any>undefined
-                }
-            ]
+            members:{
+                type:'ARGS_EXPRESSION',
+                ic_type:'ARRAY',
+                ic_subtypes:['UNKNOW'],
+                items:<any>undefined
+            }
         }
         expect(ast_expr_node).eql(result);
     });
@@ -59,22 +61,24 @@ describe('MathLang call parser', () => {
 
         const ast_expr_node = parser_result.ast;
         // console.log('fx(23) expr node', ast_expr_node);
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'ID_EXPRESSION',
+            ic_type:'INTEGER',
             name:'fx',
-            options:[
-                {
-                    type:'ARGS_EXPRESSION',
-                    items:<any>[
-                        {
-                            type:'INTEGER',
-                            value:'23',
-                            options:empty_array
-                        }
-                    ]
-                }
-            ]
+            members:{
+                type:'ARGS_EXPRESSION',
+                ic_type:'ARRAY',
+                ic_subtypes:['INTEGER'],
+                items:[
+                    {
+                        type:'INTEGER',
+                        ic_type:'INTEGER',
+                        value:'23',
+                        members:nomembers
+                    }
+                ]
+            }
         }
         expect(ast_expr_node).eql(result);
     });
@@ -140,27 +144,31 @@ describe('MathLang call parser', () => {
 
         const ast_expr_node = parser_result.ast;
         // console.log('fx(23) expr node', ast_expr_node);
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'ID_EXPRESSION',
+            ic_type:'INTEGER',
             name:'fx',
-            options:[
-                {
-                    type:'ARGS_EXPRESSION',
-                    items:<any>[
-                        {
-                            type:'INTEGER',
-                            value:'23',
-                            options:empty_array
-                        },
-                        {
-                            type:'ID_EXPRESSION',
-                            name:'efg',
-                            options:empty_array
-                        }
-                    ]
-                }
-            ]
+            members:{
+                type:'ARGS_EXPRESSION',
+                ic_type:'ARRAY',
+                ic_subtypes:['INTEGER', 'INTEGER'],
+                items:[
+                    {
+                        type:'INTEGER',
+                        ic_type:'INTEGER',
+                        value:'23',
+                        members:nomembers
+                    },
+                    {
+                        type:'ID_EXPRESSION',
+                        ic_type:'INTEGER',
+                        name:'efg',
+                        members:nomembers
+                    }
+                ]
+            }
+            
         }
         expect(ast_expr_node).eql(result);
     });

@@ -29,24 +29,24 @@ describe('MathLang assign parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_assign_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'ASSIGN_STATEMENT',
             ic_type: 'INTEGER',
             name:'a',
-            members:empty_array,
+            members:nomembers,
             expression: {
                 type:'INTEGER',
                 ic_type: 'INTEGER',
                 value:'456',
-                members:empty_array
+                members:nomembers
             }
         }
         expect(ast_assign_node).eql(result);
     });
 
-    it('Parse assign a.b=456 statement' , () => {
-        const text = 'a=12\na.b=456';
+    it('Parse assign [begin a=12\\na.b=456 end] statement' , () => {
+        const text = 'begin a=12\na.b=456 end';
         const parser_result = parse(text, false, 'blockStatement');
 
         // console.log(parser_result);
@@ -60,7 +60,7 @@ describe('MathLang assign parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_assign_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'BLOCK',
             statements:[
@@ -68,12 +68,12 @@ describe('MathLang assign parser', () => {
                     type:'ASSIGN_STATEMENT',
                     ic_type: 'INTEGER',
                     name:'a',
-                    members:empty_array,
+                    members:nomembers,
                     expression: {
                         type:'INTEGER',
                         ic_type: 'INTEGER',
                         value:'12',
-                        members:empty_array
+                        members:nomembers
                     }
                 },
                 {
@@ -89,7 +89,7 @@ describe('MathLang assign parser', () => {
                         type:'INTEGER',
                         ic_type: 'INTEGER',
                         value:'456',
-                        members:empty_array
+                        members:nomembers
                     }
                 }
             ]
@@ -97,7 +97,7 @@ describe('MathLang assign parser', () => {
         expect(ast_assign_node).eql(result);
     });
 
-    it('Parse assign a=456 + (++b*8) statement' , () => {
+    it('Parse assign [a=456 + (++b*8)] statement' , () => {
         const text = 'a=456 + (++b*8)';
         const parser_result = parse(text, false, 'statement');
 
@@ -112,12 +112,12 @@ describe('MathLang assign parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_assign_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'ASSIGN_STATEMENT',
             ic_type: 'INTEGER',
             name:'a',
-            members:empty_array,
+            members:nomembers,
             expression: {
                 type:'ADDSUB_EXPRESSION',
                 ic_type: 'INTEGER',
@@ -125,7 +125,7 @@ describe('MathLang assign parser', () => {
                     type:'INTEGER',
                     ic_type: 'INTEGER',
                     value:'456',
-                    members:empty_array
+                    members:nomembers
                 },
                 operator: {
                     type:'BINOP',
@@ -145,7 +145,7 @@ describe('MathLang assign parser', () => {
                                 type:'ID_EXPRESSION',
                                 ic_type: 'INTEGER',
                                 name:'b',
-                                members:empty_array
+                                members:nomembers
                             }
                         },
                         operator:{
@@ -156,18 +156,18 @@ describe('MathLang assign parser', () => {
                             type:'INTEGER',
                             ic_type: 'INTEGER',
                             value:'8',
-                            members:empty_array
+                            members:nomembers
                         }
                     },
-                    members:empty_array
+                    members:nomembers
                 }
             }
         }
         expect(ast_assign_node).eql(result);
     });
 
-    it('Parse assign f(x)=456 + (++x*8) statement' , () => {
-        const text = 'f(x)=456 + (++x*8)';
+    it('Parse assign [f(x is float)=456 + (++x*8)] statement' , () => {
+        const text = 'f(x is float)=456 + (++x*8)';
         const parser_result = parse(text, false, 'statement');
 
         // console.log(parser_result);
@@ -181,7 +181,7 @@ describe('MathLang assign parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_assign_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'ASSIGN_STATEMENT',
             ic_type: 'INTEGER',
@@ -189,7 +189,7 @@ describe('MathLang assign parser', () => {
             members:{
                 type:'ARGIDS_EXPRESSION',
                 ic_type: 'ARRAY',
-                ic_subtypes: ['IDENTIFIER'],
+                ic_subtypes: ['float'],
                 items:['x']
             },
             expression: {
@@ -199,7 +199,7 @@ describe('MathLang assign parser', () => {
                     type:'INTEGER',
                     ic_type: 'INTEGER',
                     value:'456',
-                    members:empty_array
+                    members:nomembers
                 },
                 operator: {
                     type:'BINOP',
@@ -219,7 +219,7 @@ describe('MathLang assign parser', () => {
                                 type:'ID_EXPRESSION',
                                 ic_type: 'INTEGER',
                                 name:'x',
-                                members:empty_array
+                                members:nomembers
                             }
                         },
                         operator:{
@@ -230,17 +230,17 @@ describe('MathLang assign parser', () => {
                             type:'INTEGER',
                             ic_type: 'INTEGER',
                             value:'8',
-                            members:empty_array
+                            members:nomembers
                         }
                     },
-                    members:empty_array
+                    members:nomembers
                 }
             }
         }
         expect(ast_assign_node).eql(result);
     });
 
-    it('Parse assign fxy(x,y)=456 + (++x*8) statement' , () => {
+    it('Parse assign [fxy(x,y)=456 + (++x*8)] statement' , () => {
         const text = 'fxy(x,y)=456 + (++x*8)';
         const parser_result = parse(text, false, 'statement');
 
@@ -255,7 +255,7 @@ describe('MathLang assign parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_assign_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'ASSIGN_STATEMENT',
             ic_type: 'INTEGER',
@@ -263,7 +263,7 @@ describe('MathLang assign parser', () => {
             members:{
                 type:'ARGIDS_EXPRESSION',
                 ic_type: 'ARRAY',
-                ic_subtypes: ['IDENTIFIER', 'IDENTIFIER'],
+                ic_subtypes: ['INTEGER', 'INTEGER'],
                 items:['x','y']
             },
             expression: {
@@ -273,7 +273,7 @@ describe('MathLang assign parser', () => {
                     type:'INTEGER',
                     ic_type: 'INTEGER',
                     value:'456',
-                    members:empty_array
+                    members:nomembers
                 },
                 operator: {
                     type:'BINOP',
@@ -293,7 +293,7 @@ describe('MathLang assign parser', () => {
                                 type:'ID_EXPRESSION',
                                 ic_type: 'INTEGER',
                                 name:'x',
-                                members:empty_array
+                                members:nomembers
                             }
                         },
                         operator:{
@@ -304,18 +304,18 @@ describe('MathLang assign parser', () => {
                             type:'INTEGER',
                             ic_type: 'INTEGER',
                             value:'8',
-                            members:empty_array
+                            members:nomembers
                         }
                     },
-                    members:empty_array
+                    members:nomembers
                 }
             }
         }
         expect(ast_assign_node).eql(result);
     });
 
-    it('Parse assign fxy.a=456 statement' , () => {
-        const text = 'fxy.a=456';
+    it('Parse assign [fxy(x is integer,y is float)=456 + (++x*8)] statement' , () => {
+        const text = 'fxy(x is integer,y is float)=456 + (++x*8)';
         const parser_result = parse(text, false, 'statement');
 
         // console.log(parser_result);
@@ -329,28 +329,193 @@ describe('MathLang assign parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_assign_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'ASSIGN_STATEMENT',
             ic_type: 'INTEGER',
             name:'fxy',
             members:{
-                type:'DOT_EXPRESSION',
-                ic_type: 'METHOD_IDENTIFIER',
-                identifier:'a'
+                type:'ARGIDS_EXPRESSION',
+                ic_type: 'ARRAY',
+                ic_subtypes: ['integer', 'float'],
+                items:['x','y']
             },
             expression: {
-                type:'INTEGER',
+                type:'ADDSUB_EXPRESSION',
                 ic_type: 'INTEGER',
-                value:'456',
-                members:empty_array
+                lhs:{
+                    type:'INTEGER',
+                    ic_type: 'INTEGER',
+                    value:'456',
+                    members:nomembers
+                },
+                operator: {
+                    type:'BINOP',
+                    value:'+'
+                },
+                rhs:{
+                    type:'PARENTHESIS_EXPRESSION',
+                    ic_type: 'INTEGER',
+                    expression: {
+                        type:'MULTDIV_EXPRESSION',
+                        ic_type: 'INTEGER',
+                        lhs:{
+                            type:'PREUNOP_EXPRESSION',
+                            ic_type: 'INTEGER',
+                            operator:'++',
+                            rhs: {
+                                type:'ID_EXPRESSION',
+                                ic_type: 'INTEGER',
+                                name:'x',
+                                members:nomembers
+                            }
+                        },
+                        operator:{
+                            type:'BINOP',
+                            value:'*'
+                        },
+                        rhs:{
+                            type:'INTEGER',
+                            ic_type: 'INTEGER',
+                            value:'8',
+                            members:nomembers
+                        }
+                    },
+                    members:nomembers
+                }
             }
         }
         expect(ast_assign_node).eql(result);
     });
 
-    it('Parse assign fxy=0 fxy.a.b=456 statement' , () => {
-        const text = 'fxy=0 fxy.a.b=456';
+    it('Parse assign [fxy(x,y is float)=456 + (++x*8)] statement' , () => {
+        const text = 'fxy(x,y is float)=456 + (++x*8)';
+        const parser_result = parse(text, false, 'statement');
+
+        // console.log(parser_result);
+
+        expect(parser_result).to.be.an('object');
+        expect(parser_result.ast).to.be.an('object');
+        expect(parser_result.cst).to.be.an('object');
+        expect(parser_result.lexErrors).to.be.an('array');
+        expect(parser_result.parseErrors).to.be.an('array');
+        expect(parser_result.lexErrors.length).equals(0);
+        expect(parser_result.parseErrors.length).equals(0);
+
+        const ast_assign_node = parser_result.ast;
+        const nomembers = <any>undefined;
+        const result = {
+            type:'ASSIGN_STATEMENT',
+            ic_type: 'INTEGER',
+            name:'fxy',
+            members:{
+                type:'ARGIDS_EXPRESSION',
+                ic_type: 'ARRAY',
+                ic_subtypes: ['INTEGER', 'float'],
+                items:['x','y']
+            },
+            expression: {
+                type:'ADDSUB_EXPRESSION',
+                ic_type: 'INTEGER',
+                lhs:{
+                    type:'INTEGER',
+                    ic_type: 'INTEGER',
+                    value:'456',
+                    members:nomembers
+                },
+                operator: {
+                    type:'BINOP',
+                    value:'+'
+                },
+                rhs:{
+                    type:'PARENTHESIS_EXPRESSION',
+                    ic_type: 'INTEGER',
+                    expression: {
+                        type:'MULTDIV_EXPRESSION',
+                        ic_type: 'INTEGER',
+                        lhs:{
+                            type:'PREUNOP_EXPRESSION',
+                            ic_type: 'INTEGER',
+                            operator:'++',
+                            rhs: {
+                                type:'ID_EXPRESSION',
+                                ic_type: 'INTEGER',
+                                name:'x',
+                                members:nomembers
+                            }
+                        },
+                        operator:{
+                            type:'BINOP',
+                            value:'*'
+                        },
+                        rhs:{
+                            type:'INTEGER',
+                            ic_type: 'INTEGER',
+                            value:'8',
+                            members:nomembers
+                        }
+                    },
+                    members:nomembers
+                }
+            }
+        }
+        expect(ast_assign_node).eql(result);
+    });
+
+    it('Parse assign [begin fxy=0 fxy.a=456 end] statement' , () => {
+        const text = 'begin fxy=0 fxy.a=456 end';
+        const parser_result = parse(text, false, 'statement');
+
+        // console.log(parser_result);
+
+        expect(parser_result).to.be.an('object');
+        expect(parser_result.ast).to.be.an('object');
+        expect(parser_result.cst).to.be.an('object');
+        expect(parser_result.lexErrors).to.be.an('array');
+        expect(parser_result.parseErrors).to.be.an('array');
+        expect(parser_result.lexErrors.length).equals(0);
+        expect(parser_result.parseErrors.length).equals(0);
+
+        const ast_assign_node = parser_result.ast;
+        const nomembers = <any>undefined;
+        const result = {
+            type:'BLOCK',
+            statements:[
+                {
+                    type:'ASSIGN_STATEMENT',
+                    ic_type: 'INTEGER',
+                    name:'fxy',
+                    members:nomembers,
+                    expression: {
+                        type:'INTEGER',
+                        ic_type: 'INTEGER',
+                        value:'0',
+                        members:nomembers
+                    }
+                },
+                {
+                    type:'ASSIGN_STATEMENT',
+                    ic_type: 'INTEGER',
+                    name:'fxy',
+                    members:{
+                        type:'DOT_EXPRESSION',
+                        ic_type: 'METHOD_IDENTIFIER',
+                        identifier:'a'
+                    },
+                    expression: {
+                        type:'INTEGER',
+                        ic_type: 'INTEGER',
+                        value:'456',
+                        members:nomembers
+                    }
+                }
+            ]
+        }
+        expect(ast_assign_node).eql(result);
+    });
+
+    it('Parse assign [begin fxy=0 fxy.a.b=456 end] statement' , () => {
+        const text = 'begin fxy=0 fxy.a.b=456 end';
         const parser_result = parse(text, false, 'blockStatement');
 
         // console.log(parser_result.cst);
@@ -366,7 +531,7 @@ describe('MathLang assign parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_assign_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'BLOCK',
             statements:[
@@ -374,12 +539,12 @@ describe('MathLang assign parser', () => {
                     type:'ASSIGN_STATEMENT',
                     ic_type: 'INTEGER',
                     name:'fxy',
-                    members:empty_array,
+                    members:nomembers,
                     expression: {
                         type:'INTEGER',
                         ic_type: 'INTEGER',
                         value:'0',
-                        members:empty_array
+                        members:nomembers
                     }
                 },
                 {
@@ -400,7 +565,7 @@ describe('MathLang assign parser', () => {
                         type:'INTEGER',
                         ic_type: 'INTEGER',
                         value:'456',
-                        members:empty_array
+                        members:nomembers
                     }
                 }
             ]
@@ -408,8 +573,8 @@ describe('MathLang assign parser', () => {
         expect(ast_assign_node).eql(result);
     });
 
-    it('Parse assign fxy=0 fxy.a.b(x,y)=456 statement' , () => {
-        const text = 'fxy=0 fxy.a.b(x,y)=456';
+    it('Parse assign [begin fxy=0 fxy.a.b(x,y)=456 end] statement' , () => {
+        const text = 'begin fxy=0 fxy.a.b(x,y)=456 end';
         const parser_result = parse(text, false, 'blockStatement');
 
         // console.log(parser_result);
@@ -423,7 +588,7 @@ describe('MathLang assign parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_assign_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'BLOCK',
             statements:[
@@ -431,12 +596,12 @@ describe('MathLang assign parser', () => {
                     type:'ASSIGN_STATEMENT',
                     ic_type: 'INTEGER',
                     name:'fxy',
-                    members:empty_array,
+                    members:nomembers,
                     expression: {
                         type:'INTEGER',
                         ic_type: 'INTEGER',
                         value:'0',
-                        members:empty_array
+                        members:nomembers
                     }
                 },
                 {
@@ -454,7 +619,7 @@ describe('MathLang assign parser', () => {
                             members:{
                                 type:'ARGIDS_EXPRESSION',
                                 ic_type: 'ARRAY',
-                                ic_subtypes: ['IDENTIFIER', 'IDENTIFIER'],
+                                ic_subtypes: ['INTEGER', 'INTEGER'],
                                 items:['x','y']
                             }
                         }
@@ -463,7 +628,7 @@ describe('MathLang assign parser', () => {
                         type:'INTEGER',
                         ic_type: 'INTEGER',
                         value:'456',
-                        members:empty_array
+                        members:nomembers
                     }
                 }
             ]
@@ -471,8 +636,8 @@ describe('MathLang assign parser', () => {
         expect(ast_assign_node).eql(result);
     });
 
-    it('Parse assign fxy=0 fxy.a(x,y).b=456 statement' , () => {
-        const text = 'fxy=0 fxy.a(x,y).b=456';
+    it('Parse assign [begin fxy=0 fxy.a(x,y).b=456 end] statement' , () => {
+        const text = 'begin fxy=0 fxy.a(x,y).b=456 end';
         const parser_result = parse(text, false, 'blockStatement');
 
         // console.log(parser_result);
@@ -486,7 +651,7 @@ describe('MathLang assign parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_assign_node = parser_result.ast;
-        const empty_array:any[] = [];
+        const nomembers = <any>undefined;
         const result = {
             type:'BLOCK',
             statements:[
@@ -494,12 +659,12 @@ describe('MathLang assign parser', () => {
                     type:'ASSIGN_STATEMENT',
                     ic_type: 'INTEGER',
                     name:'fxy',
-                    members:empty_array,
+                    members:nomembers,
                     expression: {
                         type:'INTEGER',
                         ic_type: 'INTEGER',
                         value:'0',
-                        members:empty_array
+                        members:nomembers
                     }
                 },
                 {
@@ -513,7 +678,7 @@ describe('MathLang assign parser', () => {
                         members:{
                             type:'ARGIDS_EXPRESSION',
                             ic_type: 'ARRAY',
-                            ic_subtypes: ['IDENTIFIER', 'IDENTIFIER'],
+                            ic_subtypes: ['INTEGER', 'INTEGER'],
                             items:['x','y'],
                             members:{
                                 type:'DOT_EXPRESSION',
@@ -526,7 +691,7 @@ describe('MathLang assign parser', () => {
                         type:'INTEGER',
                         ic_type: 'INTEGER',
                         value:'456',
-                        members:empty_array
+                        members:nomembers
                     }
                 }
             ]

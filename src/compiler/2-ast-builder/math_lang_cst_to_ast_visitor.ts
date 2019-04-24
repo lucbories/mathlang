@@ -155,15 +155,25 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
     MemberExpression(ctx:any) {
         // this.dump_ctx('MemberExpression', ctx);
 
-        let member_options = [];
-        let option = undefined;
-        let node = undefined;
+        const assign_ast ={
+            members:<any>undefined,
+            is_default_ast:true
+        }
+        let loop_ctx_member;
+        let loop_ast_member = assign_ast;
+
         if (ctx.MemberOptionExpression) {
-            for(option of ctx.MemberOptionExpression) {
-                node = this.visit(option);
-                member_options.push(node);
+            if ( Array.isArray(ctx.MemberOptionExpression) ) {
+                for(loop_ctx_member of ctx.MemberOptionExpression) {
+                    loop_ast_member.members = this.visit(loop_ctx_member);
+                    loop_ast_member = loop_ast_member.members;
+                }
+            } else {
+                loop_ctx_member = ctx.MemberOptionExpression;
+                loop_ast_member = this.visit(loop_ctx_member);
             }
         }
+
 
         if (ctx.ID) {
             const id = ctx.ID[0].image;
@@ -171,13 +181,13 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
                 type: "ID_EXPRESSION",
                 ic_type:this.get_symbol_type(id),
                 name: id,
-                members: member_options
+                members: loop_ast_member.is_default_ast ? loop_ast_member.members : loop_ast_member
             };
         }
 
         if (ctx.PrimaryExpression) {
             const node_prim = this.visit(ctx.PrimaryExpression);
-            node_prim.members = member_options;
+            node_prim.members = loop_ast_member.is_default_ast ? loop_ast_member.members : loop_ast_member;
             return node_prim;
         }
         
@@ -419,9 +429,10 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
     }
 
     ArgumentsWithIds(ctx:any) {
-        // this.dump_ctx('argsList', ctx);
+        // this.dump_ctx('ArgumentsWithIds', ctx);
         
-        if (!ctx.ID) {
+        // EMPTY LIST OF ARGUMENTS
+        if ( ! ctx.ArgumentWithIds) {
             return {
                 type: "ARGIDS_EXPRESSION",
                 ic_type:TYPES.ARRAY,
@@ -430,22 +441,31 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
             }
         }
 
-        const nodes:any = [];
+        const ids:any = [];
         const ic_subtypes:string[] = [];
 
-        // TODO: parse and determines function operands types
-        let node:any;
-        for(node of ctx.ID) {
-            ic_subtypes.push('IDENTIFIER');
-            nodes.push(node.image);
+        let loop_argument_ctx:any;
+        let loop_argument:any;
+        for(loop_argument_ctx of ctx.ArgumentWithIds) {
+            loop_argument = this.visit(loop_argument_ctx);
+
+            ic_subtypes.push(loop_argument.type);
+            ids.push(loop_argument.id);
         }
         
         return {
             type: "ARGIDS_EXPRESSION",
             ic_type:TYPES.ARRAY,
             ic_subtypes:ic_subtypes,
-            items: nodes
+            items: ids
         }
+    }
+
+    ArgumentWithIds(ctx:any) {
+        // this.dump_ctx('ArgumentWithIds', ctx);
+        
+        const arg_type = ctx.arg_type && ctx.arg_type[0].image ? ctx.arg_type[0].image : 'INTEGER';
+        return { id:ctx.arg_id[0].image, type: arg_type };
     }
 
     ArrayLiteral(ctx:any) {

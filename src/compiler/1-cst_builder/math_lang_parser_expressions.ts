@@ -168,15 +168,40 @@ export class MathLangParserExpressions extends MathLangParserStatements {
         this.CONSUME(t.RParen);
     });
 
-    ArgumentsWithIds = this.RULE("ArgumentsWithIds", () => {
-        this.CONSUME(t.LParen);
+    ArgumentWithIds = this.RULE("ArgumentWithIds", () => {
+        this.CONSUME(t.ID, { LABEL:'arg_id' });
         this.OPTION( () => {
-            this.CONSUME(t.ID);
-            this.MANY(() => {
-                this.CONSUME(t.Comma);
-                this.CONSUME2(t.ID);
-            })
-        })
+            this.CONSUME(t.Is);
+            this.CONSUME2(t.ID, { LABEL:'arg_type' });
+        } );
+    });
+
+    ArgumentsWithIds = this.RULE("ArgumentsWithIds", () => {
+        this.CONSUME(t.LParen);this.MANY_SEP
+
+        this.MANY_SEP( {
+            SEP: t.Comma,
+            DEF: () => {
+                this.SUBRULE(this.ArgumentWithIds);
+            }
+        } );
+
+        // this.OPTION( () => {
+        //     this.CONSUME(t.ID);
+        //     this.OPTION( () => {
+        //         this.CONSUME(t.Is);
+        //         this.CONSUME(t.ID, { LABEL:'' });
+        //     });
+        //     this.MANY(() => {
+        //         this.CONSUME(t.Comma);
+        //         this.CONSUME2(t.ID);
+        //         this.OPTION( () => {
+        //             this.CONSUME(t.Is);
+        //             this.CONSUME(t.ID);
+        //         });
+        //     })
+        // })
+
         this.CONSUME(t.RParen);
     });
 

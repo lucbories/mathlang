@@ -9,11 +9,16 @@ import {
 // ----------------- lexer -----------------
 export const math_lang_tokens:any[] = [];
 
+export const ID = chevrotain_createToken({ name: "ID", pattern: /[a-zA-Z][a-zA-Z0-9_]*/ } );
+
 // Utility to avoid manually building the math_lang_tokens array
-function createToken(options?:ITokenConfig) {
-    const newToken = chevrotain_createToken(options)
-    math_lang_tokens.push(newToken)
-    return newToken
+function createToken(options?:ITokenConfig, alt_id?:boolean) {
+    if (alt_id) {
+        options.longer_alt = ID;
+    }
+    const newToken = chevrotain_createToken(options);
+    math_lang_tokens.push(newToken);
+    return newToken;
 }
 
 
@@ -60,42 +65,47 @@ export const StringLiteral = createToken({
     pattern: /'(:?[^\\"]|\\(:?[bfnrtv"\\/]|u[0-9a-fA-F]{4}))*'/
 });
 
+
 export const BigFloat1Literal = createToken({
     name: "BigFloat1Literal",
-    pattern: /(0|[1-9]\d{10,})\.\d+([eE][+-]?\d+)?/
+    pattern: /([0-9]\d{10,})\.\d+([eE][+-]?\d+)?/
 });
 export const BigFloat2Literal = createToken({
     name: "BigFloat2Literal",
-    pattern: /(0|[1-9]\d*)\.\d{10,}([eE][+-]?\d+)?/
+    pattern: /([0-9]\d*)\.\d{10,}([eE][+-]?\d+)?/
 });
 export const BigFloat3Literal = createToken({
     name: "BigFloat3Literal",
-    pattern: /(0|[1-9]\d*)\.\d+[eE][+-]?\d{3,}/
+    pattern: /([0-9]\d*)\.\d+[eE][+-]?\d{3,}/
 });
+
 
 export const FloatLiteral = createToken({
     name: "FloatLiteral",
-    pattern: /(0|[1-9]\d{0,9})\.\d{1,10}([eE][+-]?\d{1,2})?/
+    pattern: /([0-9]\d{0,9})\.\d{1,10}([eE][+-]?\d{1,2})?/
 });
 
-export const Integer1Literal = createToken({
-    name: "Integer1Literal",
-    pattern: /(0|[1-9]\d{0,9})/
-});
 
 export const BigInteger1Literal = createToken({
     name: "BigInteger1Literal",
-    pattern: /(0|[1-9]\d{10,})/
-});
-export const BigInteger2Literal = createToken({
-    name: "BigInteger2Literal",
-    pattern: /(0|[1-9]\d*)[eE][+-]?\d{3,}/
+    pattern: /([0-9]\d{10,})/
 });
 
 export const Integer2Literal = createToken({
     name: "Integer2Literal",
-    pattern: /(0|[1-9]\d{0,9})([eE][+-]?\d{1,2})?/
+    pattern: /([0-9]\d{0,9})([eE][+-]?\d{1,2})?/
 });
+
+export const Integer1Literal = createToken({
+    name: "Integer1Literal",
+    pattern: /([0-9]\d{0,9})/
+});
+
+export const BigInteger2Literal = createToken({
+    name: "BigInteger2Literal",
+    pattern: /([0-9]\d*)[eE][+-]?\d{3,}/
+});
+
 
 export const WhiteSpace = createToken({
     name: "WhiteSpace",
@@ -105,29 +115,38 @@ export const WhiteSpace = createToken({
 
 
 // KEYWORDS
-export const Null      = createToken({ name: "Null",       pattern: /null/ });
-export const True      = createToken({ name: "True",       pattern: /true/ });
-export const False     = createToken({ name: "False",      pattern: /false/ });
+export const Null      = createToken({ name: "Null",       pattern: /null/ }, true);
+export const True      = createToken({ name: "True",       pattern: /true/ }, true);
+export const False     = createToken({ name: "False",      pattern: /false/ }, true);
+export const Is        = createToken({ name: "Is",         pattern: /is/ }, true);
 
-export const If        = createToken({ name: "If",         pattern: /if/ });
-export const Else      = createToken({ name: "Else",       pattern: /else/ });
-export const Then      = createToken({ name: "Then",       pattern: /then/ });
-export const EndIf     = createToken({ name: "EndIf",      pattern: /end if/ });
+export const If        = createToken({ name: "If",         pattern: /if/ }, true);
+export const Else      = createToken({ name: "Else",       pattern: /else/ }, true);
+export const Then      = createToken({ name: "Then",       pattern: /then/ }, true);
+export const EndIf     = createToken({ name: "EndIf",      pattern: /end if/ }, true);
 
-export const Do        = createToken({ name: "Do",         pattern: /do/ });
-export const In        = createToken({ name: "In",         pattern: /in/ });
-export const From      = createToken({ name: "From",       pattern: /from/ });
-export const To        = createToken({ name: "To",         pattern: /to/ });
-export const Step      = createToken({ name: "Step",       pattern: /step/ });
+export const Do        = createToken({ name: "Do",         pattern: /do/ }, true);
+export const In        = createToken({ name: "In",         pattern: /in/ }, true);
+export const From      = createToken({ name: "From",       pattern: /from/ }, true);
+export const To        = createToken({ name: "To",         pattern: /to/ }, true);
+export const Step      = createToken({ name: "Step",       pattern: /step/ }, true);
 
-export const While     = createToken({ name: "While",      pattern: /while/ });
-export const EndWhile  = createToken({ name: "EndWhile",   pattern: /end while/ });
+export const While     = createToken({ name: "While",      pattern: /while/ }, true);
+export const EndWhile  = createToken({ name: "EndWhile",   pattern: /end while/ }, true);
 
-export const Loop      = createToken({ name: "Loop",       pattern: /loop/ });
-export const EndLoop   = createToken({ name: "EndLoop",    pattern: /end loop/ });
+export const Loop      = createToken({ name: "Loop",       pattern: /loop/ }, true);
+export const EndLoop   = createToken({ name: "EndLoop",    pattern: /end loop/ }, true);
 
-export const For       = createToken({ name: "For",        pattern: /for/ });
-export const EndFor    = createToken({ name: "EndFor",     pattern: /end for/ });
+export const For       = createToken({ name: "For",        pattern: /for/ }, true);
+export const EndFor    = createToken({ name: "EndFor",     pattern: /end for/ }, true);
+
+export const Function  = createToken({ name: "Function",   pattern: /function/ }, true);
+export const EndFunct  = createToken({ name: "EndFunct",   pattern: /end function/ }, true);
+export const Return    = createToken({ name: "Return",     pattern: /return/ }, true);
+
+export const Begin     = createToken({ name: "Begin",      pattern: /begin/ }, true);
+export const End       = createToken({ name: "End",        pattern: /end/ }, true);
 
 // TODO: resolve ambiguity keywords vs identifiers
-export const ID        = createToken({ name: "ID", pattern: /[a-zA-Z][a-zA-Z0-9_]*/ });
+// export const ID        = createToken({ name: "ID", pattern: /[a-zA-Z][a-zA-Z0-9_]*/ });
+math_lang_tokens.push(ID);
