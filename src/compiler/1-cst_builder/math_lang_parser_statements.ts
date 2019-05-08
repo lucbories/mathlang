@@ -15,7 +15,10 @@ export class MathLangParserStatements extends Parser {
     // PROGRAN
     public program = this.RULE("program", () => {
         this.AT_LEAST_ONE( () => {
-            this.SUBRULE(this.statement, { LABEL:"blockStatement" });
+            this.OR( [
+                { ALT: () => this.SUBRULE(this.statement, { LABEL:"blockStatement" }) },
+                { ALT: () => this.SUBRULE(this.functionStatement) }
+            ] );
         });
     });
 
@@ -23,7 +26,7 @@ export class MathLangParserStatements extends Parser {
     // BLOCK
     private blockStatement = this.RULE("blockStatement", () => {
         this.CONSUME(t.Begin);
-        this.MANY(() => {
+        this.AT_LEAST_ONE(() => {
             this.SUBRULE(this.statement, { LABEL:'blockStatement' } )
         });
         this.CONSUME(t.End);
@@ -35,11 +38,11 @@ export class MathLangParserStatements extends Parser {
             { ALT: () => this.SUBRULE(this.whileStatement) },
             { ALT: () => this.SUBRULE(this.forStatement) },
             { ALT: () => this.SUBRULE(this.loopStatement) },
+//            { ALT: () => this.SUBRULE(this.switchStatement) }, // TODO SWITCH RULE
             { ALT: () => this.SUBRULE(this.assignStatement) },
-            { ALT: () => this.SUBRULE(this.functionStatement) },// TODO: MOVE TO PROGRAM FOR A FIRST LEVEL DECLARATION
             { ALT: () => this.SUBRULE(this.returnStatement) },
             { ALT: () => this.SUBRULE(this.blockStatement) }
-        ]);
+        ] );
     });
 
 
@@ -48,12 +51,12 @@ export class MathLangParserStatements extends Parser {
         this.CONSUME(t.If);
         this.SUBRULE(this.expression, { LABEL:"Condition" });
         this.CONSUME(t.Then);
-        this.MANY(() => {
+        this.AT_LEAST_ONE(() => {
             this.SUBRULE(this.statement, { LABEL:"Then" });
         });
         this.OPTION(() => {
             this.CONSUME(t.Else);
-            this.MANY2(() => {
+            this.AT_LEAST_ONE2(() => {
                 this.SUBRULE2(this.statement, { LABEL:"Else" });
             });
         });
@@ -66,7 +69,7 @@ export class MathLangParserStatements extends Parser {
         this.CONSUME(t.While);
         this.SUBRULE(this.expression);
         this.CONSUME(t.Do);
-        this.AT_LEAST_ONE( () => {
+        this.AT_LEAST_ONE(() => {
             this.SUBRULE(this.statement, { LABEL:"blockStatement" });
         });
         this.CONSUME(t.EndWhile);
@@ -75,10 +78,14 @@ export class MathLangParserStatements extends Parser {
     private forStatement = this.RULE("forStatement", () => {
         this.CONSUME(t.For);
         this.CONSUME(t.ID, { LABEL:"ForVar" } );
+        this.OPTION( () => {
+            this.CONSUME(t.Is);
+            this.CONSUME2(t.ID, { LABEL:"ForType" } );
+        });
         this.CONSUME(t.In);
         this.SUBRULE(this.expression, { LABEL:"ForIn" });
         this.CONSUME(t.Do);
-        this.AT_LEAST_ONE( () => {
+        this.AT_LEAST_ONE(() => {
             this.SUBRULE(this.statement, { LABEL:"blockStatement" });
         });
         this.CONSUME(t.EndFor);
@@ -94,7 +101,9 @@ export class MathLangParserStatements extends Parser {
         this.CONSUME(t.Step);
         this.SUBRULE3(this.expression, { LABEL:"LoopStep" });
         this.CONSUME(t.Do);
-        this.SUBRULE(this.blockStatement);
+        this.AT_LEAST_ONE(() => {
+            this.SUBRULE(this.statement, { LABEL:"blockStatement" });
+        });
         this.CONSUME(t.EndLoop);
     });
 
@@ -103,6 +112,9 @@ export class MathLangParserStatements extends Parser {
         this.CONSUME(t.ID, { LABEL:"AssignName" } );
         this.MANY( () => this.SUBRULE(this.AssignMemberOptionExpression) );
         this.CONSUME(t.Assign);
+        this.OPTION(
+            ()=>{ this.CONSUME(t.Async); }
+        );
         this.SUBRULE(this.expression, { LABEL:"AssignExpr" });
     });
 
@@ -126,8 +138,5 @@ export class MathLangParserStatements extends Parser {
 
     protected expression:any = undefined;
     protected ArgumentsWithIds:any = undefined;
-    protected BoxMemberExpression:any = undefined;
-    protected DotMemberExpression:any = undefined;
-    protected DashMemberExpression:any = undefined;
     protected AssignMemberOptionExpression:any = undefined;
 }

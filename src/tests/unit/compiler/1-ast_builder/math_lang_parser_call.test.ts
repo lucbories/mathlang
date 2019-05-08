@@ -33,7 +33,7 @@ describe('MathLang call parser', () => {
         const nomembers = <any>undefined;
         const result = {
             type:'ID_EXPRESSION',
-            ic_type:'INTEGER',
+            ic_type:'UNKNOW',
             name:'f',
             members:{
                 type:'ARGS_EXPRESSION',
@@ -64,7 +64,7 @@ describe('MathLang call parser', () => {
         const nomembers = <any>undefined;
         const result = {
             type:'ID_EXPRESSION',
-            ic_type:'INTEGER',
+            ic_type:'UNKNOW',
             name:'fx',
             members:{
                 type:'ARGS_EXPRESSION',
@@ -147,12 +147,12 @@ describe('MathLang call parser', () => {
         const nomembers = <any>undefined;
         const result = {
             type:'ID_EXPRESSION',
-            ic_type:'INTEGER',
+            ic_type:'UNKNOW',
             name:'fx',
             members:{
                 type:'ARGS_EXPRESSION',
                 ic_type:'ARRAY',
-                ic_subtypes:['INTEGER', 'INTEGER'],
+                ic_subtypes:['INTEGER', 'UNKNOW'],
                 items:[
                     {
                         type:'INTEGER',
@@ -162,7 +162,7 @@ describe('MathLang call parser', () => {
                     },
                     {
                         type:'ID_EXPRESSION',
-                        ic_type:'INTEGER',
+                        ic_type:'UNKNOW',
                         name:'efg',
                         members:nomembers
                     }

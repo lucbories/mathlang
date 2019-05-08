@@ -120,6 +120,9 @@ export const True      = createToken({ name: "True",       pattern: /true/ }, tr
 export const False     = createToken({ name: "False",      pattern: /false/ }, true);
 export const Is        = createToken({ name: "Is",         pattern: /is/ }, true);
 
+export const Async     = createToken({ name: "Async",      pattern: /async/ }, true);
+export const Await     = createToken({ name: "Await",      pattern: /await/ }, true);
+
 export const If        = createToken({ name: "If",         pattern: /if/ }, true);
 export const Else      = createToken({ name: "Else",       pattern: /else/ }, true);
 export const Then      = createToken({ name: "Then",       pattern: /then/ }, true);

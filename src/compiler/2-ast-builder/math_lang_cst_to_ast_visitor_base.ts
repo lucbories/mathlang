@@ -1,11 +1,16 @@
 import { math_lang_parser } from '../1-cst_builder/math_lang_parser';
-import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES,  TYPES } from '../3-program_builder/program_types';
-import { SymbolDeclarationRecord, FunctionScope } from '../3-program_builder/function_scope';
+import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES,  TYPES } from '../3-program_builder/math_lang_types';
+import { SymbolDeclarationRecord, FunctionScope } from '../3-program_builder/math_lang_function_scope';
 
 
 const BaseVisitor = math_lang_parser.getBaseCstVisitorConstructor()
 
-type AstBuilderErrorRecord   = { cst_node:object, ast_node:object, path:string, message:string };
+type AstBuilderErrorRecord   = {
+    context:object,
+    type:string,
+    ic_type:string,
+    message:string
+};
 type AstBuilderErrorArray    = Array<AstBuilderErrorRecord>;
 
 type ScopesStack             = Array<FunctionScope>;
@@ -21,13 +26,24 @@ type ScopesMap               = Map<string,FunctionScope>;
  */
 export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     protected _errors:AstBuilderErrorArray = new Array();
+    protected _unknow_symbols:string[] = new Array();
 
-    protected _main_scope:FunctionScope    = { func_name:'main', return_type:'none', statements:[], symbols_consts_table:new Map(), symbols_vars_table:new Map(), symbols_opds_table:new Map() };
+    protected _main_scope:FunctionScope    = {
+        func_name:'main',
+        return_type:'none',
+        statements:[],
+        symbols_consts_table:new Map(),
+        symbols_vars_table:new Map(),
+        symbols_opds_table:new Map(),
+        symbols_opds_ordered_list:[],
+        used_by_functions:[]
+    };
     
     protected _current_scope:FunctionScope = this._main_scope;
     protected _current_scope_path:string   = 'main';
     protected _scopes_stack:ScopesStack    = new Array();
     protected _scopes_map:ScopesMap        = new Map();
+
 
     /**
      * Constructor, nothing to do.
@@ -36,6 +52,15 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
         super();
         this._scopes_stack.push(this._main_scope);
         this._scopes_map.set(this._main_scope.func_name, this._main_scope);
+    }
+
+
+    /**
+     * Get scopes map.
+     * @return Map 
+     */
+    get_scopes_map() {
+        return this._scopes_map;
     }
 
 
@@ -125,7 +150,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
                 return loop_scope.symbols_opds_table.get(name).ic_type;
             }
         }
-        return TYPES.INTEGER;
+        return TYPES.UNKNOW;
     }
 
     /**
@@ -160,20 +185,35 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns true for success or false for failure
      */
     register_function_declaration(func_name:string, return_type:string, operands_declarations:any[], instructions:any[]) {
-        const func_scope:FunctionScope = { func_name:func_name, return_type:return_type, statements:instructions, symbols_consts_table:new Map(), symbols_vars_table:new Map(), symbols_opds_table:new Map() };
+        const func_scope:FunctionScope = {
+            func_name:func_name,
+            return_type:return_type,
+            statements:instructions,
+            symbols_consts_table:new Map(),
+            symbols_vars_table:new Map(),
+            symbols_opds_table:new Map(),
+            symbols_opds_ordered_list:[],
+            used_by_functions:[]
+        };
         this._scopes_map.set(func_name, func_scope);
 
         // PROCESS OPERANDS
         let opd_decl:any;
         for(opd_decl of operands_declarations){
-            const opd_record:SymbolDeclarationRecord = { name:opd_decl.name, path:func_name, ic_type:opd_decl.type, is_constant:true, init_value:undefined, uses_count:0, uses_scopes:[func_name] };
-            func_scope.symbols_opds_table.set(opd_decl.name, opd_record);
+            const opd_record:SymbolDeclarationRecord = { name:opd_decl.opd_name, path:func_name, ic_type:opd_decl.opd_type, is_constant:true, init_value:undefined, uses_count:0, uses_scopes:[func_name] };
+            func_scope.symbols_opds_table.set(opd_decl.opd_name, opd_record);
+            func_scope.symbols_opds_ordered_list.push(opd_decl.opd_name);
         }
     }
 
     set_function_declaration_statements(func_name:string, instructions:any[]){
         const func_scope = this._scopes_map.get(func_name);
         func_scope.statements = instructions;
+    }
+
+    set_function_declaration_type(func_name:string, return_type:string){
+        const func_scope = this._scopes_map.get(func_name);
+        func_scope.return_type = return_type;
     }
 
     enter_function_declaration(func_name:string){
@@ -199,7 +239,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param name symbol name
      * @returns true:symbol is a declared variable, false: symbol is not a declared variable
      */
-    has_declared_symbol(name:string):boolean {
+    has_declared_var_symbol(name:string):boolean {
         let loop_scope;
         for(loop_scope of this._scopes_stack) {
             if (loop_scope.symbols_consts_table.has(name)) {
@@ -271,21 +311,94 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     }
 
 
-    /*
-    key=this.current_scope_path: { key=symbol_name:SymbolDeclarationRecord 
+    /**
+     * Test errors.
+     * 
+     * @returns boolean
+     */
+    has_errors(){
+        return this._errors.length > 0;
+    }
 
 
-	ic_type_from_ast_type={ ast_type:ic_type }
-	ic_type_preunop={ ++:{ INTEGER:INTEGER } }
-	ic_type_postunop={ ++:{ INTEGER:INTEGER } }
-	ic_type_binop={ +:{ INTEGER-INTEGER:INTEGER } }
+    /**
+     * Get errors.
+     * 
+     * @returns errors
+     */
+    get_errors():AstBuilderErrorArray{
+        return this._errors;
+    }
 
-	
-	this.find_symbol(name): SymbolDeclarationRecord
-	this.register_symbol_declaration(name, ic_type, is_constant, init_value)
-	this.register_symbol_use(symbol_name)
 
-	this.enter_function(fname):this.scope_prefix.push(fname) this.current_scope_path=this.scope_prefix.join(¦)
-    this.leave_function():this.scope_prefix.slice(1,)
-    */
+    /**
+     * Add an error.
+     * 
+     * @param cst_context   CST context.
+     * @param ast_node_type  AST node type.
+     * @param message   human text to explain the error.
+     * 
+     * @returns 
+     */
+    add_error(cst_context:any, ast_node_type:any, message:string){
+
+        const error_node = {
+            type: ast_node_type,
+            ic_type: TYPES.ERROR,
+            context:cst_context,
+            message:message
+        };
+
+        this._errors.push(error_node);
+
+        return error_node;
+    }
+
+
+    /**
+     * Get unknow symbols.
+     * 
+     * @returns array of symbols strings.
+     */
+    get_unknow_symbols() {
+        return this._unknow_symbols;
+    }
+
+
+    /**
+     * Test unknow symbols.
+     * 
+     * @returns boolean.
+     */
+    has_unknow_symbols() {
+        return this._unknow_symbols.length > 0;
+    }
+
+
+    /**
+     * Reset state.
+     */
+    reset(){
+        this._errors = [];
+        this._unknow_symbols = [];
+
+        this._main_scope = {
+            func_name:'main',
+            return_type:'none',
+            statements:[],
+            symbols_consts_table:new Map(),
+            symbols_vars_table:new Map(),
+            symbols_opds_table:new Map(),
+            symbols_opds_ordered_list:[],
+            used_by_functions:[]
+        };
+        
+        this._current_scope        = this._main_scope;
+        this._current_scope_path   = 'main';
+        this._scopes_stack         = new Array();
+        this._scopes_map           = new Map();
+        
+        this._scopes_stack.push(this._main_scope);
+        this._scopes_map.set(this._main_scope.func_name, this._main_scope);
+    }
 }

@@ -3,7 +3,7 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import parse from '../../../../compiler/math_lang_processor';
-import TYPES from '../../../../compiler/3-program_builder/program_types'
+import TYPES from '../../../../compiler/3-program_builder/math_lang_types'
 
 
 function dump_tree(label:string, tree:any) {

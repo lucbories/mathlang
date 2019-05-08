@@ -13,6 +13,7 @@ export default function(text:string, throw_errors:boolean=true, rule_name:string
     // any top level rule may be used as an entry point
     const parser:any = math_lang_parser;
     const cst = parser[rule_name]();
+    let math_lang_cst_to_ast_visitor;
     let ast = undefined;
 
     if (math_lang_parser.errors.length > 0) {
@@ -24,7 +25,7 @@ export default function(text:string, throw_errors:boolean=true, rule_name:string
         }
     } else {
         // Build AST
-        const math_lang_cst_to_ast_visitor = new MathLangCstToAstVisitor();
+        math_lang_cst_to_ast_visitor = new MathLangCstToAstVisitor();
         ast = math_lang_cst_to_ast_visitor.visit(cst);
 //        const t=1;
     }
@@ -32,17 +33,12 @@ export default function(text:string, throw_errors:boolean=true, rule_name:string
     return {
         cst:cst,
         ast:ast,
-        ict:{
-            block:{
-                symbols:{},
-                registers:<any>[],
-                args:{},
-                instructions:<any>[]
-            },
-            symbols:{}
-        },
+        ast_scopes_map:math_lang_cst_to_ast_visitor ? math_lang_cst_to_ast_visitor.get_scopes_map() : undefined,
+        // ir_text:'',
+        // ir_code:<any>[],
         lexErrors: lexResult.errors,
         parseErrors: math_lang_parser.errors,
-        ictErrors:<any>undefined
+        ast_errors: math_lang_cst_to_ast_visitor ? math_lang_cst_to_ast_visitor.get_errors() : []
+        // ictErrors:<any>undefined
     }
 }

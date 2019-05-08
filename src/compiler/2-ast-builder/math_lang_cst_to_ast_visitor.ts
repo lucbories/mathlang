@@ -1,5 +1,6 @@
 import MathLangCstToAstVisitorStatement from './math_lang_cst_to_ast_visitor_statement';
-import TYPES from '../3-program_builder/program_types';
+import TYPES from '../3-program_builder/math_lang_types';
+import AST from '../2-ast-builder/math_lang_ast';
 
 
 
@@ -21,61 +22,94 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
     BinaryExpression(ctx:any) {
         // this.dump_ctx('BinaryExpression', ctx);
 
-        const node_lhs = this.visit(ctx.lhs);
-        const node_op  = ctx.operator   ? this.visit(ctx.operator)  : undefined;
-        const node_rhs = ctx.rhs        ? this.visit(ctx.rhs)       : undefined;
+        let loop_ast_lhs = this.visit(ctx.lhs);
 
-        if (! node_op && ! node_rhs) {
-            return node_lhs;
+        // SIMPLE LHS EXPRESSION
+        if (! ctx.operator || ! ctx.rhs) {
+            return loop_ast_lhs;
         }
 
-        return {
-            type: "COMPARATOR_EXPRESSION",
-            ic_type:TYPES.BOOLEAN,
-            lhs: node_lhs,
-            operator: node_op,
-            rhs: node_rhs
+        // LOOP ON BINOP CHAIN
+        let loop_index;
+        let loop_ast_op;
+        let loop_ast_rhs;
+        let loop_ast;
+        for(loop_index=0; loop_index < ctx.operator.length; loop_index++) {
+            loop_ast_op  = this.visit(ctx.operator[loop_index]);
+            loop_ast_rhs = this.visit(ctx.rhs[loop_index]);
+            loop_ast = {
+                type:     AST.EXPR_BINOP_COMPARE,
+                ic_type:  TYPES.BOOLEAN,
+                lhs:      loop_ast_lhs,
+                operator: loop_ast_op,
+                rhs:      loop_ast_rhs
+            };
+            loop_ast_lhs = loop_ast;
         }
+
+        return loop_ast;
     }
 
     BinaryMultDivExpression(ctx:any) {
         // this.dump_ctx('BinaryMultDivExpression', ctx);
 
-        const node_lhs = this.visit(ctx.lhs);
-        const node_op  = ctx.operator   ? this.visit(ctx.operator)  : undefined;
-        const node_rhs = ctx.rhs        ? this.visit(ctx.rhs)       : undefined;
+        let loop_ast_lhs = this.visit(ctx.lhs);
 
-        if (! node_op && ! node_rhs) {
-            return node_lhs;
+        // SIMPLE LHS EXPRESSION
+        if (! ctx.operator || ! ctx.rhs) {
+            return loop_ast_lhs;
         }
 
-        return {
-            type: "MULTDIV_EXPRESSION",
-            ic_type:this.compute_binop_type(node_op.value, node_lhs, node_rhs),
-            lhs: node_lhs,
-            operator: node_op,
-            rhs: node_rhs
+        // LOOP ON BINOP CHAIN
+        let loop_index;
+        let loop_ast_op;
+        let loop_ast_rhs;
+        let loop_ast;
+        for(loop_index=0; loop_index < ctx.operator.length; loop_index++) {
+            loop_ast_op  = this.visit(ctx.operator[loop_index]);
+            loop_ast_rhs = this.visit(ctx.rhs[loop_index]);
+            loop_ast = {
+                type:     AST.EXPR_BINOP_MULTDIV,
+                ic_type:  this.compute_binop_type(loop_ast_op.value, loop_ast_lhs, loop_ast_rhs),
+                lhs:      loop_ast_lhs,
+                operator: loop_ast_op,
+                rhs:      loop_ast_rhs
+            };
+            loop_ast_lhs = loop_ast;
         }
+
+        return loop_ast;
     }
 
     BinaryAddSubExpression(ctx:any) {
         // this.dump_ctx('BinaryAddSubExpression', ctx);
 
-        const node_lhs = this.visit(ctx.lhs);
-        const node_op  = ctx.operator   ? this.visit(ctx.operator)  : undefined;
-        const node_rhs = ctx.rhs        ? this.visit(ctx.rhs)       : undefined;
+        let loop_ast_lhs = this.visit(ctx.lhs);
 
-        if (! node_op && ! node_rhs) {
-            return node_lhs;
+        // SIMPLE LHS EXPRESSION
+        if (! ctx.operator || ! ctx.rhs) {
+            return loop_ast_lhs;
         }
 
-        return {
-            type: "ADDSUB_EXPRESSION",
-            ic_type:this.compute_binop_type(node_op.value, node_lhs, node_rhs),
-            lhs: node_lhs,
-            operator: node_op,
-            rhs: node_rhs
+        // LOOP ON BINOP CHAIN
+        let loop_index;
+        let loop_ast_op;
+        let loop_ast_rhs;
+        let loop_ast;
+        for(loop_index=0; loop_index < ctx.operator.length; loop_index++) {
+            loop_ast_op  = this.visit(ctx.operator[loop_index]);
+            loop_ast_rhs = this.visit(ctx.rhs[loop_index]);
+            loop_ast = {
+                type:     AST.EXPR_BINOP_ADDSUB,
+                ic_type:  this.compute_binop_type(loop_ast_op.value, loop_ast_lhs, loop_ast_rhs),
+                lhs:      loop_ast_lhs,
+                operator: loop_ast_op,
+                rhs:      loop_ast_rhs
+            };
+            loop_ast_lhs = loop_ast;
         }
+
+        return loop_ast;
     }
 
     UnaryExpression(ctx:any) {
@@ -91,7 +125,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
 
         if (node_rhs && node_op) {
             return {
-                type: "PREUNOP_EXPRESSION",
+                type: AST.EXPR_UNOP_PREUNOP,
                 ic_type:this.compute_preunop_type(node_op, node_rhs),
                 rhs: node_rhs,
                 operator: node_op
@@ -100,30 +134,26 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
 
         if (ctx.True) {
             return {
-                type: "TRUE",
+                type: AST.EXPR_UNOP_PRE_TRUE,
                 ic_type:TYPES.KEYWORD
             }
         }
 
         if (ctx.False) {
             return {
-                type: "FALSE",
+                type: AST.EXPR_UNOP_PRE_FALSE,
                 ic_type:TYPES.KEYWORD
             }
         }
 
         if (ctx.Null) {
             return {
-                type: "NULL",
+                type: AST.EXPR_UNOP_PRE_NULL,
                 ic_type:TYPES.KEYWORD
             }
         }
         
-        return {
-            type: "UNKNOW_UNARY_EXPRESSION",
-            ic_type: TYPES.ERROR,
-            context:ctx
-        }
+        return this.add_error(ctx, AST.EXPR_UNOP_PRE_UNKNOW, 'Unknow prefix unary operator node');
     }
 
     PostfixExpression(ctx:any) {
@@ -134,7 +164,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
         
         if (node_lhs && node_op) {
             return {
-                type: "POSTUNOP_EXPRESSION",
+                type: AST.EXPR_UNOP_POST,
                 ic_type:this.compute_postunop_type(node_op, node_lhs),
                 lhs: node_lhs,
                 operator: node_op
@@ -145,11 +175,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
             return node_lhs
         }
         
-        return {
-            type: "UNKNOW_POSTFIX_EXPRESSION",
-            ic_type: TYPES.ERROR,
-            context:ctx
-        }
+        return this.add_error(ctx, AST.EXPR_UNOP_POST_UNKNOW, 'Unknow postfix unary operator node');
     }
 
     MemberExpression(ctx:any) {
@@ -174,28 +200,45 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
             }
         }
 
+        const expression_members = loop_ast_member.is_default_ast ? loop_ast_member.members : loop_ast_member;
+
 
         if (ctx.ID) {
             const id = ctx.ID[0].image;
-            return {
-                type: "ID_EXPRESSION",
-                ic_type:this.get_symbol_type(id),
+            const symbol_type = this.get_symbol_type(id);
+            const ast_node = {
+                type: AST.EXPR_MEMBER_ID,
+                ic_type: symbol_type,
                 name: id,
-                members: loop_ast_member.is_default_ast ? loop_ast_member.members : loop_ast_member
+                members: expression_members
             };
+            if (symbol_type == TYPES.UNKNOW){
+                // CHECK FUNCTION CALL
+                if (ast_node.members && ast_node.members.type == AST.EXPR_ARGS){
+                    if (this.has_declared_func_symbol(id)){
+                        ast_node.ic_type = this.get_scopes_map().get(id).return_type;
+                        return ast_node;
+                    }
+                }
+
+                // ERROR
+                if (this.has_declared_var_symbol(id) || this.has_declared_func_symbol(id)){
+                    this.add_error(ctx.ID[0], ast_node, 'Unknow symbol type [' + id + ']');
+                } else {
+                    this._unknow_symbols.push(id);
+                    this.add_error(ctx.ID[0], ast_node, 'Unknow symbol [' + id + ']');
+                }
+            }
+            return ast_node;
         }
 
         if (ctx.PrimaryExpression) {
             const node_prim = this.visit(ctx.PrimaryExpression);
-            node_prim.members = loop_ast_member.is_default_ast ? loop_ast_member.members : loop_ast_member;
+            node_prim.members = expression_members;
             return node_prim;
         }
         
-        return {
-            type: "UNKNOW_MEMBER_EXPRESSION",
-            ic_type: TYPES.ERROR,
-            context:ctx
-        }
+        return this.add_error(ctx, AST.EXPR_MEMBER_UNKNOW, 'Unknow member expression node');
     }
 
     MemberOptionExpression(ctx:any) {
@@ -204,7 +247,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
         if (ctx.BoxMemberExpression) {
             const ast_node = this.visit(ctx.BoxMemberExpression);
             return {
-                type: "BOX_EXPRESSION",
+                type: AST.EXPR_MEMBER_BOX,
                 ic_type:ast_node.ic_type,
                 expression: ast_node
             }
@@ -212,7 +255,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
         if (ctx.DotMemberExpression) {
             const ast_node = this.visit(ctx.DotMemberExpression);
             return {
-                type: "DOT_EXPRESSION",
+                type: AST.EXPR_MEMBER_DOT,
                 ic_type:ast_node.ic_type,
                 identifier: ast_node
             }
@@ -220,7 +263,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
         if (ctx.DashMemberExpression) {
             const ast_node = this.visit(ctx.DashMemberExpression);
             return {
-                type: "DASH_EXPRESSION",
+                type: AST.EXPR_MEMBER_DASH,
                 ic_type:ast_node.ic_type,
                 expression: ast_node
             }
@@ -229,11 +272,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
             return this.visit(ctx.Arguments);
         }
         
-        return {
-            type: "UNKNOW_MEMBER_ITEM_EXPRESSION",
-            ic_type: TYPES.ERROR,
-            context: ctx
-        }
+        return this.add_error(ctx, AST.EXPR_MEMBER_UNKNOW_ITEM, 'Unknow optional member expression node');
     }
 
     AssignMemberOptionExpression(ctx:any) {
@@ -242,21 +281,21 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
         if (ctx.BoxMemberExpression) {
             const ast_node = this.visit(ctx.BoxMemberExpression);
             return {
-                type: "BOX_EXPRESSION",
+                type: AST.EXPR_MEMBER_BOX,
                 ic_type:ast_node.ic_type,
                 expression: ast_node
             }
         }
         if (ctx.DotMemberExpression) {
             return {
-                type: "DOT_EXPRESSION",
+                type: AST.EXPR_MEMBER_DOT,
                 ic_type:TYPES.METHOD_ID,
                 identifier: this.visit(ctx.DotMemberExpression)
             }
         }
         if (ctx.DashMemberExpression) {
             return {
-                type: "DASH_EXPRESSION",
+                type: AST.EXPR_MEMBER_DASH,
                 ic_type:TYPES.ATTRIBUTE_ID,
                 expression: this.visit(ctx.DashMemberExpression)
             }
@@ -266,7 +305,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
         }
         
         return {
-            type: "UNKNOW_MEMBER_ITEM_EXPRESSION",
+            type: AST.EXPR_MEMBER_UNKNOW_ITEM,
             context: ctx
         }
     }
@@ -276,7 +315,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
 
         if (ctx.StringLiteral) {
             return {
-                type: "STRING",
+                type: AST.EXPR_PRIMARY_STRING,
                 ic_type:TYPES.STRING,
                 value:ctx.StringLiteral[0].image
             }
@@ -284,7 +323,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
 
         if (ctx.Integer1Literal) {
             return {
-                type: "INTEGER",
+                type: AST.EXPR_PRIMARY_INTEGER,
                 ic_type:TYPES.INTEGER,
                 value:ctx.Integer1Literal[0].image
             }
@@ -292,7 +331,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
 
         if (ctx.Integer2Literal) {
             return {
-                type: "INTEGER",
+                type: AST.EXPR_PRIMARY_INTEGER,
                 ic_type:TYPES.INTEGER,
                 value:ctx.Integer2Literal[0].image
             }
@@ -300,7 +339,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
 
         if (ctx.FloatLiteral) {
             return {
-                type: "FLOAT",
+                type: AST.EXPR_PRIMARY_FLOAT,
                 ic_type:TYPES.FLOAT,
                 value:ctx.FloatLiteral[0].image
             }
@@ -308,7 +347,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
 
         if (ctx.BigInteger1Literal) {
             return {
-                type: "BIGINTEGER",
+                type: AST.EXPR_PRIMARY_BIGINTEGER,
                 ic_type:TYPES.BIGINTEGER,
                 value:ctx.BigInteger1Literal[0].image
             }
@@ -316,7 +355,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
 
         if (ctx.BigInteger2Literal) {
             return {
-                type: "BIGINTEGER",
+                type: AST.EXPR_PRIMARY_BIGINTEGER,
                 ic_type:TYPES.BIGINTEGER,
                 value:ctx.BigInteger2Literal[0].image
             }
@@ -324,7 +363,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
 
         if (ctx.BigFloat1Literal) {
             return {
-                type: "BIGFLOAT",
+                type: AST.EXPR_PRIMARY_BIGFLOAT,
                 ic_type:TYPES.BIGFLOAT,
                 value:ctx.BigFloat1Literal[0].image
             }
@@ -332,7 +371,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
 
         if (ctx.BigFloat2Literal) {
             return {
-                type: "BIGFLOAT",
+                type: AST.EXPR_PRIMARY_BIGFLOAT,
                 ic_type:TYPES.BIGFLOAT,
                 value:ctx.BigFloat2Literal[0].image
             }
@@ -340,7 +379,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
 
         if (ctx.BigFloat3Literal) {
             return {
-                type: "BIGFLOAT",
+                type: AST.EXPR_PRIMARY_BIGFLOAT,
                 ic_type:TYPES.BIGFLOAT,
                 value:ctx.BigFloat3Literal[0].image
             }
@@ -360,7 +399,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
         }
 
         return {
-            type: "UNKNOW_EXPRESSION",
+            type: AST.EXPR_PRIMARY_UNKNOW,
             ctx:ctx
         }
     }
@@ -370,32 +409,62 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
 
         const node_expr = this.visit(ctx.BinaryExpression);
         return {
-            type: "PARENTHESIS_EXPRESSION",
+            type: AST.EXPR_PARENTHESIS,
             ic_type:node_expr.ic_type,
             expression: node_expr
         }
     }
 
+
+    /**
+     * Visit CST Id member (id\[expression, expression...\]) node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
     BoxMemberExpression(ctx:any) {
-        return this.visit(ctx.BinaryExpression);
+        return this.visit(ctx.Arguments);
     }
 
 
+    /**
+     * Visit CST Id member (id.id) node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
     DotMemberExpression(ctx:any) {
         return ctx.ID[0].image;
     }
 
 
+    /**
+     * Visit CST Id member (id#id) node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
     DashMemberExpression(ctx:any) {
         return ctx.ID[0].image;
     }
 
+
+    /**
+     * Visit CST Arguments node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
     Arguments(ctx:any) {
         // this.dump_ctx('argsList', ctx);
         
         if (!ctx.BinaryExpression) {
             return {
-                type: "ARGS_EXPRESSION",
+                type: AST.EXPR_ARGS,
                 ic_type:TYPES.ARRAY,
                 ic_subtypes:[TYPES.UNKNOW],
                 items: undefined
@@ -421,20 +490,28 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
         }
         
         return {
-            type: "ARGS_EXPRESSION",
+            type: AST.EXPR_ARGS,
             ic_type:TYPES.ARRAY,
             ic_subtypes:ic_unique_subtypes.length == 1 ? ic_unique_subtypes : ic_subtypes,
             items: nodes
         }
     }
 
+
+    /**
+     * Visit CST Arguments with ids (id1, id2...) node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
     ArgumentsWithIds(ctx:any) {
         // this.dump_ctx('ArgumentsWithIds', ctx);
         
         // EMPTY LIST OF ARGUMENTS
         if ( ! ctx.ArgumentWithIds) {
             return {
-                type: "ARGIDS_EXPRESSION",
+                type: AST.EXPR_ARGS_IDS,
                 ic_type:TYPES.ARRAY,
                 ic_subtypes:[TYPES.UNKNOW],
                 items: undefined
@@ -454,26 +531,42 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
         }
         
         return {
-            type: "ARGIDS_EXPRESSION",
+            type: AST.EXPR_ARGS_IDS,
             ic_type:TYPES.ARRAY,
             ic_subtypes:ic_subtypes,
             items: ids
         }
     }
 
+
+    /**
+     * Visit CST Argument id node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
     ArgumentWithIds(ctx:any) {
         // this.dump_ctx('ArgumentWithIds', ctx);
-        
+
         const arg_type = ctx.arg_type && ctx.arg_type[0].image ? ctx.arg_type[0].image : 'INTEGER';
         return { id:ctx.arg_id[0].image, type: arg_type };
     }
 
+
+    /**
+     * Visit CST Array Literal node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
     ArrayLiteral(ctx:any) {
         // this.dump_ctx('ArrayLiteral', ctx);
 
         if (!ctx.BinaryExpression) {
             return {
-                type: "ARRAY_EXPRESSION",
+                type: AST.EXPR_ARRAY,
                 ic_type:TYPES.ARRAY,
                 ic_subtypes:[TYPES.UNKNOW],
                 items:<any>undefined
@@ -502,33 +595,57 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
         }
         
         return {
-            type: "ARRAY_EXPRESSION",
+            type: AST.EXPR_ARRAY,
             ic_type:TYPES.ARRAY,
             ic_subtypes:ic_unique_subtypes.length == 1 ? ic_unique_subtypes : ic_subtypes,
             items: nodes
         }
     }
 
+
+    /**
+     * Visit CST Binary Comparator operator node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
     BinaryCompareOps(ctx:any) {
         // this.dump_ctx('BinaryCompareOps', ctx);
         return {
-            type: "BINOP",
+            type: AST.EXPR_BINOP,
             value: ctx.binop[0].image
         }
     }
 
+
+    /**
+     * Visit CST Binary Mul/Div operator node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
     BinaryMultDivOps(ctx:any) {
         // this.dump_ctx('BinaryMultDivOps', ctx);
         return {
-            type: "BINOP",
+            type: AST.EXPR_BINOP,
             value: ctx.binop[0].image
         }
     }
+    
 
+    /**
+     * Visit CST Binary Add/Sub operator node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
     BinaryAddSubOps(ctx:any) {
         // this.dump_ctx('BinaryAddSubOps', ctx);
         return {
-            type: "BINOP",
+            type: AST.EXPR_BINOP,
             value: ctx.binop[0].image
         }
     }

@@ -140,18 +140,24 @@ export class MathLangParserExpressions extends MathLangParserStatements {
         this.CONSUME(t.RParen);
     });
     
-    BoxMemberExpression = this.RULE("BoxMemberExpression", () => {
+    private BoxMemberExpression = this.RULE("BoxMemberExpression", () => {
         this.CONSUME(t.LSquare);
-        this.SUBRULE(this.BinaryExpression);
+        this.AT_LEAST_ONE( () => {
+                this.SUBRULE(this.BinaryExpression);
+                this.MANY(() => {
+                    this.CONSUME(t.Comma);
+                    this.SUBRULE2(this.BinaryExpression);
+                });
+        });
         this.CONSUME(t.RSquare);
     });
 
-    DotMemberExpression = this.RULE("DotMemberExpression", () => {
+    private DotMemberExpression = this.RULE("DotMemberExpression", () => {
         this.CONSUME(t.Dot);
         this.CONSUME(t.ID);
     });
 
-    DashMemberExpression = this.RULE("DashMemberExpression", () => {
+    private DashMemberExpression = this.RULE("DashMemberExpression", () => {
         this.CONSUME(t.Dash);
         this.CONSUME(t.ID);
     });

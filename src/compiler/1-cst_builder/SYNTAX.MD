@@ -1,3 +1,181 @@
+--------------------------------------------------------------------------------------------- 
+STATEMENTS
+--------------------------------------------------------------------------------------------- 
+program
+   : statement+
+   | block_statement
+   | function_declaration
+   ;
+
+function_declaration
+   : 'function' function_header_declaration 'return' ID statement+ 'end function'
+   ;
+
+function_header_declaration
+   : ID '(' operands_declaration? ')'
+   ;
+
+operands_declaration
+   : operand_declaration (',' operand_declaration)*
+   ;
+
+operand_declaration
+   : ID ('is' ID)?
+   ;
+
+block_statement
+   : 'begin' statement+ 'end'
+   ;
+
+statement
+   : 'if' expression 'then' statement+ ('else' statement+)? 'end if'
+   | 'while' expression 'do' statement+ 'end while'
+   | 'for'    ID ('is' ID)? 'in'   expression 'do' statement+ 'end for'
+   | 'loop'   ID ('is' ID)? 'from' expression 'to' expression 'step' expression 'do' statement+ 'end loop'
+   | 'switch' ID ('is' ID)? 'in' ('on' expression 'do' statement 'end do')+ 'end switch'
+   | assign_id_declaration '=' ('async')? expression
+   | 'return' expression
+   | 'wait' ID 'do' statement+ 'end wait'
+   | 'on' ID '(' ID (',' operands_declaration)? ')' 'do' statement+ 'end error'
+   | 'emit' ID '(' ID ',' expression_arguments ')'
+   | 'dispose' ID
+   ;
+
+assign_id_declaration
+   : ID (dash_id)? ('.' function_header_declaration)?
+   | id_expression
+   ;
+
+
+
+--------------------------------------------------------------------------------------------- 
+EXPRESSIONS
+--------------------------------------------------------------------------------------------- 
+expression
+   : binary_expression
+   | parenthesis_expression
+   ;
+
+parenthesis_expression
+   : '(' binary_expression ')'
+   ;
+
+binary_expression
+   : binary_add_sub_expression (binop_compare binary_add_sub_expression)*
+   ;
+
+binary_add_sub_expression
+   : binary_mul_div_expression (binop_addsub binary_mul_div_expression)*
+   ;
+
+binary_mul_div_expression
+   : unary_expression (binop_muldiv binary_mul_div_expression)*
+   ;
+
+unary_expression
+   : postfix_expression
+   | preunop unary_expression
+   | primary_expression
+   | 'true'
+   | 'false'
+   | 'null'
+   ;
+
+postfix_expression
+   : binary_expression (postunop)?
+   ;
+
+id_expression
+   : ID (dash_id)? (box_expression_arguments)?
+   ;
+
+box_expression_arguments
+   : '[' expression_arguments ']'
+   ;
+
+
+expression_arguments
+   : binary_expression (',' binary_expression)*
+   ;
+
+
+
+---------------------------------------------------------------------------------------------
+TERMINAL
+---------------------------------------------------------------------------------------------
+dash_id
+   : '#' ID
+   ;
+
+preunop
+   : '++' | '--' | '+' | '-' | '!'
+   ;
+
+postunop
+   : '++' | '--'
+   ;
+
+primary_expression
+   : STRING_LITERAL
+   | INTEGER
+   | FLOAT
+   | BIGINTEGER
+   | BIGFLOAT
+   | ARRAY_LITERAL
+   | SET_LITERAL
+   | MAP_LITERAL
+   ;
+
+ARRAY_LITERAL
+   : '[' primary_expression (',' primary_expression)* ']'
+   ;
+
+SET_LITERAL
+   : '{' primary_expression (',' primary_expression)* '}'
+   ;
+
+MAP_LITERAL
+   : 'Map(' ID '=>' primary_expression (',' ID '=>' primary_expression)* ')'
+   ;
+
+STRING_LITERAL
+   : '(:?[^\\"]|\\(:?[bfnrtv"\\/]|u[0-9a-fA-F]{4}))*'
+   ;
+
+ID
+   : [a-zA-Z][a-zA-Z0-9_]*
+   ;
+
+WS
+   : [ \r\n\t] -> skip
+   ;
+
+
+
+---------------------------------------------------------------------------------------------
+ERRORS MANAGEMENT
+---------------------------------------------------------------------------------------------
+...
+f(...) returns TYPE
+	...
+	emit error('ERROR_NAME', optional args set) 
+	...
+	on error('ERROR_NAME', ARGS_ARRAY_NAME) do
+		...
+	end error
+end function
+on error('ERROR_NAME', ARGS_ARRAY_NAME) do
+	...
+end error
+...
+
+
+
+
+
+
+
+
 ******************************************************************************
 program         = 1+statement
 blockStatement  = 0+statement
@@ -25,6 +203,13 @@ onErrorStatement  = Keyword(on error) + Keyword(do) +  blockStatement + Keyword(
 expression
 
 
+
+
+Dqns une fonction, on ne peut pas avoir d'expression sans instruction cad on doit avoir
+soit variable = expression
+soit return expression
+mais jamais expression seule.
+==> pas de procedure a appeler, que des fonctions
 
 
 
