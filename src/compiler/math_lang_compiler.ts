@@ -3,9 +3,9 @@ import { IToken, LexerDefinitionErrorType } from 'chevrotain';
 import IProgram from '../core/iprogram';
 import IFeature from '../core/ifeature';
 
-import { math_lang_lexer, math_lang_parser } from './1-cst_builder/math_lang_parser';
+import { math_lang_lexer, math_lang_parser } from './1-cst-builder/math_lang_parser';
 import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visitor';
-import {FunctionScope} from './3-program_builder/math_lang_function_scope'
+import {FunctionScope} from './3-program-builder/math_lang_function_scope'
 
 function lexer_get_def_error(code:LexerDefinitionErrorType):string {
     switch(code) {
@@ -129,6 +129,14 @@ export default class MathLangCompiler {
      * @return AST tree.
      */
     get_ast() { return this._ast; }
+
+
+    /**
+     * Get AST Builder.
+     * 
+     * @return MathLangCstToAstVisitor.
+     */
+    get_ast_builder() { return this._ast_builder; }
 
 
     /**

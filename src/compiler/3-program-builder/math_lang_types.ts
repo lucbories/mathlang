@@ -4,6 +4,7 @@ export const TYPES = {
     BIGINTEGER:'BIGINTEGER',
     BIGFLOAT:'BIGFLOAT',
     
+    RECORD:'RECORD',
     BOOLEAN:'BOOLEAN',
     STRING:'STRING',
     NULL:'NULL',

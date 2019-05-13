@@ -20,6 +20,63 @@ export const program_1_ast = {
     "type": "PROGRAM",
     "block": [
         {
+            "type": "ASSIGN_STATEMENT",
+            "ic_type": "INTEGER",
+            "name": "left",
+            "is_async": false,
+            "expression": {
+                "type": "INTEGER",
+                "ic_type": "INTEGER",
+                "value": "12",
+                "members":<any>undefined
+            },
+            "members":<any>undefined
+        },
+        {
+            "type": "ASSIGN_STATEMENT",
+            "ic_type": "INTEGER",
+            "name": "right",
+            "is_async": false,
+            "expression": {
+                "type": "INTEGER",
+                "ic_type": "INTEGER",
+                "value": "123",
+                "members":<any>undefined
+            },
+            "members":<any>undefined
+        },
+        {
+            "type": "RETURN_STATEMENT",
+            "ic_type": "INTEGER",
+            "expression": {
+                "type": "ID_EXPRESSION",
+                "ic_type": "INTEGER",
+                "name": "my_int_square_add",
+                "members": {
+                    "type": "ARGS_EXPRESSION",
+                    "ic_type": "ARRAY",
+                    "ic_subtypes": [
+                        "INTEGER",
+                        "INTEGER"
+                    ],
+                    "items": [
+                        {
+                            "type": "ID_EXPRESSION",
+                            "ic_type": "INTEGER",
+                            "name": "left",
+                            "members":<any>undefined
+                        },
+                        {
+                            "type": "ID_EXPRESSION",
+                            "ic_type": "INTEGER",
+                            "name": "right",
+                            "members":<any>undefined
+                        }
+                    ]
+                }
+            }
+        },
+        {
             "type": "FUNCTION_STATEMENT",
             "ic_type": "INTEGER",
             "name": "my_int_square_add",
@@ -197,63 +254,6 @@ export const program_1_ast = {
                     }
                 }
             ]
-        },
-        {
-            "type": "ASSIGN_STATEMENT",
-            "ic_type": "INTEGER",
-            "name": "left",
-            "is_async": false,
-            "expression": {
-                "type": "INTEGER",
-                "ic_type": "INTEGER",
-                "value": "12",
-                "members":<any>undefined
-            },
-            "members":<any>undefined
-        },
-        {
-            "type": "ASSIGN_STATEMENT",
-            "ic_type": "INTEGER",
-            "name": "right",
-            "is_async": false,
-            "expression": {
-                "type": "INTEGER",
-                "ic_type": "INTEGER",
-                "value": "123",
-                "members":<any>undefined
-            },
-            "members":<any>undefined
-        },
-        {
-            "type": "RETURN_STATEMENT",
-            "ic_type": "UNKNOW",
-            "expression": {
-                "type": "ID_EXPRESSION",
-                "ic_type": "UNKNOW",
-                "name": "my_int_square_add",
-                "members": {
-                    "type": "ARGS_EXPRESSION",
-                    "ic_type": "ARRAY",
-                    "ic_subtypes": [
-                        "INTEGER",
-                        "INTEGER"
-                    ],
-                    "items": [
-                        {
-                            "type": "ID_EXPRESSION",
-                            "ic_type": "INTEGER",
-                            "name": "left",
-                            "members":<any>undefined
-                        },
-                        {
-                            "type": "ID_EXPRESSION",
-                            "ic_type": "INTEGER",
-                            "name": "right",
-                            "members":<any>undefined
-                        }
-                    ]
-                }
-            }
         }
     ]
 };

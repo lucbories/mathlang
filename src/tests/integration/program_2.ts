@@ -31,6 +31,128 @@ export const program_2_ast = {
     "type": "PROGRAM",
     "block": [
         {
+            "type": "ASSIGN_STATEMENT",
+            "ic_type": "FLOAT",
+            "name": "t",
+            "is_async": false,
+            "expression": {
+                "type": "FLOAT",
+                "ic_type": "FLOAT",
+                "value": "0.0",
+                "members":<any>undefined
+            },
+            "members":<any>undefined
+        },
+        {
+            "type": "ASSIGN_STATEMENT",
+            "ic_type": "FLOAT",
+            "name": "pi",
+            "is_async": false,
+            "expression": {
+                "type": "FLOAT",
+                "ic_type": "FLOAT",
+                "value": "3.14",
+                "members":<any>undefined
+            },
+            "members":<any>undefined
+        },
+        {
+            "type": "LOOP_STATEMENT",
+            "var": "i",
+            "from": {
+                "type": "INTEGER",
+                "ic_type": "INTEGER",
+                "value": "10",
+                "members":<any>undefined
+            },
+            "to": {
+                "type": "INTEGER",
+                "ic_type": "INTEGER",
+                "value": "100",
+                "members":<any>undefined
+            },
+            "step": {
+                "type": "INTEGER",
+                "ic_type": "INTEGER",
+                "value": "10",
+                "members":<any>undefined
+            },
+            "block": [
+                {
+                    "type": "ASSIGN_STATEMENT",
+                    "ic_type": "BIGFLOAT",
+                    "name": "t",
+                    "is_async": false,
+                    "members":<any>undefined,
+                    "expression": {
+                        "type": "ADDSUB_EXPRESSION",
+                        "ic_type": "BIGFLOAT",
+                        "lhs": {
+                            "type": "ID_EXPRESSION",
+                            "ic_type": "FLOAT",
+                            "name": "t",
+                            "members":<any>undefined
+                        },
+                        "operator": {
+                            "type": "BINOP",
+                            "value": "+"
+                        },
+                        "rhs": {
+                            "type": "ID_EXPRESSION",
+                            "ic_type": "BIGFLOAT",
+                            "name": "my_float_square_add",
+                            "members": {
+                                "type": "ARGS_EXPRESSION",
+                                "ic_type": "ARRAY",
+                                "ic_subtypes": [
+                                    "FLOAT",
+                                    "FLOAT"
+                                ],
+                                "items": [
+                                    {
+                                        "type": "MULTDIV_EXPRESSION",
+                                        "ic_type": "FLOAT",
+                                        "lhs": {
+                                            "type": "ID_EXPRESSION",
+                                            "ic_type": "INTEGER",
+                                            "name": "i",
+                                            "members":<any>undefined
+                                        },
+                                        "operator": {
+                                            "type": "BINOP",
+                                            "value": "*"
+                                        },
+                                        "rhs": {
+                                            "type": "ID_EXPRESSION",
+                                            "ic_type": "FLOAT",
+                                            "name": "pi",
+                                            "members":<any>undefined
+                                        }
+                                    },
+                                    {
+                                        "type": "ID_EXPRESSION",
+                                        "ic_type": "FLOAT",
+                                        "name": "pi",
+                                        "members":<any>undefined
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "type": "RETURN_STATEMENT",
+            "ic_type": "FLOAT",
+            "expression": {
+                "type": "ID_EXPRESSION",
+                "ic_type": "FLOAT",
+                "name": "t",
+                "members":<any>undefined
+            }
+        },
+        {
             "type": "FUNCTION_STATEMENT",
             "ic_type": "INTEGER",
             "name": "my_int_square_add",
@@ -228,12 +350,12 @@ export const program_2_ast = {
             "block": [
                 {
                     "type": "ASSIGN_STATEMENT",
-                    "ic_type": "UNKNOW",
+                    "ic_type": "FLOAT",
                     "name": "a",
                     "is_async": false,
                     "expression": {
                         "type": "ADDSUB_EXPRESSION",
-                        "ic_type": "UNKNOW",
+                        "ic_type": "FLOAT",
                         "lhs": {
                             "type": "MULTDIV_EXPRESSION",
                             "ic_type": "FLOAT",
@@ -260,7 +382,7 @@ export const program_2_ast = {
                         },
                         "rhs": {
                             "type": "ID_EXPRESSION",
-                            "ic_type": "UNKNOW",
+                            "ic_type": "INTEGER",
                             "name": "my_int_square_add",
                             "members": {
                                 "type": "ARGS_EXPRESSION",
@@ -450,128 +572,6 @@ export const program_2_ast = {
                     }
                 }
             ]
-        },
-        {
-            "type": "ASSIGN_STATEMENT",
-            "ic_type": "FLOAT",
-            "name": "t",
-            "is_async": false,
-            "expression": {
-                "type": "FLOAT",
-                "ic_type": "FLOAT",
-                "value": "0.0",
-                "members":<any>undefined
-            },
-            "members":<any>undefined
-        },
-        {
-            "type": "ASSIGN_STATEMENT",
-            "ic_type": "FLOAT",
-            "name": "pi",
-            "is_async": false,
-            "expression": {
-                "type": "FLOAT",
-                "ic_type": "FLOAT",
-                "value": "3.14",
-                "members":<any>undefined
-            },
-            "members":<any>undefined
-        },
-        {
-            "type": "LOOP_STATEMENT",
-            "var": "i",
-            "from": {
-                "type": "INTEGER",
-                "ic_type": "INTEGER",
-                "value": "10",
-                "members":<any>undefined
-            },
-            "to": {
-                "type": "INTEGER",
-                "ic_type": "INTEGER",
-                "value": "100",
-                "members":<any>undefined
-            },
-            "step": {
-                "type": "INTEGER",
-                "ic_type": "INTEGER",
-                "value": "10",
-                "members":<any>undefined
-            },
-            "block": [
-                {
-                    "type": "ASSIGN_STATEMENT",
-                    "ic_type": "UNKNOW",
-                    "name": "t",
-                    "is_async": false,
-                    "expression": {
-                        "type": "ADDSUB_EXPRESSION",
-                        "ic_type": "UNKNOW",
-                        "lhs": {
-                            "type": "ID_EXPRESSION",
-                            "ic_type": "FLOAT",
-                            "name": "t",
-                            "members":<any>undefined
-                        },
-                        "operator": {
-                            "type": "BINOP",
-                            "value": "+"
-                        },
-                        "rhs": {
-                            "type": "ID_EXPRESSION",
-                            "ic_type": "UNKNOW",
-                            "name": "my_float_square_add",
-                            "members": {
-                                "type": "ARGS_EXPRESSION",
-                                "ic_type": "ARRAY",
-                                "ic_subtypes": [
-                                    "FLOAT",
-                                    "FLOAT"
-                                ],
-                                "items": [
-                                    {
-                                        "type": "MULTDIV_EXPRESSION",
-                                        "ic_type": "FLOAT",
-                                        "lhs": {
-                                            "type": "ID_EXPRESSION",
-                                            "ic_type": "INTEGER",
-                                            "name": "i",
-                                            "members":<any>undefined
-                                        },
-                                        "operator": {
-                                            "type": "BINOP",
-                                            "value": "*"
-                                        },
-                                        "rhs": {
-                                            "type": "ID_EXPRESSION",
-                                            "ic_type": "FLOAT",
-                                            "name": "pi",
-                                            "members":<any>undefined
-                                        }
-                                    },
-                                    {
-                                        "type": "ID_EXPRESSION",
-                                        "ic_type": "FLOAT",
-                                        "name": "pi",
-                                        "members":<any>undefined
-                                    }
-                                ]
-                            }
-                        }
-                    },
-                    "members":<any>undefined
-                }
-            ]
-        },
-        {
-            "type": "RETURN_STATEMENT",
-            "ic_type": "FLOAT",
-            "expression": {
-                "type": "ID_EXPRESSION",
-                "ic_type": "FLOAT",
-                "name": "t",
-                "members":<any>undefined
-            }
         }
     ]
 };

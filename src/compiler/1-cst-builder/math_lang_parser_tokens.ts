@@ -46,6 +46,9 @@ export const Equality          = createToken({ name: "Equality",           patte
 export const Difference        = createToken({ name: "Difference",         pattern: /!=/ });
 export const Exclam            = createToken({ name: "Exclam",             pattern: /!/ });
 
+export const DoubleArrow       = createToken({ name: "DoubleArrow",        pattern: /<->/ });
+export const Arrow             = createToken({ name: "Arrow",              pattern: /->/ });
+
 export const LessEqualThan     = createToken({ name: "LessEqualThan",      pattern: /<=/ });
 export const LessThan          = createToken({ name: "LessThan",           pattern: /</ });
 export const GreaterEqualThan  = createToken({ name: "GreaterEqualThan",   pattern: />=/ });
@@ -121,7 +124,13 @@ export const False     = createToken({ name: "False",      pattern: /false/ }, t
 export const Is        = createToken({ name: "Is",         pattern: /is/ }, true);
 
 export const Async     = createToken({ name: "Async",      pattern: /async/ }, true);
-export const Await     = createToken({ name: "Await",      pattern: /await/ }, true);
+export const Wait      = createToken({ name: "Wait",       pattern: /wait/ }, true);
+export const EndWait   = createToken({ name: "EndWait",    pattern: /end wait/ }, true);
+export const Dispose   = createToken({ name: "Dispose",    pattern: /dispose/ }, true);
+
+export const Emit      = createToken({ name: "Emit",       pattern: /emit/ }, true);
+export const On        = createToken({ name: "On",         pattern: /on/ }, true);
+export const EndOn     = createToken({ name: "EndOn",      pattern: /end on/ }, true);
 
 export const If        = createToken({ name: "If",         pattern: /if/ }, true);
 export const Else      = createToken({ name: "Else",       pattern: /else/ }, true);
@@ -142,6 +151,10 @@ export const EndLoop   = createToken({ name: "EndLoop",    pattern: /end loop/ }
 
 export const For       = createToken({ name: "For",        pattern: /for/ }, true);
 export const EndFor    = createToken({ name: "EndFor",     pattern: /end for/ }, true);
+
+export const Switch    = createToken({ name: "Switch",     pattern: /switch/ }, true);
+export const EndSwitch = createToken({ name: "EndSwitch",  pattern: /end switch/ }, true);
+
 
 export const Function  = createToken({ name: "Function",   pattern: /function/ }, true);
 export const EndFunct  = createToken({ name: "EndFunct",   pattern: /end function/ }, true);

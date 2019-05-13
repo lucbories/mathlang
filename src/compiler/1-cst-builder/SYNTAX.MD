@@ -3,7 +3,6 @@ STATEMENTS
 --------------------------------------------------------------------------------------------- 
 program
    : statement+
-   | block_statement
    | function_declaration
    ;
 
@@ -23,22 +22,23 @@ operand_declaration
    : ID ('is' ID)?
    ;
 
-block_statement
-   : 'begin' statement+ 'end'
-   ;
-
 statement
    : 'if' expression 'then' statement+ ('else' statement+)? 'end if'
+   | block_statement
    | 'while' expression 'do' statement+ 'end while'
    | 'for'    ID ('is' ID)? 'in'   expression 'do' statement+ 'end for'
    | 'loop'   ID ('is' ID)? 'from' expression 'to' expression 'step' expression 'do' statement+ 'end loop'
    | 'switch' ID ('is' ID)? 'in' ('on' expression 'do' statement 'end do')+ 'end switch'
    | assign_id_declaration '=' ('async')? expression
    | 'return' expression
-   | 'wait' ID 'do' statement+ 'end wait'
-   | 'on' ID '(' ID (',' operands_declaration)? ')' 'do' statement+ 'end error'
-   | 'emit' ID '(' ID ',' expression_arguments ')'
+   | 'wait' ID (',' ID)* 'do' statement+ 'end wait'
+   | 'on' ID '(' (ID (',' operands_declaration)? )? ')' 'do' statement+ 'end on'
+   | 'emit' ID '(' box_expression_arguments? ')'
    | 'dispose' ID
+   ;
+
+block_statement
+   : 'begin' statement+ 'end'
    ;
 
 assign_id_declaration
@@ -98,6 +98,10 @@ expression_arguments
    : binary_expression (',' binary_expression)*
    ;
 
+record_expression
+   : '[' ID '->' binary_expression (ID '->' binary__expression)* ']'
+   ;
+
 
 
 ---------------------------------------------------------------------------------------------
@@ -125,7 +129,7 @@ primary_expression
    | SET_LITERAL
    | MAP_LITERAL
    ;
-
+   
 ARRAY_LITERAL
    : '[' primary_expression (',' primary_expression)* ']'
    ;

@@ -154,12 +154,12 @@ describe('MathLang compiler test', () => {
         const errors = compiler.get_errors();
 
         // ERRORS
-        if (errors.length != 4){
+        if (errors.length != 3){
             console.log('errors', errors);
-            expect(errors.length).equals(4);
+            expect(errors.length).equals(3);
             return;
         }
-        expect(errors.length).equals(4); // Unknow symbols and unknow symbols types
+        expect(errors.length).equals(3); // Unknow symbols and unknow symbols types
         
         // GET AST
         const compiler_ast = compiler.get_ast();
@@ -178,13 +178,13 @@ describe('MathLang compiler test', () => {
         const errors = compiler.get_errors();
 
         // ERRORS
-        if (errors.length != 10){
+        if (errors.length != 8){
             const errors = compiler.get_errors();
             console.log('errors', errors);
-            expect(errors.length).equals(10);
+            expect(errors.length).equals(8);
             return;
         }
-        expect(errors.length).equals(10); // Unknow symbols and unknow symbols types
+        expect(errors.length).equals(8); // Unknow symbols and unknow symbols types
         
         // GET AST
         const compiler_ast = compiler.get_ast();

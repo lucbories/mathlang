@@ -1,5 +1,5 @@
 import MathLangCstToAstVisitorStatement from './math_lang_cst_to_ast_visitor_statement';
-import TYPES from '../3-program_builder/math_lang_types';
+import TYPES from '../3-program-builder/math_lang_types';
 import AST from '../2-ast-builder/math_lang_ast';
 
 
@@ -128,7 +128,8 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
                 type: AST.EXPR_UNOP_PREUNOP,
                 ic_type:this.compute_preunop_type(node_op, node_rhs),
                 rhs: node_rhs,
-                operator: node_op
+                operator: node_op,
+                ic_function: this.get_prefix_operator_function(node_op)
             }
         }
 
@@ -167,7 +168,8 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
                 type: AST.EXPR_UNOP_POST,
                 ic_type:this.compute_postunop_type(node_op, node_lhs),
                 lhs: node_lhs,
-                operator: node_op
+                operator: node_op,
+                ic_function: this.get_postfix_operator_function(node_op)
             }
         }
 
@@ -453,6 +455,42 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
 
 
     /**
+     * Visit CST Record node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    Record(ctx:any) {
+        // this.dump_ctx('Record', ctx);
+        
+        const ast_record = {
+            type: AST.EXPR_RECORD,
+            ic_type:TYPES.RECORD,
+            items:<any> {}
+        };
+        const cst_keys   = Array.isArray(ctx.key)   ? ctx.key   : [ctx.key];
+        const cst_values = Array.isArray(ctx.value) ? ctx.value : [ctx.value];
+
+        if (cst_keys.length != cst_values.length){
+            return this.add_error(ctx, AST.EXPR_RECORD, 'Bad keys and values lengths');
+        }
+
+        let ast_key:string;
+        let ast_value:any;
+        let index:number;
+        for(index=0; index < cst_keys.length; index++) {
+            ast_key   = cst_keys[index][0].image;
+            ast_value = this.visit(cst_values[index]);
+
+            ast_record.items[ast_key] = ast_value;
+        }
+        
+        return ast_record;
+    }
+
+
+    /**
      * Visit CST Arguments node.
      * 
      * @param ctx CST nodes
@@ -612,9 +650,21 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
      */
     BinaryCompareOps(ctx:any) {
         // this.dump_ctx('BinaryCompareOps', ctx);
+        const cst_operator = ctx.binop[0].image;
+        let ic_func_name;
+        switch(cst_operator){
+            case '>':  ic_func_name = 'sup'; break;
+            case '>=': ic_func_name = 'sup_equal'; break;
+            case '<':  ic_func_name = 'inf'; break;
+            case '<=': ic_func_name = 'inf_equal'; break;
+            case '==': ic_func_name = 'equal'; break;
+            case '!=': ic_func_name = 'not_equal'; break;
+            default:   ic_func_name = 'unknow'; break;
+        }
         return {
             type: AST.EXPR_BINOP,
-            value: ctx.binop[0].image
+            value: cst_operator,
+            ic_function: ic_func_name
         }
     }
 
@@ -628,9 +678,11 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
      */
     BinaryMultDivOps(ctx:any) {
         // this.dump_ctx('BinaryMultDivOps', ctx);
+        const cst_operator = ctx.binop[0].image;
         return {
             type: AST.EXPR_BINOP,
-            value: ctx.binop[0].image
+            value: cst_operator,
+            ic_function: cst_operator == '*' ? 'mul' : 'div'
         }
     }
     
@@ -644,9 +696,48 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
      */
     BinaryAddSubOps(ctx:any) {
         // this.dump_ctx('BinaryAddSubOps', ctx);
+        const cst_operator = ctx.binop[0].image;
         return {
             type: AST.EXPR_BINOP,
-            value: ctx.binop[0].image
+            value: cst_operator,
+            ic_function: cst_operator == '+' ? 'add' : 'sub'
+        }
+    }
+
+
+
+
+    /**
+     * Get IC Function name for pre operator.
+     * 
+     * @param CST operator
+     * 
+     * @returns IC function name
+     */
+    get_prefix_operator_function(cst_operator:string) {
+        switch(cst_operator){
+            case '++': return 'add_one'; break;
+            case '--': return 'sub_one'; break;
+            case '+':  return 'ignore'; break;
+            case '-':  return 'negate'; break;
+            case '!':  return 'factorial'; break;
+            default:   return 'unknow'; break;
+        }
+    }
+
+
+    /**
+     * Get IC Function name for post operator.
+     * 
+     * @param CST operator
+     * 
+     * @returns IC function name
+     */
+    get_postfix_operator_function(cst_operator:string) {
+        switch(cst_operator){
+            case '++': return 'add_one'; break;
+            case '--': return 'sub_one'; break;
+            default:   return 'unknow'; break;
         }
     }
 }

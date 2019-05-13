@@ -32,16 +32,21 @@ export class MathLangParserStatements extends Parser {
         this.CONSUME(t.End);
     });
 
+    // STATEMENT
     private statement = this.RULE("statement", () => {
         this.OR( [
+            { ALT: () => this.SUBRULE(this.blockStatement) },
             { ALT: () => this.SUBRULE(this.ifStatement) },
             { ALT: () => this.SUBRULE(this.whileStatement) },
             { ALT: () => this.SUBRULE(this.forStatement) },
             { ALT: () => this.SUBRULE(this.loopStatement) },
-//            { ALT: () => this.SUBRULE(this.switchStatement) }, // TODO SWITCH RULE
+            { ALT: () => this.SUBRULE(this.switchStatement) },
             { ALT: () => this.SUBRULE(this.assignStatement) },
             { ALT: () => this.SUBRULE(this.returnStatement) },
-            { ALT: () => this.SUBRULE(this.blockStatement) }
+            { ALT: () => this.SUBRULE(this.disposeStatement) },
+            { ALT: () => this.SUBRULE(this.emitStatement) },
+            { ALT: () => this.SUBRULE(this.onStatement) },
+            { ALT: () => this.SUBRULE(this.waitStatement) }
         ] );
     });
 
@@ -107,6 +112,23 @@ export class MathLangParserStatements extends Parser {
         this.CONSUME(t.EndLoop);
     });
 
+    // SWITCH
+    private switchStatement = this.RULE("switchStatement", () => {
+        this.CONSUME(t.Switch);
+        this.CONSUME2(t.ID, { LABEL:"switchVariable" } );
+        this.AT_LEAST_ONE( () => {
+            this.SUBRULE(this.switchStatementItem);
+        });
+        this.CONSUME3(t.EndSwitch);
+    });
+
+    private switchStatementItem = this.RULE("switchStatementItem", () => {
+        this.SUBRULE(this.expression, { LABEL:"caseExpression" });
+        this.MANY( () => this.SUBRULE(this.statement, { LABEL:"blockStatement" }) );
+        this.CONSUME(t.End);
+    });
+
+
     // ASSIGN
     private assignStatement = this.RULE("assignStatement", () => {
         this.CONSUME(t.ID, { LABEL:"AssignName" } );
@@ -136,7 +158,48 @@ export class MathLangParserStatements extends Parser {
         this.SUBRULE(this.expression);
     });
 
+    // DISPOSE
+    private disposeStatement = this.RULE("disposeStatement", () => {
+        this.CONSUME(t.Dispose);
+        this.CONSUME(t.ID);
+    });
+
+    // EMIT
+    private emitStatement = this.RULE("emitStatement", () => {
+        this.CONSUME(t.Emit);
+        this.CONSUME(t.ID);
+        this.SUBRULE(this.Record);
+    });
+
+    // ON .. END ON
+    private onStatement = this.RULE("onStatement", () => {
+        this.CONSUME(t.On);
+        this.CONSUME2(t.ID, { LABEL:"eventName" } );
+        this.CONSUME3(t.LCurly);
+        this.CONSUME4(t.ID, { LABEL:'recordName' });
+        this.CONSUME5(t.RCurly);
+        this.CONSUME6(t.Do);
+        this.MANY( () => this.SUBRULE(this.statement, { LABEL:"blockStatement" }) );
+        this.CONSUME7(t.EndOn);
+    });
+
+    // WAIT
+    private waitStatement = this.RULE("waitStatement", () => {
+        this.CONSUME(t.Wait);
+        this.CONSUME2(t.ID, { LABEL:"asyncVariable" } );
+        this.MANY_SEP( {
+            SEP: t.Comma,
+            DEF: () => {
+                this.CONSUME3(t.ID, { LABEL:"asyncVariable" } );
+            }
+        } );
+        this.CONSUME4(t.Do);
+        this.MANY( () => this.SUBRULE(this.statement, { LABEL:"blockStatement" }) );
+        this.CONSUME5(t.EndWait);
+    });
+
     protected expression:any = undefined;
     protected ArgumentsWithIds:any = undefined;
     protected AssignMemberOptionExpression:any = undefined;
+    protected Record:any = undefined;
 }

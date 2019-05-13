@@ -1,6 +1,6 @@
-import { math_lang_parser } from '../1-cst_builder/math_lang_parser';
-import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES,  TYPES } from '../3-program_builder/math_lang_types';
-import { SymbolDeclarationRecord, FunctionScope } from '../3-program_builder/math_lang_function_scope';
+import { math_lang_parser } from '../1-cst-builder/math_lang_parser';
+import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES,  TYPES } from '../3-program-builder/math_lang_types';
+import { SymbolDeclarationRecord, FunctionScope } from '../3-program-builder/math_lang_function_scope';
 
 
 const BaseVisitor = math_lang_parser.getBaseCstVisitorConstructor()
@@ -28,7 +28,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     protected _errors:AstBuilderErrorArray = new Array();
     protected _unknow_symbols:string[] = new Array();
 
-    protected _main_scope:FunctionScope    = {
+    protected _main_scope:FunctionScope = {
         func_name:'main',
         return_type:'none',
         statements:[],

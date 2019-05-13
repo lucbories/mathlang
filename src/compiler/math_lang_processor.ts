@@ -1,5 +1,5 @@
 
-import { math_lang_lexer, math_lang_parser } from './1-cst_builder/math_lang_parser';
+import { math_lang_lexer, math_lang_parser } from './1-cst-builder/math_lang_parser';
 import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visitor';
 
 

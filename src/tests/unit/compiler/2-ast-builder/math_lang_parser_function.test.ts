@@ -232,10 +232,11 @@ describe('MathLang function declaration parser', () => {
         expect(parser_result.ast).eql(result);
     });
 
-    it('Parse complex function statement' , () => {
+    it('Parse complex functions program (cross unordered references of variables and functions' , () => {
         const text = `
-        a = 456
-        function m2(x is INTEGER) return INTEGER return x*2 end function
+        begin
+            b=m2(12)
+        end
         function myfunc(x is BIGFLOAT, y is INTEGER) return BIGFLOAT
             if x + y > 0 then
                 return x + y
@@ -243,6 +244,8 @@ describe('MathLang function declaration parser', () => {
 
             return x + m2(y) + a
         end function
+        function m2(x is INTEGER) return INTEGER return x*2 end function
+        a = 456
         `;
         const parser_result = parse(text, false, 'program');
 
@@ -261,6 +264,34 @@ describe('MathLang function declaration parser', () => {
             "type": "PROGRAM",
             "block": [
                 {
+                    "type": "BLOCK",
+                    "statements":[
+                        {
+                            "type": "ASSIGN_STATEMENT",
+                            "ic_type": "INTEGER",
+                            "name": "b",
+                            "is_async":false,
+                            "expression": {
+                                "name":"m2",
+                                "type": "ID_EXPRESSION",
+                                "ic_type": "INTEGER",
+                                "members":{
+                                    "ic_subtypes":["INTEGER"],
+                                    "ic_type":"ARRAY",
+                                    "items":[
+                                        {
+                                            "type": "INTEGER",
+                                            "ic_type": "INTEGER",
+                                            "value": "12"
+                                        }
+                                    ],
+                                    "type":"ARGS_EXPRESSION"
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
                     "type": "ASSIGN_STATEMENT",
                     "ic_type": "INTEGER",
                     "name": "a",
@@ -270,45 +301,6 @@ describe('MathLang function declaration parser', () => {
                         "ic_type": "INTEGER",
                         "value": "456"
                     }
-                },
-                {
-                    "type": "FUNCTION_STATEMENT",
-                    "ic_type": "INTEGER",
-                    "name": "m2",
-                    "operands": {
-                        "type": "ARGIDS_EXPRESSION",
-                        "ic_type": "ARRAY",
-                        "ic_subtypes": [
-                            "INTEGER"
-                        ],
-                        "items": [
-                            "x"
-                        ]
-                    },
-                    "block": [
-                        {
-                            "type": "RETURN_STATEMENT",
-                            "ic_type": "INTEGER",
-                            "expression": {
-                                "type": "MULTDIV_EXPRESSION",
-                                "ic_type": "INTEGER",
-                                "lhs": {
-                                    "type": "ID_EXPRESSION",
-                                    "ic_type": "INTEGER",
-                                    "name": "x"
-                                },
-                                "operator": {
-                                    "type": "BINOP",
-                                    "value": "*"
-                                },
-                                "rhs": {
-                                    "type": "INTEGER",
-                                    "ic_type": "INTEGER",
-                                    "value": "2"
-                                }
-                            }
-                        }
-                    ]
                 },
                 {
                     "type": "FUNCTION_STATEMENT",
@@ -431,6 +423,45 @@ describe('MathLang function declaration parser', () => {
                                     "type": "ID_EXPRESSION",
                                     "ic_type": "INTEGER",
                                     "name": "a"
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "FUNCTION_STATEMENT",
+                    "ic_type": "INTEGER",
+                    "name": "m2",
+                    "operands": {
+                        "type": "ARGIDS_EXPRESSION",
+                        "ic_type": "ARRAY",
+                        "ic_subtypes": [
+                            "INTEGER"
+                        ],
+                        "items": [
+                            "x"
+                        ]
+                    },
+                    "block": [
+                        {
+                            "type": "RETURN_STATEMENT",
+                            "ic_type": "INTEGER",
+                            "expression": {
+                                "type": "MULTDIV_EXPRESSION",
+                                "ic_type": "INTEGER",
+                                "lhs": {
+                                    "type": "ID_EXPRESSION",
+                                    "ic_type": "INTEGER",
+                                    "name": "x"
+                                },
+                                "operator": {
+                                    "type": "BINOP",
+                                    "value": "*"
+                                },
+                                "rhs": {
+                                    "type": "INTEGER",
+                                    "ic_type": "INTEGER",
+                                    "value": "2"
                                 }
                             }
                         }

@@ -47,6 +47,7 @@ describe('MathLang if parser', () => {
                     type:'ASSIGN_STATEMENT',
                     ic_type:'INTEGER',
                     name:'a',
+                    is_async:false,
                     members:nomembers,
                     expression: {
                         type:'INTEGER',
@@ -111,6 +112,7 @@ describe('MathLang if parser', () => {
                             "type": "ASSIGN_STATEMENT",
                             "ic_type": "INTEGER",
                             "name": "a",
+                            "is_async":false,
                             "members": nomembers,
                             "expression": {
                                 "type": "INTEGER",
@@ -123,6 +125,7 @@ describe('MathLang if parser', () => {
                             "type": "ASSIGN_STATEMENT",
                             "ic_type": "INTEGER",
                             "name": "b",
+                            "is_async":false,
                             "members": nomembers,
                             "expression": {
                                 "type": "INTEGER",
@@ -169,6 +172,7 @@ describe('MathLang if parser', () => {
                     type:'ASSIGN_STATEMENT',
                     ic_type:'INTEGER',
                     name:'a',
+                    is_async:false,
                     members:nomembers,
                     expression: {
                         type:'INTEGER',
@@ -183,6 +187,7 @@ describe('MathLang if parser', () => {
                     type:'ASSIGN_STATEMENT',
                     ic_type:'FLOAT',
                     name:'a',
+                    is_async:false,
                     members:nomembers,
                     expression: {
                         type:'FLOAT',

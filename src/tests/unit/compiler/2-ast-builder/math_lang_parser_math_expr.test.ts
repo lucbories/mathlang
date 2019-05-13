@@ -3,7 +3,7 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import parse from '../../../../compiler/math_lang_processor';
-import TYPES from '../../../../compiler/3-program_builder/math_lang_types'
+import TYPES from '../../../../compiler/3-program-builder/math_lang_types'
 
 
 function dump_tree(label:string, tree:any) {
@@ -33,7 +33,7 @@ describe('MathLang math expression parser', () => {
         const nomembers = <any>undefined;
         const result = {
             type:'ADDSUB_EXPRESSION',
-            ic_type:TYPES.INTEGER,
+            ic_type:TYPES.UNKNOW,
             lhs:{
                 type:'INTEGER',
                 ic_type:TYPES.INTEGER,
@@ -46,17 +46,17 @@ describe('MathLang math expression parser', () => {
             },
             rhs:{
                 type:'PARENTHESIS_EXPRESSION',
-                ic_type:TYPES.INTEGER,
+                ic_type:TYPES.UNKNOW,
                 expression: {
                     type:'MULTDIV_EXPRESSION',
-                    ic_type:TYPES.INTEGER,
+                    ic_type:TYPES.UNKNOW,
                     lhs:{
                         type:'PREUNOP_EXPRESSION',
-                        ic_type:TYPES.INTEGER,
+                        ic_type:TYPES.UNKNOW,
                         operator:'++',
                         rhs: {
                             type:'ID_EXPRESSION',
-                            ic_type:TYPES.INTEGER,
+                            ic_type:TYPES.UNKNOW,
                             name:'b',
                             members:nomembers
                         }
@@ -96,20 +96,20 @@ describe('MathLang math expression parser', () => {
         const nomembers = <any>undefined;
         const result = {
             type:'MULTDIV_EXPRESSION',
-            ic_type:TYPES.FLOAT,
+            ic_type:TYPES.UNKNOW,
             lhs:{
                 type:'PARENTHESIS_EXPRESSION',
-                ic_type:TYPES.FLOAT,
+                ic_type:TYPES.UNKNOW,
                 expression: {
                     type:'MULTDIV_EXPRESSION',
-                    ic_type:TYPES.FLOAT,
+                    ic_type:TYPES.UNKNOW,
                     lhs:{
                         type:'PREUNOP_EXPRESSION',
-                        ic_type:TYPES.INTEGER,
+                        ic_type:TYPES.UNKNOW,
                         operator:'--',
                         rhs: {
                             type:'ID_EXPRESSION',
-                            ic_type:TYPES.INTEGER,
+                            ic_type:TYPES.UNKNOW,
                             name:'b',
                             members:nomembers
                         }
@@ -160,7 +160,7 @@ describe('MathLang math expression parser', () => {
         const nomembers = <any>undefined;
         const result = {
             type:'MULTDIV_EXPRESSION',
-            ic_type:TYPES.FLOAT,
+            ic_type:TYPES.UNKNOW,
             lhs:{
                 type:'INTEGER',
                 ic_type:TYPES.INTEGER,
@@ -173,14 +173,14 @@ describe('MathLang math expression parser', () => {
             },
             rhs:{
                 type:'MULTDIV_EXPRESSION',
-                ic_type:TYPES.FLOAT,
+                ic_type:TYPES.UNKNOW,
                 lhs:{
                     type:'PREUNOP_EXPRESSION',
-                    ic_type:TYPES.INTEGER,
+                    ic_type:TYPES.UNKNOW,
                     operator:'!',
                     rhs: {
                         type:'ID_EXPRESSION',
-                        ic_type:TYPES.INTEGER,
+                        ic_type:TYPES.UNKNOW,
                         name:'b',
                         members:nomembers
                     }
@@ -279,7 +279,7 @@ describe('MathLang math expression parser', () => {
             ic_type:TYPES.BOOLEAN,
             lhs:{
                 type:'ID_EXPRESSION',
-                ic_type:TYPES.INTEGER,
+                ic_type:TYPES.UNKNOW,
                 name:'abc_UI_23',
                 members:nomembers
             },
@@ -346,7 +346,7 @@ describe('MathLang math expression parser', () => {
             ic_type:TYPES.BOOLEAN,
             rhs:{
                 type:'ID_EXPRESSION',
-                ic_type:TYPES.INTEGER,
+                ic_type:TYPES.UNKNOW,
                 name:'a45Bc',
                 members:nomembers
             },

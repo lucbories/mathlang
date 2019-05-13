@@ -1,7 +1,8 @@
 
 import MathLangCstToAstVisitorBase from './math_lang_cst_to_ast_visitor_base'
-import TYPES from '../3-program_builder/math_lang_types';
 import AST from '../2-ast-builder/math_lang_ast';
+import TYPES from '../3-program-builder/math_lang_types';
+
 
 
 
@@ -23,19 +24,39 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         // console.log('program', ctx)
 
         const statements = [];
-        let statement;
+        let cst_statement;
+        let ast_statement;
 
-        // LOOP ON OTHER STATEMENTS
-        if (ctx.blockStatement){
-            for(statement of ctx.blockStatement){
-                statements.push( this.visit(statement) );
+        // LOOP ON FUNCTIONS DECLARATIONS STATEMENTS HEADERS
+        let ast_function_header_nodes:any = {};
+        if (ctx.functionStatement){
+            for(cst_statement of ctx.functionStatement){
+                cst_statement.children.visit_header = true;
+                cst_statement.children.visit_body = false;
+
+                ast_statement = this.visit(cst_statement);
+                ast_function_header_nodes[ast_statement.name] = ast_statement;
             }
         }
 
-        // LOOP ON FUNCTIONS DECLARATIONS STATEMENTS
+        // LOOP ON OTHER STATEMENTS
+        if (ctx.blockStatement){
+            for(cst_statement of ctx.blockStatement){
+                ast_statement = this.visit(cst_statement);
+                statements.push(ast_statement);
+                this._main_scope.statements.push(ast_statement);
+            }
+        }
+
+        // LOOP ON FUNCTIONS DECLARATIONS STATEMENTS BODY
         if (ctx.functionStatement){
-            for(statement of ctx.functionStatement){
-                statements.push( this.visit(statement) );
+            for(cst_statement of ctx.functionStatement){
+                cst_statement.children.visit_header = false;
+                cst_statement.children.visit_body = true;
+
+                ast_statement = this.visit(cst_statement);
+                ast_statement.operands = ast_function_header_nodes[ast_statement.name].operands;
+                statements.push(ast_statement);
             }
         }
 
@@ -111,6 +132,18 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
         if (ctx.returnStatement) {
             return this.visit(ctx.returnStatement);
+        }
+
+        if (ctx.disposeStatement) {
+            return this.visit(ctx.disposeStatement);
+        }
+
+        if (ctx.emitStatement) {
+            return this.visit(ctx.emitStatement);
+        }
+
+        if (ctx.onStatement) {
+            return this.visit(ctx.onStatement);
         }
         
         // if (ctx.switchStatement) { // TODO SWITCH STATEMENT
@@ -249,6 +282,59 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
     
 
     /**
+     * Visit CST Switch node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    switchStatement(ctx:any) {
+        // console.log('switchStatement', ctx)
+
+        const ast_var = ctx.switchVariable[0].image;
+
+        const ast_items=[];
+        let cst_item;
+        let ast_item;
+        for(cst_item of ctx.switchStatementItem){
+            ast_item = this.visit(cst_item);
+            ast_items.push(ast_item);
+        }
+
+        return {
+            type: AST.STAT_SWITCH,
+            var:ast_var,
+            items:ast_items
+        }
+    }
+    
+
+    /**
+     * Visit CST Switch Item node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    switchStatementItem(ctx:any) {
+        // console.log('switchStatementItem', ctx)
+        
+        const node_expr = this.visit(ctx.caseExpression);
+
+        const statements = [];
+        let statement;
+        for(statement of ctx.blockStatement){
+            statements.push( this.visit(statement) );
+        }
+
+        return {
+            item_expression:node_expr,
+            item_block:statements
+        }
+    }
+    
+
+    /**
      * Visit CST Assign node.
      * 
      * @param ctx CST nodes
@@ -355,31 +441,36 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         // console.log('functionStatement', ctx)
 
         const function_name = ctx.functionName[0].image;
-        const operands_decl = this.visit(ctx.ArgumentsWithIds);
         const returned_type = ctx.returnedType[0].image;
 
-        const operands = [];
-        if (operands_decl.items) {
-            let loop_index;
-            for(loop_index=0; loop_index < operands_decl.items.length; loop_index++) {
-                operands.push( { opd_name:operands_decl.items[loop_index], opd_type:operands_decl.ic_subtypes[loop_index] } );
+        let operands_decl = [];
+        if (ctx.visit_header){
+            operands_decl = this.visit(ctx.ArgumentsWithIds);
+            const operands = [];
+            if (operands_decl.items) {
+                let loop_index;
+                for(loop_index=0; loop_index < operands_decl.items.length; loop_index++) {
+                    operands.push( { opd_name:operands_decl.items[loop_index], opd_type:operands_decl.ic_subtypes[loop_index] } );
+                }
             }
+
+            this.register_function_declaration(function_name, returned_type, operands, []);
         }
-
-        this.register_function_declaration(function_name, returned_type, operands, []);
-
-        // CHANGE SCOPE FOR FUNCTION STATEMENTS
-        this.enter_function_declaration(function_name);
 
         const statements = [];
-        let statement;
-        for(statement of ctx.blockStatement){
-            statements.push( this.visit(statement) );
+        if (ctx.visit_body){
+            // CHANGE SCOPE FOR FUNCTION STATEMENTS
+            this.enter_function_declaration(function_name);
+
+            let statement;
+            for(statement of ctx.blockStatement){
+                statements.push( this.visit(statement) );
+            }
+
+            this.leave_function_declaration();
+
+            this.set_function_declaration_statements(function_name, statements);
         }
-
-        this.leave_function_declaration();
-
-        this.set_function_declaration_statements(function_name, statements);
 
         return {
             type: AST.STAT_FUNCTION,
@@ -407,6 +498,100 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             type: AST.STAT_RETURN,
             ic_type:node_expr.ic_type,
             expression:node_expr
+        }
+    }
+    
+
+    /**
+     * Visit CST Dispose.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    disposeStatement(ctx:any) {
+        // console.log('DisposeStatement', ctx)
+
+        const name = ctx.ID[0].image;
+
+        return {
+            type: AST.STAT_DISPOSE,
+            name:name
+        }
+    }
+    
+
+    /**
+     * Visit CST Emit.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    emitStatement(ctx:any) {
+        // console.log('emitStatement', ctx)
+
+        const node_record = this.visit(ctx.Record);
+
+        return {
+            type: AST.STAT_EMIT,
+            event:ctx.ID[0].image,
+            operands:node_record
+        }
+    }
+    
+
+    /**
+     * Visit CST On.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    onStatement(ctx:any) {
+        // console.log('onStatement', ctx)
+
+        const statements = [];
+        let statement;
+        for(statement of ctx.blockStatement){
+            statements.push( this.visit(statement) );
+        }
+
+        return {
+            type: AST.STAT_ON,
+            event:ctx.eventName[0].image,
+            record:ctx.recordName[0].image,
+            block:statements
+        }
+    }
+    
+
+    /**
+     * Visit CST Wait.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    waitStatement(ctx:any) {
+        // console.log('waitStatement', ctx)
+
+        const vars = [];
+        let name;
+        for(name of ctx.asyncVariables){
+            vars.push(name.image);
+        }
+
+        const statements = [];
+        let statement;
+        for(statement of ctx.blockStatement){
+            statements.push( this.visit(statement) );
+        }
+
+        return {
+            type: AST.STAT_WAIT,
+            asyncVariables: vars,
+            block:statements
         }
     }
 }

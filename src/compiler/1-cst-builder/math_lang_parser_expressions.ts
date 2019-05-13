@@ -162,6 +162,22 @@ export class MathLangParserExpressions extends MathLangParserStatements {
         this.CONSUME(t.ID);
     });
 
+    Record = this.RULE("Record", () => {
+        this.CONSUME(t.LCurly);
+
+        this.CONSUME2(t.ID, { LABEL:'key' });
+        this.CONSUME3(t.Colon);
+        this.SUBRULE(this.BinaryExpression, { LABEL:'value' });
+
+        this.MANY(() => {
+            this.CONSUME4(t.ID, { LABEL:'key' });
+            this.CONSUME5(t.Colon);
+            this.SUBRULE2(this.BinaryExpression, { LABEL:'value' });
+        });
+
+        this.CONSUME(t.RCurly);
+    });
+
     private Arguments = this.RULE("Arguments", () => {
         this.CONSUME(t.LParen);
         this.OPTION( () => {
@@ -192,22 +208,6 @@ export class MathLangParserExpressions extends MathLangParserStatements {
             }
         } );
 
-        // this.OPTION( () => {
-        //     this.CONSUME(t.ID);
-        //     this.OPTION( () => {
-        //         this.CONSUME(t.Is);
-        //         this.CONSUME(t.ID, { LABEL:'' });
-        //     });
-        //     this.MANY(() => {
-        //         this.CONSUME(t.Comma);
-        //         this.CONSUME2(t.ID);
-        //         this.OPTION( () => {
-        //             this.CONSUME(t.Is);
-        //             this.CONSUME(t.ID);
-        //         });
-        //     })
-        // })
-
         this.CONSUME(t.RParen);
     });
 
@@ -221,24 +221,6 @@ export class MathLangParserExpressions extends MathLangParserStatements {
         });
         this.CONSUME(t.RSquare);
     });
-
-    // private ObjectLiteral = this.RULE("ObjectLiteral", () => {
-    //     this.CONSUME(t.LCurly);
-    //     this.MANY_SEP({
-    //         SEP: t.Comma,
-    //         DEF: () => {
-    //             this.SUBRULE2(this.ObjectItem);
-    //         }
-    //     });
-    //     this.CONSUME(t.RCurly);
-    // });
-
-    // private ObjectItem = this.RULE("ObjectItem", () => {
-    //     this.CONSUME(t.StringLiteral);
-    //     this.CONSUME(t.Colon);
-    //     this.SUBRULE(this.BinaryExpression);
-    // });
-
 
 
     private BinaryCompareOps = this.RULE("BinaryCompareOps", () => {
