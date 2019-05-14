@@ -267,7 +267,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
             return {
                 type: AST.EXPR_MEMBER_DASH,
                 ic_type:ast_node.ic_type,
-                expression: ast_node
+                identifier: ast_node
             }
         }
         if (ctx.Arguments) {
@@ -299,7 +299,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorStat
             return {
                 type: AST.EXPR_MEMBER_DASH,
                 ic_type:TYPES.ATTRIBUTE_ID,
-                expression: this.visit(ctx.DashMemberExpression)
+                identifier: this.visit(ctx.DashMemberExpression)
             }
         }
         if (ctx.ArgumentsWithIds) {

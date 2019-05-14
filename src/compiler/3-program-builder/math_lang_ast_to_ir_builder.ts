@@ -37,14 +37,24 @@ export enum ICOperandSource {
     FROM_INLINE      = 'FROM_INLINE'
 }
 
-export type ICOperand = {
-    ic_type:string,             // TYPES.*
+export type ICIdAccessor = {
+    id:string,
+    is_attribute:boolean,
+    is_method:boolean,
+    is_box_args:boolean,
+    box_args_count:number
+};
+
+export interface ICOperand {
+    ic_type:string,
     ic_source:ICOperandSource,
-    ic_name:string
+    ic_name:string,
+    ic_id_accessors:ICIdAccessor[],
+    ic_id_accessors_str:string
 };
 
 
-export type ICError = {
+export interface ICError {
     ic_type:string,
     ic_source:ICOperandSource,
     ic_name:string,
@@ -59,6 +69,19 @@ export type ICInstruction = {
     operands:ICOperand[],
     text:string
 };
+
+
+
+/**
+ * Test if a variable type is an ICError.
+ * @param toBeDetermined variable to test type
+ */
+function test_if_error(var_to_test: ICOperand|ICError): var_to_test is ICError {
+    if((var_to_test as ICError).message){
+      return true
+    }
+    return false
+}
 
 
 
@@ -216,21 +239,24 @@ export default class MathLangAstToIrVisitor {
         const ic_code = IC.REGISTER_SET;
         
         // GET LEFT
-        const ic_left = this.visit_value_id(ast_statement.name, ast_statement.members);
+        const ic_left = this.visit_value_id(ast_statement, ast_func_scope, ic_function);
         const ic_left_type = ast_statement.ic_type;
+       if (test_if_error(ic_left)){
+           this.add_error(ast_statement, 'Error in assign statement:left side is not a valid id expression');
+           return;
+       }
 
         // GET RIGHT
         const ic_right = this.visit_expression(ast_statement.expression, ast_func_scope, ic_function);
         const ic_right_type = ast_statement.expression.ic_type;
-
-        // CHECK TYPES
-        if (ic_left_type != ic_right_type){
-            // TODO ERROR
+        if (test_if_error(ic_right)){
+            this.add_error(ast_statement, 'Error in assign statement:right side is not a valid expression');
+            return;
         }
 
         let ic_right_str:string = this.get_operand_source_str(ic_right);
         
-        const ic_opd_1 = ic_left_type  + ':@' + ic_left.ic_name;
+        const ic_opd_1 = ic_left_type  + ':@' + ic_left.ic_name + ic_left.ic_id_accessors_str;
         const ic_opd_2 = ic_right_type + ':' + ic_right_str;
 
         // ADD IC STATEMENT
@@ -255,31 +281,35 @@ export default class MathLangAstToIrVisitor {
     visit_expression(ast_expression:any, ast_func_scope:FunctionScope, ic_function:ICFunction):ICOperand|ICError{
         
         switch(ast_expression.type){
-            case AST.EXPR_MEMBER_ID: return {
-                ic_type:ast_expression.ic_type,
-                ic_source:ICOperandSource.FROM_ID,
-                ic_name:ast_expression.name
-            };
+            case AST.EXPR_MEMBER_ID: return this.visit_value_id(ast_expression, ast_func_scope, ic_function);
 
             case AST.EXPR_PRIMARY_INTEGER: return {
                 ic_type:TYPES.INTEGER,
                 ic_source:ICOperandSource.FROM_INLINE,
-                ic_name:ast_expression.value
+                ic_name:ast_expression.value,
+                ic_id_accessors:[],
+                ic_id_accessors_str:''
             };
             case AST.EXPR_PRIMARY_BIGINTEGER: return {
                 ic_type:TYPES.BIGINTEGER,
                 ic_source:ICOperandSource.FROM_INLINE,
-                ic_name:ast_expression.value
+                ic_name:ast_expression.value,
+                ic_id_accessors:[],
+                ic_id_accessors_str:''
             };
             case AST.EXPR_PRIMARY_FLOAT: return {
                 ic_type:TYPES.FLOAT,
                 ic_source:ICOperandSource.FROM_INLINE,
-                ic_name:ast_expression.value
+                ic_name:ast_expression.value,
+                ic_id_accessors:[],
+                ic_id_accessors_str:''
             };
             case AST.EXPR_PRIMARY_BIGFLOAT: return {
                 ic_type:TYPES.BIGFLOAT,
                 ic_source:ICOperandSource.FROM_INLINE,
-                ic_name:ast_expression.value
+                ic_name:ast_expression.value,
+                ic_id_accessors:[],
+                ic_id_accessors_str:''
             };
 
             case AST.EXPR_BINOP_ADDSUB:{
@@ -295,21 +325,27 @@ export default class MathLangAstToIrVisitor {
                 return {
                     ic_type:TYPES.BOOLEAN,
                     ic_source:ICOperandSource.FROM_INLINE,
-                    ic_name:'###FALSE'
+                    ic_name:'###FALSE',
+                    ic_id_accessors:[],
+                    ic_id_accessors_str:''
                 };
             }
             case AST.EXPR_UNOP_PRE_NULL:{
                 return {
                     ic_type:TYPES.UNKNOW,
                     ic_source:ICOperandSource.FROM_INLINE,
-                    ic_name:'###NULL'
+                    ic_name:'###NULL',
+                    ic_id_accessors:[],
+                    ic_id_accessors_str:''
                 };
             }
             case AST.EXPR_UNOP_PRE_TRUE:{
                 return {
                     ic_type:TYPES.BOOLEAN,
                     ic_source:ICOperandSource.FROM_INLINE,
-                    ic_name:'###TRUE'
+                    ic_name:'###TRUE',
+                    ic_id_accessors:[],
+                    ic_id_accessors_str:''
                 };
             }
             case AST.EXPR_UNOP_POST:{
@@ -349,33 +385,72 @@ export default class MathLangAstToIrVisitor {
      * 
      * @returns ICOperand
      */
-    visit_value_id(ast_id_name:string, ast_id_members:any):ICOperand|ICError{
-        if (ast_id_members == undefined){
+    visit_value_id(ast_expression:any, ast_func_scope:FunctionScope, ic_function:ICFunction):ICOperand|ICError{
+        if (ast_expression.members == undefined){
             return {
-                ic_type:TYPES.VARIABLE_ID,
+                ic_type:ast_expression.ic_type,
                 ic_source:ICOperandSource.FROM_ID,
-                ic_name:ast_id_name
+                ic_name:ast_expression.name,
+                ic_id_accessors:[],
+                ic_id_accessors_str:''
             };
         }
 
-        if (ast_id_members.ic_type == TYPES.METHOD_ID){
-            return {
-                ic_type:TYPES.METHOD_ID,
-                ic_source:ICOperandSource.FROM_ID,
-                ic_name:ast_id_name + '.' + ast_id_members.identifier
-            };
+        // LOOP ON ID OPTIONS
+        const accessors:ICIdAccessor[] = [];
+        let loop_accessor:ICIdAccessor;
+        let loop_member = ast_expression.members;
+        let id_str = '';
+        while(loop_member){
+            // METHOD
+            if (loop_member.type == AST.EXPR_MEMBER_DOT){
+                loop_accessor={
+                    id:loop_member.identifier,
+                    is_attribute:false,
+                    is_method:true,
+                    is_box_args:false,
+                    box_args_count:0
+                }
+                id_str += '.' + loop_member.identifier;
+                accessors.push(loop_accessor);
+            }
+
+            // ATTRIBUTE
+            if (loop_member.type == AST.EXPR_MEMBER_DASH){
+                loop_accessor={
+                    id:loop_member.identifier,
+                    is_attribute:false,
+                    is_method:true,
+                    is_box_args:false,
+                    box_args_count:0
+                }
+                id_str += '#' + loop_member.identifier;
+                accessors.push(loop_accessor);
+            }
+
+            // BOX OF ARGS
+            if (loop_member.type == AST.EXPR_MEMBER_BOX){
+                loop_accessor={
+                    id:undefined,
+                    is_attribute:false,
+                    is_method:false,
+                    is_box_args:true,
+                    box_args_count:loop_member.expression.items.length
+                }
+                id_str += '[' + loop_member.expression.items.length + ']';
+                accessors.push(loop_accessor);
+            }
+
+            loop_member = loop_member.members ? loop_member.members : undefined;
         }
 
         return {
-            ic_type:TYPES.ERROR,
+            ic_type:ast_expression.ic_type,
             ic_source:ICOperandSource.FROM_ID,
-            ic_name:ast_id_name
+            ic_name:ast_expression.name,
+            ic_id_accessors:accessors,
+            ic_id_accessors_str:id_str
         };
-        // {
-        //     value_id:'VALUE',
-        //     name:ast_id_expression.name,
-        //     value_accessors:'' // TODO ast_id_expression.members
-        // }
     }
 
 
@@ -400,6 +475,12 @@ export default class MathLangAstToIrVisitor {
 
         const ic_left =this.visit_expression(ast_lhs, ast_func_scope, ic_function);
         const ic_right=this.visit_expression(ast_rhs, ast_func_scope, ic_function);
+        if (test_if_error(ic_left)){
+            return this.add_error(ast_lhs, 'Error in binop expression:left side is not a valid expression');
+        }
+        if (test_if_error(ic_right)){
+            return this.add_error(ast_rhs, 'Error in binop expression:right side is not a valid expression');
+        }
 
         let ic_left_str:string = this.get_operand_source_str(ic_left);
         let ic_right_str:string = this.get_operand_source_str(ic_right);
@@ -416,7 +497,9 @@ export default class MathLangAstToIrVisitor {
         return {
             ic_type:ic_type,
             ic_source:ic_source,
-            ic_name:undefined
+            ic_name:undefined,
+            ic_id_accessors:[],
+            ic_id_accessors_str:''
         }
     }
 
@@ -437,8 +520,10 @@ export default class MathLangAstToIrVisitor {
         const ic_source = ICOperandSource.FROM_STACK
         const ic_type   = ast_expression.ic_type;
         const ic_op     = ast_expression.ic_function;
-
         const ic_right  = this.visit_expression(ast_rhs, ast_func_scope, ic_function);
+        if (test_if_error(ic_right)){
+            return this.add_error(ast_rhs, 'Error in preunop expression:right side is not a valid expression');
+        }
 
         let ic_right_str:string = this.get_operand_source_str(ic_right);
 
@@ -454,7 +539,9 @@ export default class MathLangAstToIrVisitor {
         return {
             ic_type:ic_type,
             ic_source:ic_source,
-            ic_name:undefined
+            ic_name:undefined,
+            ic_id_accessors:[],
+            ic_id_accessors_str:''
         }
     }
 
@@ -476,7 +563,10 @@ export default class MathLangAstToIrVisitor {
         const ic_type   = ast_expression.ic_type;
         const ic_op     = ast_expression.ic_function;
         const ic_left   = this.visit_expression(ast_lhs, ast_func_scope, ic_function);
-
+        if (test_if_error(ic_left)){
+            return this.add_error(ast_lhs, 'Error in postunop expression:left side is not a valid expression');
+        }
+        
         let ic_left_str:string = this.get_operand_source_str(ic_left);
 
         // ADD IC STATEMENT
@@ -491,7 +581,9 @@ export default class MathLangAstToIrVisitor {
         return {
             ic_type:ic_type,
             ic_source:ic_source,
-            ic_name:undefined
+            ic_name:undefined,
+            ic_id_accessors:[],
+            ic_id_accessors_str:''
         }
     }
 

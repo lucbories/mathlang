@@ -90,6 +90,7 @@ describe('MathLang number parser', () => {
         const result = {
             type:'PREUNOP_EXPRESSION',
             ic_type:'INTEGER',
+            ic_function:'negate',
             operator:'-',
             rhs:{
                 type:'INTEGER',
@@ -122,6 +123,7 @@ describe('MathLang number parser', () => {
         const result = {
             type:'PREUNOP_EXPRESSION',
             ic_type:'INTEGER',
+            ic_function:'negate',
             operator:'-',
             rhs:{
                 type:'INTEGER',
@@ -236,6 +238,7 @@ describe('MathLang number parser', () => {
         const result = {
             type:'PREUNOP_EXPRESSION',
             ic_type:'FLOAT',
+            ic_function:'negate',
             operator:'-',
             rhs:{
                 type:'FLOAT',
@@ -268,6 +271,7 @@ describe('MathLang number parser', () => {
         const result = {
             type:'PREUNOP_EXPRESSION',
             ic_type:'BIGFLOAT',
+            ic_function:'negate',
             operator:'-',
             rhs:{
                 type:'BIGFLOAT',
@@ -300,6 +304,7 @@ describe('MathLang number parser', () => {
         const result = {
             type:'PREUNOP_EXPRESSION',
             ic_type:'BIGFLOAT',
+            ic_function:'negate',
             operator:'-',
             rhs:{
                 type:'BIGFLOAT',

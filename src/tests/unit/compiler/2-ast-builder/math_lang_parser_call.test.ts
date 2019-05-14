@@ -32,7 +32,7 @@ describe('MathLang call parser', () => {
         const ast_expr_node = parser_result.ast;
         const nomembers = <any>undefined;
         const result = {
-            type:'ID_EXPRESSION',
+            type:'ID_MEMBER_EXPRESSION',
             ic_type:'UNKNOW',
             name:'f',
             members:{
@@ -63,7 +63,7 @@ describe('MathLang call parser', () => {
         // console.log('fx(23) expr node', ast_expr_node);
         const nomembers = <any>undefined;
         const result = {
-            type:'ID_EXPRESSION',
+            type:'ID_MEMBER_EXPRESSION',
             ic_type:'UNKNOW',
             name:'fx',
             members:{
@@ -146,7 +146,7 @@ describe('MathLang call parser', () => {
         // console.log('fx(23) expr node', ast_expr_node);
         const nomembers = <any>undefined;
         const result = {
-            type:'ID_EXPRESSION',
+            type:'ID_MEMBER_EXPRESSION',
             ic_type:'UNKNOW',
             name:'fx',
             members:{
@@ -161,7 +161,7 @@ describe('MathLang call parser', () => {
                         members:nomembers
                     },
                     {
-                        type:'ID_EXPRESSION',
+                        type:'ID_MEMBER_EXPRESSION',
                         ic_type:'UNKNOW',
                         name:'efg',
                         members:nomembers

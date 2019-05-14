@@ -151,6 +151,7 @@ describe('MathLang function declaration parser', () => {
                                     members:nomembers
                                 },
                                 operator:{
+                                    ic_function:'add',
                                     type:AST.EXPR_BINOP,
                                     value:'+'
                                 },
@@ -214,6 +215,7 @@ describe('MathLang function declaration parser', () => {
                                     members:nomembers
                                 },
                                 operator:{
+                                    ic_function:'add',
                                     type:AST.EXPR_BINOP,
                                     value:'+'
                                 },
@@ -273,7 +275,7 @@ describe('MathLang function declaration parser', () => {
                             "is_async":false,
                             "expression": {
                                 "name":"m2",
-                                "type": "ID_EXPRESSION",
+                                "type": "ID_MEMBER_EXPRESSION",
                                 "ic_type": "INTEGER",
                                 "members":{
                                     "ic_subtypes":["INTEGER"],
@@ -328,21 +330,23 @@ describe('MathLang function declaration parser', () => {
                                     "type": "ADDSUB_EXPRESSION",
                                     "ic_type": "BIGFLOAT",
                                     "lhs": {
-                                        "type": "ID_EXPRESSION",
+                                        "type": "ID_MEMBER_EXPRESSION",
                                         "ic_type": "BIGFLOAT",
                                         "name": "x"
                                     },
                                     "operator": {
+                                        "ic_function":"add",
                                         "type": "BINOP",
                                         "value": "+"
                                     },
                                     "rhs": {
-                                        "type": "ID_EXPRESSION",
+                                        "type": "ID_MEMBER_EXPRESSION",
                                         "ic_type": "INTEGER",
                                         "name": "y"
                                     }
                                 },
                                 "operator": {
+                                    "ic_function":"sup",
                                     "type": "BINOP",
                                     "value": ">"
                                 },
@@ -360,16 +364,17 @@ describe('MathLang function declaration parser', () => {
                                         "type": "ADDSUB_EXPRESSION",
                                         "ic_type": "BIGFLOAT",
                                         "lhs": {
-                                            "type": "ID_EXPRESSION",
+                                            "type": "ID_MEMBER_EXPRESSION",
                                             "ic_type": "BIGFLOAT",
                                             "name": "x"
                                         },
                                         "operator": {
+                                            "ic_function":"add",
                                             "type": "BINOP",
                                             "value": "+"
                                         },
                                         "rhs": {
-                                            "type": "ID_EXPRESSION",
+                                            "type": "ID_MEMBER_EXPRESSION",
                                             "ic_type": "INTEGER",
                                             "name": "y"
                                         }
@@ -387,16 +392,17 @@ describe('MathLang function declaration parser', () => {
                                     "type": "ADDSUB_EXPRESSION",
                                     "ic_type": "BIGFLOAT",
                                     "lhs": {
-                                        "type": "ID_EXPRESSION",
+                                        "type": "ID_MEMBER_EXPRESSION",
                                         "ic_type": "BIGFLOAT",
                                         "name": "x"
                                     },
                                     "operator": {
+                                        "ic_function":"add",
                                         "type": "BINOP",
                                         "value": "+"
                                     },
                                     "rhs": {
-                                        "type": "ID_EXPRESSION",
+                                        "type": "ID_MEMBER_EXPRESSION",
                                         "ic_type": "INTEGER",
                                         "name": "m2",
                                         "members": {
@@ -407,7 +413,7 @@ describe('MathLang function declaration parser', () => {
                                             ],
                                             "items": [
                                                 {
-                                                    "type": "ID_EXPRESSION",
+                                                    "type": "ID_MEMBER_EXPRESSION",
                                                     "ic_type": "INTEGER",
                                                     "name": "y"
                                                 }
@@ -416,11 +422,12 @@ describe('MathLang function declaration parser', () => {
                                     }
                                 },
                                 "operator": {
+                                    "ic_function":"add",
                                     "type": "BINOP",
                                     "value": "+"
                                 },
                                 "rhs": {
-                                    "type": "ID_EXPRESSION",
+                                    "type": "ID_MEMBER_EXPRESSION",
                                     "ic_type": "INTEGER",
                                     "name": "a"
                                 }
@@ -450,11 +457,12 @@ describe('MathLang function declaration parser', () => {
                                 "type": "MULTDIV_EXPRESSION",
                                 "ic_type": "INTEGER",
                                 "lhs": {
-                                    "type": "ID_EXPRESSION",
+                                    "type": "ID_MEMBER_EXPRESSION",
                                     "ic_type": "INTEGER",
                                     "name": "x"
                                 },
                                 "operator": {
+                                    "ic_function":"mul",
                                     "type": "BINOP",
                                     "value": "*"
                                 },

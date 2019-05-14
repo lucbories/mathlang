@@ -148,6 +148,7 @@ describe('MathLang assign parser', () => {
                             members:nomembers
                         },
                         operator: {
+                            ic_function:'add',
                             type:'BINOP',
                             value:'+'
                         },
@@ -160,15 +161,17 @@ describe('MathLang assign parser', () => {
                                 lhs:{
                                     type:'PREUNOP_EXPRESSION',
                                     ic_type: 'INTEGER',
+                                    ic_function:'add_one',
                                     operator:'++',
                                     rhs: {
-                                        type:'ID_EXPRESSION',
+                                        type:'ID_MEMBER_EXPRESSION',
                                         ic_type: 'INTEGER',
                                         name:'b',
                                         members:nomembers
                                     }
                                 },
                                 operator:{
+                                    ic_function:'mul',
                                     type:'BINOP',
                                     value:'*'
                                 },
@@ -226,6 +229,7 @@ describe('MathLang assign parser', () => {
                     members:nomembers
                 },
                 operator: {
+                    ic_function:'add',
                     type:'BINOP',
                     value:'+'
                 },
@@ -238,15 +242,17 @@ describe('MathLang assign parser', () => {
                         lhs:{
                             type:'PREUNOP_EXPRESSION',
                             ic_type: 'FLOAT',
+                            ic_function:'add_one',
                             operator:'++',
                             rhs: {
-                                type:'ID_EXPRESSION',
+                                type:'ID_MEMBER_EXPRESSION',
                                 ic_type: 'FLOAT',
                                 name:'x',
                                 members:nomembers
                             }
                         },
                         operator:{
+                            ic_function:'mul',
                             type:'BINOP',
                             value:'*'
                         },
@@ -301,6 +307,7 @@ describe('MathLang assign parser', () => {
                     members:nomembers
                 },
                 operator: {
+                    ic_function:'add',
                     type:'BINOP',
                     value:'+'
                 },
@@ -313,15 +320,17 @@ describe('MathLang assign parser', () => {
                         lhs:{
                             type:'PREUNOP_EXPRESSION',
                             ic_type: 'INTEGER',
+                            ic_function:'add_one',
                             operator:'++',
                             rhs: {
-                                type:'ID_EXPRESSION',
+                                type:'ID_MEMBER_EXPRESSION',
                                 ic_type: 'INTEGER',
                                 name:'x',
                                 members:nomembers
                             }
                         },
                         operator:{
+                            ic_function:'mul',
                             type:'BINOP',
                             value:'*'
                         },
@@ -376,6 +385,7 @@ describe('MathLang assign parser', () => {
                     members:nomembers
                 },
                 operator: {
+                    ic_function:'add',
                     type:'BINOP',
                     value:'+'
                 },
@@ -388,15 +398,17 @@ describe('MathLang assign parser', () => {
                         lhs:{
                             type:'PREUNOP_EXPRESSION',
                             ic_type: 'INTEGER',
+                            ic_function:'add_one',
                             operator:'++',
                             rhs: {
-                                type:'ID_EXPRESSION',
+                                type:'ID_MEMBER_EXPRESSION',
                                 ic_type: 'INTEGER',
                                 name:'x',
                                 members:nomembers
                             }
                         },
                         operator:{
+                            ic_function:'mul',
                             type:'BINOP',
                             value:'*'
                         },
@@ -451,6 +463,7 @@ describe('MathLang assign parser', () => {
                     members:nomembers
                 },
                 operator: {
+                    ic_function:'add',
                     type:'BINOP',
                     value:'+'
                 },
@@ -463,15 +476,17 @@ describe('MathLang assign parser', () => {
                         lhs:{
                             type:'PREUNOP_EXPRESSION',
                             ic_type: 'INTEGER',
+                            ic_function:'add_one',
                             operator:'++',
                             rhs: {
-                                type:'ID_EXPRESSION',
+                                type:'ID_MEMBER_EXPRESSION',
                                 ic_type: 'INTEGER',
                                 name:'x',
                                 members:nomembers
                             }
                         },
                         operator:{
+                            ic_function:'mul',
                             type:'BINOP',
                             value:'*'
                         },

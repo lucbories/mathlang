@@ -41,6 +41,7 @@ describe('MathLang math expression parser', () => {
                 members:nomembers
             },
             operator: {
+                ic_function:'add',
                 type:'BINOP',
                 value:'+'
             },
@@ -53,15 +54,17 @@ describe('MathLang math expression parser', () => {
                     lhs:{
                         type:'PREUNOP_EXPRESSION',
                         ic_type:TYPES.UNKNOW,
+                        ic_function:'add_one',
                         operator:'++',
                         rhs: {
-                            type:'ID_EXPRESSION',
+                            type:'ID_MEMBER_EXPRESSION',
                             ic_type:TYPES.UNKNOW,
                             name:'b',
                             members:nomembers
                         }
                     },
                     operator:{
+                        ic_function:'mul',
                         type:'BINOP',
                         value:'*'
                     },
@@ -106,15 +109,17 @@ describe('MathLang math expression parser', () => {
                     lhs:{
                         type:'PREUNOP_EXPRESSION',
                         ic_type:TYPES.UNKNOW,
+                        ic_function:'sub_one',
                         operator:'--',
                         rhs: {
-                            type:'ID_EXPRESSION',
+                            type:'ID_MEMBER_EXPRESSION',
                             ic_type:TYPES.UNKNOW,
                             name:'b',
                             members:nomembers
                         }
                     },
                     operator:{
+                        ic_function:'div',
                         type:'BINOP',
                         value:'/'
                     },
@@ -128,6 +133,7 @@ describe('MathLang math expression parser', () => {
                 members:nomembers
             },
             operator: {
+                ic_function:'mul',
                 type:'BINOP',
                 value:'*'
             },
@@ -168,6 +174,7 @@ describe('MathLang math expression parser', () => {
                 members:nomembers
             },
             operator: {
+                ic_function:'div',
                 type:'BINOP',
                 value:'/'
             },
@@ -177,15 +184,17 @@ describe('MathLang math expression parser', () => {
                 lhs:{
                     type:'PREUNOP_EXPRESSION',
                     ic_type:TYPES.UNKNOW,
+                    ic_function:'factorial',
                     operator:'!',
                     rhs: {
-                        type:'ID_EXPRESSION',
+                        type:'ID_MEMBER_EXPRESSION',
                         ic_type:TYPES.UNKNOW,
                         name:'b',
                         members:nomembers
                     }
                 },
                 operator:{
+                    ic_function:'div',
                     type:'BINOP',
                     value:'/'
                 },
@@ -229,6 +238,7 @@ describe('MathLang math expression parser', () => {
                     members:nomembers
                 },
                 operator:{
+                    ic_function:'mul',
                     type:'BINOP',
                     value:'*'
                 },
@@ -240,6 +250,7 @@ describe('MathLang math expression parser', () => {
                 }
             },
             operator: {
+                ic_function:'add',
                 type:'BINOP',
                 value:'+'
             },
@@ -252,6 +263,7 @@ describe('MathLang math expression parser', () => {
                     value:'78',
                     members:nomembers
                 },
+                ic_function:'add_one',
                 operator:'++'
             }
         }
@@ -278,12 +290,13 @@ describe('MathLang math expression parser', () => {
             type:'COMPARATOR_EXPRESSION',
             ic_type:TYPES.BOOLEAN,
             lhs:{
-                type:'ID_EXPRESSION',
+                type:'ID_MEMBER_EXPRESSION',
                 ic_type:TYPES.UNKNOW,
                 name:'abc_UI_23',
                 members:nomembers
             },
             operator:{
+                ic_function:'inf',
                 type:'BINOP',
                 value:'<'
             },
@@ -300,6 +313,7 @@ describe('MathLang math expression parser', () => {
                         members:nomembers
                     },
                     operator:{
+                        ic_function:'mul',
                         type:'BINOP',
                         value:'*'
                     },
@@ -311,6 +325,7 @@ describe('MathLang math expression parser', () => {
                     }
                 },
                 operator: {
+                    ic_function:'add',
                     type:'BINOP',
                     value:'+'
                 },
@@ -345,12 +360,13 @@ describe('MathLang math expression parser', () => {
             type:'COMPARATOR_EXPRESSION',
             ic_type:TYPES.BOOLEAN,
             rhs:{
-                type:'ID_EXPRESSION',
+                type:'ID_MEMBER_EXPRESSION',
                 ic_type:TYPES.UNKNOW,
                 name:'a45Bc',
                 members:nomembers
             },
             operator:{
+                ic_function:'sup',
                 type:'BINOP',
                 value:'>'
             },
@@ -367,6 +383,7 @@ describe('MathLang math expression parser', () => {
                         members:nomembers
                     },
                     operator:{
+                        ic_function:'mul',
                         type:'BINOP',
                         value:'*'
                     },
@@ -378,6 +395,7 @@ describe('MathLang math expression parser', () => {
                     }
                 },
                 operator: {
+                    ic_function:'add',
                     type:'BINOP',
                     value:'+'
                 },

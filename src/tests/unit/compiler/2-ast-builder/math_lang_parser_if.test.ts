@@ -97,6 +97,7 @@ describe('MathLang if parser', () => {
                             "members": nomembers
                         },
                         "operator": {
+                            "ic_function":"add",
                             "type": "BINOP",
                             "value": "+"
                         },

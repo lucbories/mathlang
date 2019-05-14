@@ -49,7 +49,7 @@ export const program_1_ast = {
             "type": "RETURN_STATEMENT",
             "ic_type": "INTEGER",
             "expression": {
-                "type": "ID_EXPRESSION",
+                "type": "ID_MEMBER_EXPRESSION",
                 "ic_type": "INTEGER",
                 "name": "my_int_square_add",
                 "members": {
@@ -61,13 +61,13 @@ export const program_1_ast = {
                     ],
                     "items": [
                         {
-                            "type": "ID_EXPRESSION",
+                            "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "INTEGER",
                             "name": "left",
                             "members":<any>undefined
                         },
                         {
-                            "type": "ID_EXPRESSION",
+                            "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "INTEGER",
                             "name": "right",
                             "members":<any>undefined
@@ -102,17 +102,18 @@ export const program_1_ast = {
                         "type": "MULTDIV_EXPRESSION",
                         "ic_type": "INTEGER",
                         "lhs": {
-                            "type": "ID_EXPRESSION",
+                            "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "INTEGER",
                             "name": "left",
                             "members":<any>undefined
                         },
                         "operator": {
+                            "ic_function":"mul",
                             "type": "BINOP",
                             "value": "*"
                         },
                         "rhs": {
-                            "type": "ID_EXPRESSION",
+                            "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "INTEGER",
                             "name": "left",
                             "members":<any>undefined
@@ -126,7 +127,7 @@ export const program_1_ast = {
                     "name": "b",
                     "is_async": false,
                     "expression": {
-                        "type": "ID_EXPRESSION",
+                        "type": "ID_MEMBER_EXPRESSION",
                         "ic_type": "UNKNOW",
                         "name": "square",
                         "members": {
@@ -137,7 +138,7 @@ export const program_1_ast = {
                             ],
                             "items": [
                                 {
-                                    "type": "ID_EXPRESSION",
+                                    "type": "ID_MEMBER_EXPRESSION",
                                     "ic_type": "INTEGER",
                                     "name": "right",
                                     "members":<any>undefined
@@ -156,12 +157,13 @@ export const program_1_ast = {
                             "type": "COMPARATOR_EXPRESSION",
                             "ic_type": "BOOLEAN",
                             "lhs": {
-                                "type": "ID_EXPRESSION",
+                                "type": "ID_MEMBER_EXPRESSION",
                                 "ic_type": "INTEGER",
                                 "name": "a",
                                 "members":<any>undefined
                             },
                             "operator": {
+                                "ic_function":"equal",
                                 "type": "BINOP",
                                 "value": "=="
                             },
@@ -197,12 +199,13 @@ export const program_1_ast = {
                             "type": "COMPARATOR_EXPRESSION",
                             "ic_type": "BOOLEAN",
                             "lhs": {
-                                "type": "ID_EXPRESSION",
+                                "type": "ID_MEMBER_EXPRESSION",
                                 "ic_type": "UNKNOW",
                                 "name": "b",
                                 "members":<any>undefined
                             },
                             "operator": {
+                                "ic_function":"equal",
                                 "type": "BINOP",
                                 "value": "=="
                             },
@@ -236,17 +239,18 @@ export const program_1_ast = {
                         "type": "ADDSUB_EXPRESSION",
                         "ic_type": "UNKNOW",
                         "lhs": {
-                            "type": "ID_EXPRESSION",
+                            "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "INTEGER",
                             "name": "a",
                             "members":<any>undefined
                         },
                         "operator": {
+                            "ic_function":"add",
                             "type": "BINOP",
                             "value": "+"
                         },
                         "rhs": {
-                            "type": "ID_EXPRESSION",
+                            "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "UNKNOW",
                             "name": "b",
                             "members":<any>undefined
