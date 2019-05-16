@@ -78,15 +78,17 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
 
     /**
      * 
+     * 
      * @param node AST node
+     * 
      * @returns Program type
      */
-	find_type(node:any):string {
-        if (node && node.program_type) {
-            return node.program_type;
-        }
-        return undefined;
-    }
+	// find_type(node:any):string {
+    //     if (node && node.program_type) {
+    //         return node.program_type;
+    //     }
+    //     return undefined;
+    // }
 
 
     /**

@@ -2,7 +2,7 @@ import VMType from '../../engine/vm/vmtype';
 import IFeature from '../../core/ifeature';
 
 
-const TYPE_NAME:string='NUMBER_TYPE';
+const TYPE_NAME:string='NUMBER';
 const TYPE_FEATURES:IFeature[]=[];
 
 

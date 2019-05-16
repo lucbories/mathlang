@@ -3,41 +3,12 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
-import MathLangAstToIrVisitor from '../../../../compiler/3-program-builder/math_lang_ast_to_ir_builder';
+import DEFAULT_TYPES from '../../../../features/default_types';
 
-
-function dump_tree(label:string, tree:any) {
-    const json = JSON.stringify(tree);
-    console.log(label, json)
-}
-
-
-function dump_ic_functions_source(ic_functions_map:Map<string,any>, dump_functions:boolean):string{
-    let ic_source:string='';
-    ic_functions_map.forEach(
-        (value:any, key)=>{
-            if (dump_functions){
-                console.log('ic' + '-' + key + '(instr): returns ' + value.return_type);
-            }
-            value.statements.forEach(
-                (value:any, index:number)=>{
-                    if (dump_functions){
-                        dump_tree('ic-' + key + ':' + index, value);
-                    }
-                    ic_source = ic_source.concat('\n', value.text);
-                }
-            );
-            if (dump_functions){
-                console.log('\nic-' + key + '(text):', ic_source);
-            }
-        }
-    );
-    return ic_source;
-}
 
 
 describe('MathLang assign parser', () => {
-    const compiler = new MathLangCompiler([]);
+    const compiler = new MathLangCompiler(DEFAULT_TYPES);
 
     it('Parse assign a=456 statement' , () => {
         compiler.reset();
@@ -53,19 +24,13 @@ describe('MathLang assign parser', () => {
         }
         
         // GET AST
-        const compiler_ast = compiler.get_ast();
-        // dump_tree('ast', compiler_ast);
+        // const compiler_ast = compiler.get_ast();
+        // compiler.dump_tree('ast', compiler_ast);
 
-        const ast_functions_map = compiler.get_ast_builder().get_scopes_map();
-        const ir_builder = new MathLangAstToIrVisitor(ast_functions_map);
-
-        ir_builder.visit();
-
-        const ic_functions_map = ir_builder.get_ic_functions_map();
-
-        // DUMP IC
+        // GET IC CODE
+        const ic_functions_map = compiler.get_ic_functions_map();
         // console.log('ic_functions_map', ic_functions_map);
-        const ic_source:string = dump_ic_functions_source(ic_functions_map, false);
+        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
 
         // TEST IC TEXT
         const expected_ic_source = `
@@ -90,19 +55,13 @@ none:function-declare-leave main`;
         }
         
         // GET AST
-        const compiler_ast = compiler.get_ast();
-        // dump_tree('ast', compiler_ast);
+        // const compiler_ast = compiler.get_ast();
+        // compiler.dump_tree('ast', compiler_ast);
 
-        const ast_functions_map = compiler.get_ast_builder().get_scopes_map();
-        const ir_builder = new MathLangAstToIrVisitor(ast_functions_map);
-
-        ir_builder.visit();
-
-        const ic_functions_map = ir_builder.get_ic_functions_map();
-
-        // DUMP IC
+        // GET IC CODE
+        const ic_functions_map = compiler.get_ic_functions_map();
         // console.log('ic_functions_map', ic_functions_map);
-        const ic_source:string = dump_ic_functions_source(ic_functions_map, false);
+        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
 
         // TEST IC TEXT
         const expected_ic_source = `
@@ -128,23 +87,13 @@ none:function-declare-leave main`;
         }
         
         // GET AST
-        const compiler_ast = compiler.get_ast();
-        // dump_tree('ast', compiler_ast);
+        // const compiler_ast = compiler.get_ast();
+        // compiler.dump_tree('ast', compiler_ast);
 
-        const ast_functions_map = compiler.get_ast_builder().get_scopes_map();
-        const ir_builder = new MathLangAstToIrVisitor(ast_functions_map);
-
-        ir_builder.visit();
-        if ( ir_builder.has_error() ){
-            console.log('errors', ir_builder.get_errors());
-            expect('has error').equals(false);
-        }
-
-        const ic_functions_map = ir_builder.get_ic_functions_map();
-
-        // DUMP IC
+        // GET IC CODE
+        const ic_functions_map = compiler.get_ic_functions_map();
         // console.log('ic_functions_map', ic_functions_map);
-        const ic_source:string = dump_ic_functions_source(ic_functions_map, false);
+        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
 
         // TEST IC TEXT
         const expected_ic_source = `
@@ -170,23 +119,13 @@ none:function-declare-leave main`;
         }
         
         // GET AST
-        const compiler_ast = compiler.get_ast();
-        // dump_tree('ast', compiler_ast);
+        // const compiler_ast = compiler.get_ast();
+        // compiler.dump_tree('ast', compiler_ast);
 
-        const ast_functions_map = compiler.get_ast_builder().get_scopes_map();
-        const ir_builder = new MathLangAstToIrVisitor(ast_functions_map);
-
-        ir_builder.visit();
-        if ( ir_builder.has_error() ){
-            console.log('errors', ir_builder.get_errors());
-            expect('has error').equals(false);
-        }
-
-        const ic_functions_map = ir_builder.get_ic_functions_map();
-
-        // DUMP IC
+        // GET IC CODE
+        const ic_functions_map = compiler.get_ic_functions_map();
         // console.log('ic_functions_map', ic_functions_map);
-        const ic_source:string = dump_ic_functions_source(ic_functions_map, false);
+        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
 
         // TEST IC TEXT
         const expected_ic_source = `

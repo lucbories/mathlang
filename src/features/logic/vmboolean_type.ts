@@ -2,7 +2,7 @@ import VMType from '../../engine/vm/vmtype';
 import IFeature from '../../core/ifeature';
 
 
-const TYPE_NAME:string='BOOLEAN_TYPE';
+const TYPE_NAME:string='BOOLEAN';
 const TYPE_FEATURES:IFeature[]=[];
 
 

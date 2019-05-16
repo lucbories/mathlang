@@ -1,12 +1,22 @@
 import { IToken, LexerDefinitionErrorType } from 'chevrotain';
 
 import IProgram from '../core/iprogram';
-import IFeature from '../core/ifeature';
+import IType from '../core/itype';
 
 import { math_lang_lexer, math_lang_parser } from './1-cst-builder/math_lang_parser';
 import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visitor';
-import {FunctionScope} from './3-program-builder/math_lang_function_scope'
+import {FunctionScope} from './3-program-builder/math_lang_function_scope';
+import MathLangAstToIcVisitor, { ICFunction } from './3-program-builder/math_lang_ast_to_ic_builder';
 
+
+
+/**
+ * Get a lexer error string with a lexer error code.
+ * 
+ * @param code lexer error code.
+ * 
+ * @returns error message.
+ */
 function lexer_get_def_error(code:LexerDefinitionErrorType):string {
     switch(code) {
         case LexerDefinitionErrorType.MISSING_PATTERN: return 'MISSING_PATTERN';
@@ -29,6 +39,10 @@ function lexer_get_def_error(code:LexerDefinitionErrorType):string {
     }
 };
 
+
+/**
+ * Compiler step enum.
+ */
 enum CompilerStep {
     LEXEMES,
     CST,
@@ -38,6 +52,10 @@ enum CompilerStep {
     MC
 };
 
+
+/**
+ * Compiler error record type.
+ */
 type CompilerError = {
     source:string,
     step:CompilerStep,
@@ -48,8 +66,16 @@ type CompilerError = {
     solution:string
 };
 
+
+/**
+ * MathLang compiler class.
+ * 
+ * @author Luc BORIES
+ * @license Apache-2.0
+ */
 export default class MathLangCompiler {
-    private _features:IFeature[];
+    private _types_map:Map<string,IType>;
+
     private _symbols:Map<string,FunctionScope>;
 
     private _errors:CompilerError[];
@@ -58,7 +84,7 @@ export default class MathLangCompiler {
     private _lexemes:IToken[];
     private _cst:any;
     private _ast:any;
-    private _ic_functions:any[];
+    private _ic_functions:Map<string,ICFunction>;
     private _program:IProgram;
 
     private _ast_builder:MathLangCstToAstVisitor;
@@ -69,8 +95,23 @@ export default class MathLangCompiler {
      * 
      * @param features Language features.
      */
-    constructor(features:[]) {
-        // TODO set types and features
+    constructor(private _types:IType[]=[]) {
+        // INIT TYPES MAP
+        this._types_map = new Map<string,IType>();
+
+        this._types.forEach(
+            (loop_type)=>this._types_map.set(loop_type.get_name(), loop_type)
+        );
+
+        if (this._types_map.has('NUMBER')){
+            this._types_map.set('INTEGER', this._types_map.get('NUMBER'));
+            this._types_map.set('FLOAT', this._types_map.get('NUMBER'));
+        }
+
+        if (this._types_map.has('BIGNUMBER')){
+            this._types_map.set('BIGINTEGER', this._types_map.get('BIGNUMBER'));
+            this._types_map.set('BIGFLOAT', this._types_map.get('BIGNUMBER'));
+        }
 
         this._ast_builder = new MathLangCstToAstVisitor();
     }
@@ -140,6 +181,14 @@ export default class MathLangCompiler {
 
 
     /**
+     * Get compiled IC functions.
+     * 
+     * @return Map<string,ICFunction>.
+     */
+    get_ic_functions_map() { return this._ic_functions; }
+
+
+    /**
      * Get compiled program.
      * 
      * @return IProgram.
@@ -153,6 +202,16 @@ export default class MathLangCompiler {
      * @return CompilerError[].
      */
     get_errors() { return this._errors; }
+
+
+    /**
+     * Test if the named type exists in features.
+     * 
+     * @returns boolean, true if type exists.
+     */
+    has_type(type_name:string){
+        return this._types_map.has(type_name);
+    }
 
 
     /**
@@ -180,14 +239,13 @@ export default class MathLangCompiler {
             return false;
         }
 
+        // BUILD IC
+        if (! this.build_ic()){
+            return false;
+        }
+
         return this._errors.length == 0;
     }
-
-
-    /**
-     * Set language types definition.
-     */
-    set_types(){}
     
 
     /**
@@ -308,15 +366,103 @@ export default class MathLangCompiler {
         return true;
     }
 
+
+    /**
+     * Build intermediate code (IC) functions from AST and language rules and types.
+     * 
+     * @returns boolean (true:success, false:error occures).
+     */
     build_ic():boolean{
+        const functions_map = this._ast_builder.get_scopes_map();
+
+        const ic_builder = new MathLangAstToIcVisitor(functions_map, this._types_map);
+        ic_builder.visit();
+        this._ic_functions = ic_builder.get_ic_functions_map();
+
+        if (ic_builder.has_error()){
+            const errors = ic_builder.get_errors();
+            let ic_build_error;
+            for(ic_build_error of errors){                
+                const error:CompilerError = {
+                    source:this._text,
+                    step:CompilerStep.IC,
+                    line:0,
+                    column:0,
+                    src_extract:'',
+                    message:ic_build_error.message + ' with [ic_type=' + ic_build_error.ic_type + ', ic_source=' + ic_build_error.ic_source + ', ic_name=' + ic_build_error.ic_name + ', ic_index=' + ic_build_error.ic_index + ']',
+                    solution:'IC build error [' + ic_build_error.message + ']'
+                };
+                this._errors.push(error);
+            }
+            return false;
+        }
+
+
         return true;
     }
 
+
+    /**
+     * Optimize IC functions.
+     * 
+     * @returns boolean (true:success, false:error occures).
+     */
     optimize_ic():boolean{
         return true;
     }
 
+
+    /**
+     * Build machine code from IC functions.
+     * 
+     * @returns boolean (true:success, false:error occures).
+     */
     build_mc():boolean{
         return true;
+    }
+
+
+
+    /**
+     * Dump CST or AST tree.
+     * 
+     * @param label tree label
+     * @param tree tree object
+     */
+    dump_tree(label:string, tree:any) {
+        const json = JSON.stringify(tree);
+        console.log(label, json)
+    }
+
+
+    /**
+     * Dump IC functions to a string and optionaly to console.
+     * 
+     * @param ic_functions_map IC functions map
+     * @param dump_functions should dump to console ? (boolean)
+     * 
+     * @returns dumped string.
+     */
+    dump_ic_functions_source(ic_functions_map:Map<string,any>, dump_functions:boolean):string{
+        let ic_source:string='';
+        ic_functions_map.forEach(
+            (value:any, key)=>{
+                if (dump_functions){
+                    console.log('ic' + '-' + key + '(instr): returns ' + value.return_type);
+                }
+                value.statements.forEach(
+                    (value:any, index:number)=>{
+                        if (dump_functions){
+                            this.dump_tree('ic-' + key + ':' + index, value);
+                        }
+                        ic_source = ic_source.concat('\n', value.text);
+                    }
+                );
+                if (dump_functions){
+                    console.log('\nic-' + key + '(text):', ic_source);
+                }
+            }
+        );
+        return ic_source;
     }
 }

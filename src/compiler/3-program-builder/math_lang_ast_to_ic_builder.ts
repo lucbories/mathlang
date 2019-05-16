@@ -1,5 +1,8 @@
+import IType from '../../core/itype';
+
 import AST from '../2-ast-builder/math_lang_ast';
-import { SymbolDeclarationRecord, FunctionScope } from './math_lang_function_scope';
+
+import { FunctionScope } from './math_lang_function_scope';
 import TYPES from './math_lang_types';
 
 
@@ -91,7 +94,7 @@ function test_if_error(var_to_test: ICOperand|ICError): var_to_test is ICError {
  * @author Luc BORIES
  * @license Apache-2.0
  */
-export default class MathLangAstToIrVisitor {
+export default class MathLangAstToIcVisitor {
     protected _ic_functions:Map<string,ICFunction> = new Map();
     private _errors:ICError[] = [];
 
@@ -101,7 +104,17 @@ export default class MathLangAstToIrVisitor {
      * 
      * @param _ast_functions AST functions scopes
      */
-    constructor(protected _ast_functions:Map<string,FunctionScope>) {
+    constructor(protected _ast_functions:Map<string,FunctionScope>, private _types_map:Map<string,IType>) {
+    }
+
+
+    /**
+     * Test if the named type exists in features.
+     * 
+     * @returns boolean, true if type exists.
+     */
+    has_type(type_name:string){
+        return this._types_map.has(type_name);
     }
 
 
@@ -132,6 +145,13 @@ export default class MathLangAstToIrVisitor {
     visit_function(ast_func_scope:FunctionScope) {
         const ast_statements = ast_func_scope.statements;
         let ic_statements:ICInstruction[] = [];
+
+        // CHECK RETURN TYPE
+        if (ast_func_scope.func_name != 'main'){
+            if (! this.has_type(ast_func_scope.return_type) ){
+                return this.add_error(ast_func_scope, 'Type [' + ast_func_scope.return_type + '] not found.')
+            }
+        }
 
         const ic_function = {
             func_name:ast_func_scope.func_name,
@@ -241,14 +261,24 @@ export default class MathLangAstToIrVisitor {
         // GET LEFT
         const ic_left = this.visit_value_id(ast_statement, ast_func_scope, ic_function);
         const ic_left_type = ast_statement.ic_type;
-       if (test_if_error(ic_left)){
-           this.add_error(ast_statement, 'Error in assign statement:left side is not a valid id expression');
-           return;
-       }
+        // CHECK RETURN TYPE
+        if (! this.has_type(ic_left_type) ){
+            return this.add_error(ast_statement, 'Type [' + ic_left_type + '] not found.')
+        }
+        // CHECK LEFT EXPRESSION
+        if (test_if_error(ic_left)){
+            this.add_error(ast_statement, 'Error in assign statement:left side is not a valid id expression');
+            return;
+        }
 
         // GET RIGHT
         const ic_right = this.visit_expression(ast_statement.expression, ast_func_scope, ic_function);
         const ic_right_type = ast_statement.expression.ic_type;
+        // CHECK RETURN TYPE
+        if (! this.has_type(ic_right_type) ){
+            return this.add_error(ast_statement.expression, 'Type [' + ic_right_type + '] not found.')
+        }
+        // CHECK RIGHT EXPRESSION
         if (test_if_error(ic_right)){
             this.add_error(ast_statement, 'Error in assign statement:right side is not a valid expression');
             return;
@@ -386,6 +416,11 @@ export default class MathLangAstToIrVisitor {
      * @returns ICOperand
      */
     visit_value_id(ast_expression:any, ast_func_scope:FunctionScope, ic_function:ICFunction):ICOperand|ICError{
+        // CHECK TYPE
+        if (! this.has_type(ast_expression.ic_type) ){
+            return this.add_error(ast_expression, 'Type [' + ast_expression.ic_type + '] not found.')
+        }
+
         if (ast_expression.members == undefined){
             return {
                 ic_type:ast_expression.ic_type,
@@ -473,10 +508,25 @@ export default class MathLangAstToIrVisitor {
         const ic_type   = ast_expression.ic_type;
         const ic_op     = ast_expression.operator.ic_function;
 
+        // CHECK TYPE
+        if (! this.has_type(ast_expression.ic_type) ){
+            return this.add_error(ast_expression, 'Type [' + ast_expression.ic_type + '] not found.')
+        }
+
         const ic_left =this.visit_expression(ast_lhs, ast_func_scope, ic_function);
         const ic_right=this.visit_expression(ast_rhs, ast_func_scope, ic_function);
+
+        // CHECK LEFT
+        if (! this.has_type(ic_left.ic_type) ){
+            return this.add_error(ic_left, 'Type [' + ic_left.ic_type + '] not found.')
+        }
         if (test_if_error(ic_left)){
             return this.add_error(ast_lhs, 'Error in binop expression:left side is not a valid expression');
+        }
+
+        // CHECK RIGHT
+        if (! this.has_type(ic_right.ic_type) ){
+            return this.add_error(ic_right, 'Type [' + ic_right.ic_type + '] not found.')
         }
         if (test_if_error(ic_right)){
             return this.add_error(ast_rhs, 'Error in binop expression:right side is not a valid expression');
@@ -521,6 +571,16 @@ export default class MathLangAstToIrVisitor {
         const ic_type   = ast_expression.ic_type;
         const ic_op     = ast_expression.ic_function;
         const ic_right  = this.visit_expression(ast_rhs, ast_func_scope, ic_function);
+
+        // CHECK
+        if (! this.has_type(ast_expression.ic_type) ){
+            return this.add_error(ast_expression, 'Type [' + ast_expression.ic_type + '] not found.')
+        }
+
+        // CHECK RIGHT
+        if (! this.has_type(ic_right.ic_type) ){
+            return this.add_error(ic_right, 'Type [' + ic_right.ic_type + '] not found.')
+        }
         if (test_if_error(ic_right)){
             return this.add_error(ast_rhs, 'Error in preunop expression:right side is not a valid expression');
         }
@@ -563,6 +623,16 @@ export default class MathLangAstToIrVisitor {
         const ic_type   = ast_expression.ic_type;
         const ic_op     = ast_expression.ic_function;
         const ic_left   = this.visit_expression(ast_lhs, ast_func_scope, ic_function);
+
+        // CHECK TYPE
+        if (! this.has_type(ast_expression.ic_type) ){
+            return this.add_error(ast_expression, 'Type [' + ast_expression.ic_type + '] not found.')
+        }
+
+        // CHECK LEFT
+        if (! this.has_type(ic_left.ic_type) ){
+            return this.add_error(ic_left, 'Type [' + ic_left.ic_type + '] not found.')
+        }
         if (test_if_error(ic_left)){
             return this.add_error(ast_lhs, 'Error in postunop expression:left side is not a valid expression');
         }

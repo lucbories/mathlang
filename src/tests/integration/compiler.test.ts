@@ -14,7 +14,6 @@ function dump_tree(label:string, tree:any) {
 }
 
 
-
 describe('MathLang compiler test', () => {
     const compiler = new MathLangCompiler([]);
 
