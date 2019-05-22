@@ -1,181 +1,57 @@
 {
-    "type": "PROGRAM",
-    "block": [
-        {
-            "type": "FUNCTION_STATEMENT",
+    "type": "ASSIGN_STATEMENT",
+    "ic_type": "FLOAT",
+    "name": "f",
+    "is_async": false,
+    "members": [],
+    "expression": {
+        "type": "ADDSUB_EXPRESSION",
+        "ic_type": "FLOAT",
+        "lhs": {
+            "type": "INTEGER",
             "ic_type": "INTEGER",
-            "name": "m2",
-            "operands": {
-                "type": "ARGIDS_EXPRESSION",
-                "ic_type": "ARRAY",
-                "ic_subtypes": [
-                    "INTEGER"
-                ],
-                "items": [
-                    "x"
-                ]
-            },
-            "block": [
-                {
-                    "type": "RETURN_STATEMENT",
-                    "ic_type": "INTEGER",
-                    "expression": {
-                        "type": "MULTDIV_EXPRESSION",
-                        "ic_type": "INTEGER",
-                        "lhs": {
-                            "type": "ID_EXPRESSION",
-                            "ic_type": "INTEGER",
-                            "name": "x"
-                        },
-                        "operator": {
-                            "type": "BINOP",
-                            "value": "*"
-                        },
-                        "rhs": {
-                            "type": "INTEGER",
-                            "ic_type": "INTEGER",
-                            "value": "2"
-                        }
-                    }
-                }
-            ]
+            "value": "456"
         },
-        {
-            "type": "FUNCTION_STATEMENT",
-            "ic_type": "BIGFLOAT",
-            "name": "myfunc",
-            "operands": {
-                "type": "ARGIDS_EXPRESSION",
-                "ic_type": "ARRAY",
-                "ic_subtypes": [
-                    "BIGFLOAT",
-                    "INTEGER"
-                ],
-                "items": [
-                    "x",
-                    "y"
-                ]
-            },
-            "block": [
-                {
-                    "type": "IF_STATEMENT",
-                    "condition": {
-                        "type": "COMPARATOR_EXPRESSION",
-                        "ic_type": "BOOLEAN",
-                        "lhs": {
-                            "type": "ADDSUB_EXPRESSION",
-                            "ic_type": "BIGFLOAT",
-                            "lhs": {
-                                "type": "ID_EXPRESSION",
-                                "ic_type": "BIGFLOAT",
-                                "name": "x"
-                            },
-                            "operator": {
-                                "type": "BINOP",
-                                "value": "+"
-                            },
-                            "rhs": {
-                                "type": "ID_EXPRESSION",
-                                "ic_type": "INTEGER",
-                                "name": "y"
-                            }
-                        },
-                        "operator": {
-                            "type": "BINOP",
-                            "value": ">"
-                        },
-                        "rhs": {
-                            "type": "INTEGER",
-                            "ic_type": "INTEGER",
-                            "value": "0"
-                        }
-                    },
-                    "then": [
-                        {
-                            "type": "RETURN_STATEMENT",
-                            "ic_type": "BIGFLOAT",
-                            "expression": {
-                                "type": "ADDSUB_EXPRESSION",
-                                "ic_type": "BIGFLOAT",
-                                "lhs": {
-                                    "type": "ID_EXPRESSION",
-                                    "ic_type": "BIGFLOAT",
-                                    "name": "x"
-                                },
-                                "operator": {
-                                    "type": "BINOP",
-                                    "value": "+"
-                                },
-                                "rhs": {
-                                    "type": "ID_EXPRESSION",
-                                    "ic_type": "INTEGER",
-                                    "name": "y"
-                                }
-                            }
-                        }
-                    ]
-                },
-                {
-                    "type": "RETURN_STATEMENT",
-                    "ic_type": "UNKNOW",
-                    "expression": {
-                        "type": "ADDSUB_EXPRESSION",
-                        "ic_type": "UNKNOW",
-                        "lhs": {
-                            "type": "ADDSUB_EXPRESSION",
-                            "ic_type": "BIGFLOAT",
-                            "lhs": {
-                                "type": "ID_EXPRESSION",
-                                "ic_type": "BIGFLOAT",
-                                "name": "x"
-                            },
-                            "operator": {
-                                "type": "BINOP",
-                                "value": "+"
-                            },
-                            "rhs": {
-                                "type": "ID_EXPRESSION",
-                                "ic_type": "INTEGER",
-                                "name": "m2",
-                                "members": {
-                                    "type": "ARGS_EXPRESSION",
-                                    "ic_type": "ARRAY",
-                                    "ic_subtypes": [
-                                        "INTEGER"
-                                    ],
-                                    "items": [
-                                        {
-                                            "type": "ID_EXPRESSION",
-                                            "ic_type": "INTEGER",
-                                            "name": "y"
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        "operator": {
-                            "type": "BINOP",
-                            "value": "+"
-                        },
-                        "rhs": {
-                            "type": "ID_EXPRESSION",
-                            "ic_type": "UNKNOW",
-                            "name": "a"
-                        }
-                    }
-                }
-            ]
+        "operator": {
+            "type": "BINOP",
+            "value": "+",
+            "ic_function": "add"
         },
-        {
-            "type": "ASSIGN_STATEMENT",
-            "ic_type": "INTEGER",
-            "name": "a",
-            "is_async": false,
+        "rhs": {
+            "type": "PARENTHESIS_EXPRESSION",
+            "ic_type": "FLOAT",
             "expression": {
-                "type": "INTEGER",
-                "ic_type": "INTEGER",
-                "value": "456"
+                "type": "MULTDIV_EXPRESSION",
+                "ic_type": "FLOAT",
+                "lhs": {
+                    "type": "PREUNOP_EXPRESSION",
+                    "ic_type": "FLOAT",
+                    "rhs": {
+                        "type": "ID_MEMBER_EXPRESSION",
+                        "ic_type": "FLOAT",
+                        "name": "x",
+                        "members": []
+                    },
+                    "operator": "++",
+                    "ic_function": "add_one"
+                },
+                "operator": {
+                    "type": "BINOP",
+                    "value": "*",
+                    "ic_function": "mul"
+                },
+                "rhs": {
+                    "type": "INTEGER",
+                    "ic_type": "INTEGER",
+                    "value": "8"
+                }
             }
         }
+    },
+    "operands_types": [
+        "FLOAT"
+    ],
+    "operands_names": [
+        "x"
     ]
 }

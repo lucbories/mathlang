@@ -74,6 +74,8 @@ type CompilerError = {
  * @license Apache-2.0
  */
 export default class MathLangCompiler {
+    private _max_errors:number = 10; // TODO
+
     private _types_map:Map<string,IType>;
 
     private _symbols:Map<string,FunctionScope>;
@@ -113,7 +115,7 @@ export default class MathLangCompiler {
             this._types_map.set('BIGFLOAT', this._types_map.get('BIGNUMBER'));
         }
 
-        this._ast_builder = new MathLangCstToAstVisitor();
+        this._ast_builder = new MathLangCstToAstVisitor(this._types_map);
     }
 
 
@@ -211,6 +213,35 @@ export default class MathLangCompiler {
      */
     has_type(type_name:string){
         return this._types_map.has(type_name);
+    }
+
+
+    /**
+     * Compiler to AST method.
+     * @param text source to compile.
+     * 
+     * @returns boolean: true if no error else false.
+     */
+    compile_ast(text:string, parser_rule:string=undefined):boolean {
+        this._text = text;
+        this._errors = [];
+
+        // BUID LEXEMES
+        if (! this.build_lexemes()){
+            return false;
+        }
+        
+        // BUILD CST
+        if (! this.build_cst(parser_rule)){
+            return false;
+        }
+        
+        // BUILD AST
+        if (! this.build_ast()){
+            return false;
+        }
+
+        return this._errors.length == 0;
     }
 
 
@@ -317,7 +348,7 @@ export default class MathLangCompiler {
                 const rule_name = cst_build_error.name;
                 const rule_token = cst_build_error.token;
                 const rule_message = cst_build_error.message;
-                const rule_stack = 'rules stack:[' + cst_build_error.context.ruleStack.join(',') + ']\nrules occurences stack:[' + cst_build_error.context.ruleStack.join(',') + ']\n';
+                const rule_stack = 'rules stack:[' + cst_build_error.context.ruleStack.join(',') + ']\nrules occurences stack:[' + cst_build_error.context.ruleOccurrenceStack.join(',') + ']\n';
                 
                 const error:CompilerError = {
                     source:this._text,

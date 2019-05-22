@@ -27,6 +27,7 @@ export class MathLangParserExpressions extends MathLangParserStatements {
     private c4:any = undefined;
     private c5:any = undefined;
 
+
     private BinaryExpression = this.RULE("BinaryExpression", () => {
         this.SUBRULE(this.BinaryAddSubExpression,       { LABEL:"lhs" } );
         this.MANY(() => {
@@ -34,6 +35,7 @@ export class MathLangParserExpressions extends MathLangParserStatements {
             this.SUBRULE2(this.BinaryAddSubExpression,  { LABEL:"rhs" })
         });
     });
+
 
     private BinaryAddSubExpression = this.RULE("BinaryAddSubExpression", () => {
         this.SUBRULE(this.BinaryMultDivExpression,      { LABEL:"lhs" } )
@@ -76,40 +78,135 @@ export class MathLangParserExpressions extends MathLangParserStatements {
     });
 
     private PostfixExpression = this.RULE("PostfixExpression", () => {
-        this.SUBRULE(this.MemberExpression,                         { LABEL:"lhs" } );
+        this.OR( [
+            { ALT: () => this.SUBRULE(this.idRight, { LABEL:"lhs" } ) },
+            { ALT: () => this.SUBRULE(this.PrimaryExpression, { LABEL:"lhs" } ) }
+        ]);
+
         this.OPTION( () => {
-            this.OR( [ 
-                { ALT: () => this.CONSUME(t.Incr,                   { LABEL:"operator" } ) },
-                { ALT: () => this.CONSUME(t.Decr,                   { LABEL:"operator" } ) }
+            this.OR2( [ 
+                { ALT: () => this.CONSUME(t.Incr,  { LABEL:"operator" } ) },
+                { ALT: () => this.CONSUME(t.Decr, { LABEL:"operator" } ) }
             ]);
         });
     });
 
-    private MemberExpression = this.RULE("MemberExpression", () => {
-        this.OR( [
-            { ALT: () => this.CONSUME(t.ID) },
-            { ALT: () => this.SUBRULE(this.PrimaryExpression) }
-        ]);
-        this.MANY( () => this.SUBRULE(this.MemberOptionExpression) );
+
+    private ParenthesisExpression = this.RULE("ParenthesisExpression", () => {
+        this.CONSUME(t.LParen);
+        this.SUBRULE(this.BinaryExpression);
+        this.CONSUME(t.RParen);
     });
-    
-    private MemberOptionExpression = this.RULE("MemberOptionExpression", () => {
-        this.OR( [
-            { ALT: () => this.SUBRULE(this.BoxMemberExpression) },
-            { ALT: () => this.SUBRULE(this.DotMemberExpression) },
-            { ALT: () => this.SUBRULE(this.DashMemberExpression) },
-            { ALT: () => this.SUBRULE(this.Arguments) }
-        ] );
+
+
+    /**
+     * Rule for an id expression of a left part expression.
+     *  id
+     *      #id
+     *      #id#id...
+     *      #id[expr list]
+     *      [expr list]
+     *      [expr list]#id...
+     *      [expr list] [expr list]#id...
+     *          .id(id:id list)
+     */
+    idLeft = this.RULE("idLeft", () => {
+        // MAIN ID
+        this.CONSUME(t.ID);
+
+        // MAIN ID ATTRIBUTES OR INDEXED ACCESSES (OPTIONAL)
+        this.MANY( () => 
+            this.OR( [
+                { ALT: () => this.SUBRULE(this.dashIdExpression, { LABEL:'attributeOrIndexed' } ) },
+                { ALT: () => this.SUBRULE1(this.indexedBracketsExpression, { LABEL:'attributeOrIndexed' } ) }
+            ])
+        );
+
+        // METHOD DECLARATION (OPTIONAL)
+        this.OPTION( ()=>{
+            this.OR2( [
+                { ALT: () => this.SUBRULE(this.ArgumentsWithIds) },
+                { ALT: () => this.SUBRULE(this.dotIdArgsDeclarationExpression) }
+            ])
+        });
     });
-    
-    AssignMemberOptionExpression = this.RULE("AssignMemberOptionExpression", () => {
-        this.OR( [
-            { ALT: () => this.SUBRULE(this.BoxMemberExpression) },
-            { ALT: () => this.SUBRULE(this.DotMemberExpression) },
-            { ALT: () => this.SUBRULE(this.DashMemberExpression) },
-            { ALT: () => this.SUBRULE(this.ArgumentsWithIds) }
-        ] );
+
+
+    /**
+     * Rule for an id expression of a right part expression.
+     *  id
+     *      #id
+     *      #id#id...
+     *      #id[expr list]
+     *      [expr list]
+     *      [expr list]#id...
+     *      [expr list] [expr list]#id...
+     *          .id(expr list)
+     */
+    idRight = this.RULE("idRight", () => {
+        // MAIN ID
+        this.CONSUME(t.ID);
+
+        // MAIN ID ATTRIBUTES OR INDEXED ACCESSES (OPTIONAL)
+        this.MANY( () => 
+            this.OR( [
+                { ALT: () => this.SUBRULE(this.dashIdExpression, { LABEL:'attributeOrIndexed' } ) },
+                { ALT: () => this.SUBRULE(this.indexedBracketsExpression, { LABEL:'attributeOrIndexed' } ) }
+            ])
+        );
+
+        // METHOD DECLARATION (OPTIONAL)
+        this.OPTION( ()=>{
+            this.OR2( [
+                { ALT: () => this.SUBRULE(this.Arguments) },
+                { ALT: () => this.SUBRULE(this.dotIdArgsCallExpression) }
+            ])
+        });
     });
+
+
+    /**
+     * Rule for an id expression of a type expression.
+     */
+    idType = this.RULE("idType", () => {
+        this.CONSUME(t.ID);
+    });
+
+
+    /**
+     * Rule for an id expression of a type expression.
+     */
+    private indexedBracketsExpression = this.RULE("indexedBracketsExpression", () => {
+        this.CONSUME(t.LSquare);
+        this.AT_LEAST_ONE_SEP( {
+            SEP: t.Comma,
+            DEF: () => {
+                this.SUBRULE(this.BinaryExpression);
+            }
+        });
+        this.CONSUME(t.RSquare);
+    });
+
+
+    private dotIdArgsDeclarationExpression = this.RULE("dotIdArgsDeclarationExpression", () => {
+        this.CONSUME(t.Dot);
+        this.CONSUME(t.ID);
+        this.SUBRULE(this.ArgumentsWithIds);
+    });
+
+
+    private dotIdArgsCallExpression = this.RULE("dotIdArgsCallExpression", () => {
+        this.CONSUME(t.Dot);
+        this.CONSUME(t.ID);
+        this.SUBRULE(this.Arguments);
+    });
+
+
+    private dashIdExpression = this.RULE("dashIdExpression", () => {
+        this.CONSUME(t.Dash);
+        this.CONSUME(t.ID);
+    });
+
 
     private PrimaryExpression = this.RULE("PrimaryExpression", () => {
         this.OR(
@@ -134,34 +231,6 @@ export class MathLangParserExpressions extends MathLangParserStatements {
         )
     });
 
-    private ParenthesisExpression = this.RULE("ParenthesisExpression", () => {
-        this.CONSUME(t.LParen);
-        this.SUBRULE(this.BinaryExpression);
-        this.CONSUME(t.RParen);
-    });
-    
-    private BoxMemberExpression = this.RULE("BoxMemberExpression", () => {
-        this.CONSUME(t.LSquare);
-        this.AT_LEAST_ONE( () => {
-                this.SUBRULE(this.BinaryExpression);
-                this.MANY(() => {
-                    this.CONSUME(t.Comma);
-                    this.SUBRULE2(this.BinaryExpression);
-                });
-        });
-        this.CONSUME(t.RSquare);
-    });
-
-    private DotMemberExpression = this.RULE("DotMemberExpression", () => {
-        this.CONSUME(t.Dot);
-        this.CONSUME(t.ID);
-    });
-
-    private DashMemberExpression = this.RULE("DashMemberExpression", () => {
-        this.CONSUME(t.Dash);
-        this.CONSUME(t.ID);
-    });
-
     Record = this.RULE("Record", () => {
         this.CONSUME(t.LCurly);
 
@@ -181,12 +250,13 @@ export class MathLangParserExpressions extends MathLangParserStatements {
     private Arguments = this.RULE("Arguments", () => {
         this.CONSUME(t.LParen);
         this.OPTION( () => {
-            this.SUBRULE(this.BinaryExpression);
-            this.MANY(() => {
-                this.CONSUME(t.Comma);
-                this.SUBRULE2(this.BinaryExpression);
-            })
-        })
+            this.MANY_SEP( {
+                SEP: t.Comma,
+                DEF: () => {
+                    this.SUBRULE(this.BinaryExpression);
+                }
+            });
+        });
         this.CONSUME(t.RParen);
     });
 
@@ -194,19 +264,19 @@ export class MathLangParserExpressions extends MathLangParserStatements {
         this.CONSUME(t.ID, { LABEL:'arg_id' });
         this.OPTION( () => {
             this.CONSUME(t.Is);
-            this.CONSUME2(t.ID, { LABEL:'arg_type' });
-        } );
+            this.SUBRULE(this.idType, { LABEL:'arg_type' });
+        });
     });
 
     ArgumentsWithIds = this.RULE("ArgumentsWithIds", () => {
-        this.CONSUME(t.LParen);this.MANY_SEP
+        this.CONSUME(t.LParen);
 
         this.MANY_SEP( {
             SEP: t.Comma,
             DEF: () => {
                 this.SUBRULE(this.ArgumentWithIds);
             }
-        } );
+        });
 
         this.CONSUME(t.RParen);
     });
@@ -231,21 +301,21 @@ export class MathLangParserExpressions extends MathLangParserStatements {
             { ALT: () => this.CONSUME(t.LessEqualThan,    { LABEL:"binop" }) },
             { ALT: () => this.CONSUME(t.GreaterThan,      { LABEL:"binop" }) },
             { ALT: () => this.CONSUME(t.GreaterEqualThan, { LABEL:"binop" }) }
-        ])
+        ]);
     });
 
     private BinaryMultDivOps = this.RULE("BinaryMultDivOps", () => {
         this.OR([
             { ALT: () => this.CONSUME(t.Mult,  { LABEL:"binop" }) },
             { ALT: () => this.CONSUME(t.Div,   { LABEL:"binop" }) }
-        ])
+        ]);
     });
 
     private BinaryAddSubOps = this.RULE("BinaryAddSubOps", () => {
         this.OR([
             { ALT: () => this.CONSUME(t.Plus,   { LABEL:"binop" } ) },
             { ALT: () => this.CONSUME(t.Minus,  { LABEL:"binop" } ) }
-        ])
+        ]);
     });
 }
 

@@ -12,6 +12,13 @@ export default interface IType {
     add_feature(feature:IFeature):void;
     remove_feature(feature:IFeature):void;
 
+    get_indexes_count():number;
+    get_indexed_type():IType;
+
+    has_attribute(attribute_name:string):boolean;
+    get_attribute(attribute_name:string):IType;
+
+    has_method(method_name:string, operands:IType[]):boolean;
     get_method(method_name:string, operands:IType[]):IMethod;
     get_method_with_values(method_name:string, operands:IValue[]):IMethod;
 

@@ -1,4 +1,5 @@
 
+import IType from '../../core/itype';
 import MathLangCstToAstVisitorBase from './math_lang_cst_to_ast_visitor_base'
 import AST from '../2-ast-builder/math_lang_ast';
 import TYPES from '../3-program-builder/math_lang_types';
@@ -7,8 +8,8 @@ import TYPES from '../3-program-builder/math_lang_types';
 
 
 export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVisitorBase {
-    constructor() {
-        super();
+    constructor(types_map:Map<string,IType>) {
+        super(types_map);
     }
 
 
@@ -262,7 +263,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         const node_to = this.visit(ctx.LoopTo);
         const node_step = this.visit(ctx.LoopStep);
 
-        this.register_symbol_declaration(node_var, node_type, false, undefined);
+        this.register_symbol_declaration(node_var, node_type, false, undefined, ctx, AST.STAT_LOOP);
         
         const statements = [];
         let statement;
@@ -344,87 +345,75 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
     assignStatement(ctx:any) {
         // console.log('assignStatement', ctx)
 
-        const assign_name = ctx.AssignName[0].image;
-        const assign_ast ={
+        const cst_id_left_node = ctx.idLeft[0];
+        const ast_id_left_node = this.visit(cst_id_left_node);
+        const assign_name = ast_id_left_node.name;
+
+        
+        // *** NOT A FUNCTION DECLARATION ***
+        if (ast_id_left_node.type != AST.EXPR_MEMBER_FUNC_DECL){
+            // EVALUATE RIGHT EXPRESSION
+            const cst_expr_node = ctx.AssignExpr;
+            const ast_expr_node = this.visit(cst_expr_node);
+            const assign_ast = {
+                type: AST.STAT_ASSIGN,
+                ic_type: ast_expr_node.ic_type,
+                name:assign_name,
+                is_async:ctx.Async ? true : false,
+                members:ast_id_left_node.members,
+                expression:ast_expr_node
+            };
+            return assign_ast;
+        }
+
+
+        // *** FUNCTION DECLARATION ***
+        let assign_ast = {
             type: AST.STAT_ASSIGN,
             ic_type: TYPES.UNKNOW,
             name:assign_name,
             is_async:ctx.Async ? true : false,
-            members: <any>undefined,
-            expression: <any>[]
-        }
-        let loop_ctx_member;
-        let loop_ast_member = assign_ast;
+            members:ast_id_left_node.members,
+            expression:<any>undefined,
+            operands_types:ast_id_left_node.operands_types,
+            operands_names:ast_id_left_node.operands_names
+        };
 
-        if (ctx.AssignMemberOptionExpression) {
-            if ( Array.isArray(ctx.AssignMemberOptionExpression) ) {
-                for(loop_ctx_member of ctx.AssignMemberOptionExpression) {
-                    loop_ast_member.members = this.visit(loop_ctx_member);
-                    loop_ast_member = loop_ast_member.members;
-                }
-            } else {
-                loop_ctx_member = ctx.AssignMemberOptionExpression;
-                loop_ast_member.members = this.visit(loop_ctx_member);
-            }
-        }
+        // DECLARE FUNCTION
+        const operands_types = ast_id_left_node.operands_types;
+        const operands_names = ast_id_left_node.operands_names;
+        const default_type = operands_types.length > 0 ? operands_types[0]:'INTEGER';
+        const operands = [];
 
-        // REGISTER ASSIGNED SYMBOL
-        if (! this.has_declared_vars_symbol(assign_name)) {
-            let is_constant = false;
-
-            if (assign_ast.members) {
-                // FUNCTION DECLARATION
-                if (assign_ast.members.type == AST.EXPR_ARGS_IDS && assign_ast.members.ic_type == TYPES.ARRAY) {
-                    const operands:any[] = [];
-                    
-                    let loop_name:string;
-                    let loop_type:string;
-                    let opd_index:number;
-                    
-                    const default_type = assign_ast.members.ic_subtypes.length > 0 ? assign_ast.members.ic_subtypes[0]:'INTEGER';
-                    
-                    for(opd_index=0; opd_index < assign_ast.members.items.length; opd_index++){
-                        loop_name = assign_ast.members.items[opd_index];
-                        loop_type = opd_index < assign_ast.members.ic_subtypes.length ? assign_ast.members.ic_subtypes[opd_index] : default_type;
-                        operands.push( { opd_name:loop_name, opd_type:loop_type } )
-                    }
-                    
-                    this.register_function_declaration(assign_name, TYPES.UNKNOW, operands, []);
-
-                    this.enter_function_declaration(assign_name);
-                    const expr_node = this.visit(ctx.AssignExpr);
-                    this.leave_function_declaration();
-                    
-                    this.set_function_declaration_statements(assign_name, expr_node);
-                    this.set_function_declaration_type(assign_name, expr_node.ic_type);
-
-                    assign_ast.ic_type = expr_node.ic_type;
-                    assign_ast.expression = expr_node;
-
-                    return assign_ast;
-                }
-
-                // ERROR : AN UNDECLARED SYMBOL CANNOT HAVE MEMBERS EXPRESSION (Get method, get attribute, get index, call)
-                return this.add_error(ctx, AST.STAT_UNKNOW_ID, 'Unknow symbol [' + assign_name + '] in assign expression with members');
-            }
-
-            const expr_node = this.visit(ctx.AssignExpr);
-            this.register_symbol_declaration(assign_name, expr_node.ic_type, is_constant, undefined);
-
-            assign_ast.ic_type = expr_node.ic_type;
-            assign_ast.expression = expr_node;
-
-            return assign_ast;
+        let opd_index;
+        let loop_name;
+        let loop_type;
+        for(opd_index=0; opd_index < operands_names.length; opd_index++){
+            loop_name = operands_names[opd_index];
+            loop_type = opd_index < operands_types.length ?operands_types[opd_index] : default_type;
+            operands.push( { opd_name:loop_name, opd_type:loop_type } )
         }
 
-        // TODO
-        // if (assign_ast.members.ic_type == TYPES.METHOD_ID || assign_ast.members.ic_type == TYPES.ATTRIBUTE_ID || assign_ast.members.type == "BOX_EXPRESSION")
+        this.register_function_declaration(assign_name, TYPES.UNKNOW, operands, [], ctx, AST.STAT_ASSIGN);
         
+        // EVALUATE RIGHT EXPRESSION
+        this.enter_function_declaration(assign_name);
+        const cst_expr_node = ctx.AssignExpr;
+        const ast_expr_node = this.visit(cst_expr_node);
+        this.leave_function_declaration();
 
-        const expr_node = this.visit(ctx.AssignExpr);
+        // UPDATE RIGHT TYPE
+        assign_ast.ic_type = ast_expr_node.ic_type;
+        assign_ast.expression = ast_expr_node;
 
-        assign_ast.ic_type = expr_node.ic_type;
-        assign_ast.expression = expr_node;
+        // UPDATE FUNCTION DECLARATION
+        this.set_function_declaration_statements(assign_name, ast_expr_node);
+        this.set_function_declaration_type(assign_name, ast_expr_node.ic_type);
+            
+        // CHECK LEFT TYPE == RIGHT TYPE
+        if (ast_id_left_node.ic_type != TYPES.UNKNOW && assign_ast.ic_type != ast_id_left_node.ic_type){
+            this.add_error(ctx.ArgumentsWithIds, AST.EXPR_MEMBER_FUNC_DECL, 'Error:left type [' + assign_ast.ic_type + '] and right type [' + ast_id_left_node.ic_type + '] are different for function declaration.')
+        }
 
         return assign_ast;
     }
@@ -454,7 +443,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
                 }
             }
 
-            this.register_function_declaration(function_name, returned_type, operands, []);
+            this.register_function_declaration(function_name, returned_type, operands, [], ctx, AST.STAT_FUNCTION);
         }
 
         const statements = [];

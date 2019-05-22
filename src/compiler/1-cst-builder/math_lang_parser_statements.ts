@@ -131,8 +131,7 @@ export class MathLangParserStatements extends Parser {
 
     // ASSIGN
     private assignStatement = this.RULE("assignStatement", () => {
-        this.CONSUME(t.ID, { LABEL:"AssignName" } );
-        this.MANY( () => this.SUBRULE(this.AssignMemberOptionExpression) );
+        this.SUBRULE(this.idLeft);
         this.CONSUME(t.Assign);
         this.OPTION(
             ()=>{ this.CONSUME(t.Async); }
@@ -146,7 +145,7 @@ export class MathLangParserStatements extends Parser {
         this.CONSUME2(t.ID, { LABEL:"functionName" } );
         this.SUBRULE(this.ArgumentsWithIds);
         this.CONSUME3(t.Return);
-        this.CONSUME4(t.ID, { LABEL:"returnedType" } );
+        this.SUBRULE2(this.idType, { LABEL:"returnedType" });
         this.AT_LEAST_ONE( () => {
             this.SUBRULE(this.statement, { LABEL:"blockStatement" });
         });
@@ -161,7 +160,7 @@ export class MathLangParserStatements extends Parser {
     // DISPOSE
     private disposeStatement = this.RULE("disposeStatement", () => {
         this.CONSUME(t.Dispose);
-        this.CONSUME(t.ID);
+        this.SUBRULE(this.idLeft);
     });
 
     // EMIT
@@ -186,11 +185,10 @@ export class MathLangParserStatements extends Parser {
     // WAIT
     private waitStatement = this.RULE("waitStatement", () => {
         this.CONSUME(t.Wait);
-        this.CONSUME2(t.ID, { LABEL:"asyncVariable" } );
-        this.MANY_SEP( {
+        this.AT_LEAST_ONE_SEP( {
             SEP: t.Comma,
             DEF: () => {
-                this.CONSUME3(t.ID, { LABEL:"asyncVariable" } );
+                this.SUBRULE(this.idLeft, { LABEL:"asyncVariable" } );
             }
         } );
         this.CONSUME4(t.Do);
@@ -198,6 +196,9 @@ export class MathLangParserStatements extends Parser {
         this.CONSUME5(t.EndWait);
     });
 
+    protected idLeft:any = undefined;
+    protected idRight:any = undefined;
+    protected idType:any = undefined;
     protected expression:any = undefined;
     protected ArgumentsWithIds:any = undefined;
     protected AssignMemberOptionExpression:any = undefined;

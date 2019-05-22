@@ -3,6 +3,7 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import MathLangCompiler from '../../compiler/math_lang_compiler';
+import DEFAULT_TYPES from '../../features/default_types';
 
 import { program_1_source, program_1_ast } from './program_1';
 import { program_2_source, program_2_ast } from './program_2';
@@ -15,7 +16,7 @@ function dump_tree(label:string, tree:any) {
 
 
 describe('MathLang compiler test', () => {
-    const compiler = new MathLangCompiler([]);
+    const compiler = new MathLangCompiler(DEFAULT_TYPES);
 
     it('Compile a=456' , () => {
         compiler.reset();
@@ -153,12 +154,12 @@ describe('MathLang compiler test', () => {
         const errors = compiler.get_errors();
 
         // ERRORS
-        if (errors.length != 3){
+        if (errors.length != 5){
             console.log('errors', errors);
-            expect(errors.length).equals(3);
+            expect(errors.length).equals(5);
             return;
         }
-        expect(errors.length).equals(3); // Unknow symbols and unknow symbols types
+        expect(errors.length).equals(5); // Unknow symbols and unknow symbols types
         
         // GET AST
         const compiler_ast = compiler.get_ast();
@@ -177,13 +178,13 @@ describe('MathLang compiler test', () => {
         const errors = compiler.get_errors();
 
         // ERRORS
-        if (errors.length != 8){
+        if (errors.length != 13){
             const errors = compiler.get_errors();
             console.log('errors', errors);
-            expect(errors.length).equals(8);
+            expect(errors.length).equals(13);
             return;
         }
-        expect(errors.length).equals(8); // Unknow symbols and unknow symbols types
+        expect(errors.length).equals(13); // Unknow symbols and unknow symbols types
         
         // GET AST
         const compiler_ast = compiler.get_ast();

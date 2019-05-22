@@ -37,7 +37,32 @@ import IFeature from '../../core/ifeature';
     }
 
 
+    // INDEXES
+    get_indexes_count():number{ // TODO
+        return 0;
+    }
+
+    get_indexed_type():IType{ // TODO
+        return undefined;
+    }
+
+
+    // ATTRIBUTES
+    has_attribute(attribute_name:string):boolean{ // TODO
+        return false;
+    }
+
+    get_attribute(attribute_name:string):IType{ // TODO
+        return undefined;
+    }
+    
+
     // METHODS
+    has_method(method_name:string, operands:IType[]):boolean{
+        const method = this.get_method(method_name, operands);
+        return method != undefined;
+    }
+
     get_method(method_name:string, operands:IType[]):IMethod {
         let feature:IFeature;
         for(feature of this._features) {

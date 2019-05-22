@@ -438,7 +438,7 @@ export default class MathLangAstToIcVisitor {
         let id_str = '';
         while(loop_member){
             // METHOD
-            if (loop_member.type == AST.EXPR_MEMBER_DOT){
+            if (loop_member.type == AST.EXPR_MEMBER_FUNC_CALL){
                 loop_accessor={
                     id:loop_member.identifier,
                     is_attribute:false,
@@ -451,7 +451,7 @@ export default class MathLangAstToIcVisitor {
             }
 
             // ATTRIBUTE
-            if (loop_member.type == AST.EXPR_MEMBER_DASH){
+            if (loop_member.type == AST.EXPR_MEMBER_ATTRIBUTE){
                 loop_accessor={
                     id:loop_member.identifier,
                     is_attribute:false,
@@ -464,7 +464,7 @@ export default class MathLangAstToIcVisitor {
             }
 
             // BOX OF ARGS
-            if (loop_member.type == AST.EXPR_MEMBER_BOX){
+            if (loop_member.type == AST.EXPR_MEMBER_INDEXED){
                 loop_accessor={
                     id:undefined,
                     is_attribute:false,

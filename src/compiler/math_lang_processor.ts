@@ -1,4 +1,6 @@
 
+import IType from '../core/itype';
+import DEFAULT_TYPES from '../features/default_types';
 import { math_lang_lexer, math_lang_parser } from './1-cst-builder/math_lang_parser';
 import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visitor';
 
@@ -25,7 +27,23 @@ export default function(text:string, throw_errors:boolean=true, rule_name:string
         }
     } else {
         // Build AST
-        math_lang_cst_to_ast_visitor = new MathLangCstToAstVisitor();
+        const types_map = new Map<string,IType>();
+
+        DEFAULT_TYPES.forEach(
+            (loop_type)=>types_map.set(loop_type.get_name(), loop_type)
+        );
+
+        if (types_map.has('NUMBER')){
+            types_map.set('INTEGER', types_map.get('NUMBER'));
+            types_map.set('FLOAT', types_map.get('NUMBER'));
+        }
+
+        if (types_map.has('BIGNUMBER')){
+            types_map.set('BIGINTEGER', types_map.get('BIGNUMBER'));
+            types_map.set('BIGFLOAT', types_map.get('BIGNUMBER'));
+        }
+        
+        math_lang_cst_to_ast_visitor = new MathLangCstToAstVisitor(types_map);
         ast = math_lang_cst_to_ast_visitor.visit(cst);
 //        const t=1;
     }

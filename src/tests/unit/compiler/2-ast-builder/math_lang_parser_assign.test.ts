@@ -2,341 +2,358 @@ import * as mocha from 'mocha';
 import * as chai from 'chai';
 const expect = chai.expect;
 
-import parse from '../../../../compiler/math_lang_processor';
-
-
-function dump_tree(label:string, tree:any) {
-    const json = JSON.stringify(tree);
-    console.log(label, json)
-}
+import TYPES from '../../../../compiler/3-program-builder/math_lang_types';
+import AST from '../../../../compiler/2-ast-builder/math_lang_ast';
+import MathLangCompiler from '../../../../compiler/math_lang_compiler';
+import DEFAULT_TYPES from '../../../../features/default_types';
 
 
 
 describe('MathLang assign parser', () => {
+    const compiler = new MathLangCompiler(DEFAULT_TYPES);
 
     it('Parse assign a=456 statement' , () => {
+        compiler.reset();
         const text = 'a=456';
-        const parser_result = parse(text, false, 'statement');
+        const result = compiler.compile_ast(text, 'statement');
 
-        // console.log(parser_result.ast);
+        // ERRORS
+        const expected_errors = 0;
+        const errors = compiler.get_errors();
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
-
-        const ast_assign_node = parser_result.ast;
-        const nomembers = <any>undefined;
-        const result = {
-            type:'ASSIGN_STATEMENT',
-            ic_type: 'INTEGER',
+        // TEST AST
+        const nomembers = <any>[];
+        const expected_ast = {
+            type:AST.STAT_ASSIGN,
+            ic_type: TYPES.INTEGER,
             name:'a',
             is_async: false,
             members:nomembers,
             expression: {
-                type:'INTEGER',
-                ic_type: 'INTEGER',
-                value:'456',
-                members:nomembers
+                type:TYPES.INTEGER,
+                ic_type: TYPES.INTEGER,
+                value:'456'
             }
         }
-        expect(ast_assign_node).eql(result);
+        expect(compiler_ast).eql(expected_ast);
     });
 
-    it('Parse assign [begin a=12\\na.b=456 end] statement' , () => {
-        const text = 'begin a=12\na.b=456 end';
-        const parser_result = parse(text, false, 'blockStatement');
+    it('Parse assign [begin a=12\\na#b=456 end] statement' , () => {
+        compiler.reset();
+        const text = 'begin a=12\na#b=456 end';
+        const result = compiler.compile_ast(text, 'blockStatement');
 
-        // console.log(parser_result);
+        // ERRORS
+        const expected_errors = 2;
+        const errors = compiler.get_errors();
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
-
-        const ast_assign_node = parser_result.ast;
-        const nomembers = <any>undefined;
-        const result = {
-            type:'BLOCK',
+        // TEST AST
+        const nomembers = <any>[];
+        const expected_ast = {
+            type:AST.BLOCK,
             statements:[
                 {
-                    type:'ASSIGN_STATEMENT',
-                    ic_type: 'INTEGER',
+                    type:AST.STAT_ASSIGN,
+                    ic_type: TYPES.INTEGER,
                     name:'a',
                     is_async: false,
                     members:nomembers,
                     expression: {
-                        type:'INTEGER',
-                        ic_type: 'INTEGER',
-                        value:'12',
-                        members:nomembers
+                        type:TYPES.INTEGER,
+                        ic_type: TYPES.INTEGER,
+                        value:'12'
                     }
                 },
                 {
-                    type:'ASSIGN_STATEMENT',
-                    ic_type: 'INTEGER',
+                    type:AST.STAT_ASSIGN,
+                    ic_type: TYPES.INTEGER,
                     name:'a',
                     is_async: false,
-                    members:{
-                        type: 'DOT_EXPRESSION',
-                        ic_type: 'METHOD_IDENTIFIER',
-                        identifier: 'b'
-                    },
+                    members:[
+                        {
+                            type: AST.EXPR_MEMBER_ATTRIBUTE,
+                            ic_type: TYPES.UNKNOW,
+                            attribute_name: 'b'
+                        }
+                    ],
                     expression: {
-                        type:'INTEGER',
-                        ic_type: 'INTEGER',
-                        value:'456',
-                        members:nomembers
+                        type:TYPES.INTEGER,
+                        ic_type: TYPES.INTEGER,
+                        value:'456'
                     }
                 }
             ]
         }
-        expect(ast_assign_node).eql(result);
+        expect(compiler_ast).eql(expected_ast);
     });
 
     it('Parse assign [b=5 a=456 + (++b*8)] statement' , () => {
+        compiler.reset();
         const text = 'b=5 a=456 + (++b*8)';
-        const parser_result = parse(text, false, 'program');
+        const result = compiler.compile_ast(text, 'program');
 
-        // console.log(parser_result);
+        // ERRORS
+        const expected_errors = 3;
+        const errors = compiler.get_errors();
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
-
-        const ast_assign_node = parser_result.ast;
-        const nomembers = <any>undefined;
-        const result = {
-            type:'PROGRAM',
+        // TEST AST
+        const nomembers = <any>[];
+        const expected_ast = {
+            type:AST.PROGRAM,
             block:[
                 {
-                    type:'ASSIGN_STATEMENT',
-                    ic_type: 'INTEGER',
+                    type:AST.STAT_ASSIGN,
+                    ic_type: TYPES.INTEGER,
                     name:'b',
                     is_async: false,
                     members:nomembers,
                     expression: {
-                        type:'INTEGER',
-                        ic_type: 'INTEGER',
-                        value:'5',
-                        members:nomembers
+                        type:TYPES.INTEGER,
+                        ic_type: TYPES.INTEGER,
+                        value:'5'
                     }
                 },
                 {
-                    type:'ASSIGN_STATEMENT',
-                    ic_type: 'INTEGER',
+                    type:AST.STAT_ASSIGN,
+                    ic_type: TYPES.UNKNOW,
                     name:'a',
                     is_async: false,
                     members:nomembers,
                     expression: {
-                        type:'ADDSUB_EXPRESSION',
-                        ic_type: 'INTEGER',
+                        type:AST.EXPR_BINOP_ADDSUB,
+                        ic_type: TYPES.UNKNOW,
                         lhs:{
-                            type:'INTEGER',
-                            ic_type: 'INTEGER',
-                            value:'456',
-                            members:nomembers
+                            type:TYPES.INTEGER,
+                            ic_type: TYPES.INTEGER,
+                            value:'456'
                         },
                         operator: {
                             ic_function:'add',
-                            type:'BINOP',
+                            type:AST.EXPR_BINOP,
                             value:'+'
                         },
                         rhs:{
-                            type:'PARENTHESIS_EXPRESSION',
-                            ic_type: 'INTEGER',
+                            type:AST.EXPR_PARENTHESIS,
+                            ic_type: TYPES.UNKNOW,
                             expression: {
-                                type:'MULTDIV_EXPRESSION',
-                                ic_type: 'INTEGER',
+                                type:AST.EXPR_BINOP_MULTDIV,
+                                ic_type: TYPES.UNKNOW,
                                 lhs:{
-                                    type:'PREUNOP_EXPRESSION',
-                                    ic_type: 'INTEGER',
+                                    type:AST.EXPR_UNOP_PREUNOP,
+                                    ic_type: TYPES.UNKNOW,
                                     ic_function:'add_one',
                                     operator:'++',
                                     rhs: {
-                                        type:'ID_MEMBER_EXPRESSION',
-                                        ic_type: 'INTEGER',
+                                        type:AST.EXPR_MEMBER_ID,
+                                        ic_type: TYPES.UNKNOW,
                                         name:'b',
                                         members:nomembers
                                     }
                                 },
                                 operator:{
                                     ic_function:'mul',
-                                    type:'BINOP',
+                                    type:AST.EXPR_BINOP,
                                     value:'*'
                                 },
                                 rhs:{
-                                    type:'INTEGER',
-                                    ic_type: 'INTEGER',
-                                    value:'8',
-                                    members:nomembers
+                                    type:TYPES.INTEGER,
+                                    ic_type: TYPES.INTEGER,
+                                    value:'8'
                                 }
-                            },
-                            members:nomembers
+                            }
                         }
                     }
                 }
             ]
         }
-        expect(ast_assign_node).eql(result);
+        expect(compiler_ast).eql(expected_ast);
     });
 
     it('Parse assign [f(x is FLOAT)=456 + (++x*8)] statement' , () => {
+        compiler.reset();
         const text = 'f(x is FLOAT)=456 + (++x*8)';
-        const parser_result = parse(text, false, 'statement');
+        const result = compiler.compile_ast(text, 'statement');
 
-        // console.log(parser_result);
-        // dump_tree('ast errors', parser_result.ast_errors);
+        // ERRORS
+        const expected_errors = 1;
+        const errors = compiler.get_errors();
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
+        
+            // GET AST
+            const compiler_ast = compiler.get_ast();
+            compiler.dump_tree('compiler_ast', compiler_ast);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // compiler.dump_tree('compiler_ast', compiler_ast);
 
-        const ast_assign_node = parser_result.ast;
-        const nomembers = <any>undefined;
-        const result = {
-            type:'ASSIGN_STATEMENT',
-            ic_type: 'FLOAT',
+        // TEST AST
+        const nomembers = <any>[];
+        const expected_ast = {
+            type:AST.STAT_ASSIGN,
+            ic_type: TYPES.FLOAT,
             name:'f',
             is_async: false,
-            members:{
-                type:'ARGIDS_EXPRESSION',
-                ic_type: 'ARRAY',
-                ic_subtypes: ['FLOAT'],
-                items:['x']
-            },
+            members:<any>[],
+            operands_names:['x'],
+            operands_types:[TYPES.FLOAT],
             expression: {
-                type:'ADDSUB_EXPRESSION',
-                ic_type: 'FLOAT',
+                type:AST.EXPR_BINOP_ADDSUB,
+                ic_type: TYPES.FLOAT,
                 lhs:{
-                    type:'INTEGER',
-                    ic_type: 'INTEGER',
-                    value:'456',
-                    members:nomembers
+                    type:TYPES.INTEGER,
+                    ic_type: TYPES.INTEGER,
+                    value:'456'
                 },
                 operator: {
                     ic_function:'add',
-                    type:'BINOP',
+                    type:AST.EXPR_BINOP,
                     value:'+'
                 },
                 rhs:{
-                    type:'PARENTHESIS_EXPRESSION',
-                    ic_type: 'FLOAT',
+                    type:AST.EXPR_PARENTHESIS,
+                    ic_type: TYPES.FLOAT,
                     expression: {
-                        type:'MULTDIV_EXPRESSION',
-                        ic_type: 'FLOAT',
+                        type:AST.EXPR_BINOP_MULTDIV,
+                        ic_type: TYPES.FLOAT,
                         lhs:{
-                            type:'PREUNOP_EXPRESSION',
-                            ic_type: 'FLOAT',
+                            type:AST.EXPR_UNOP_PREUNOP,
+                            ic_type: TYPES.FLOAT,
                             ic_function:'add_one',
                             operator:'++',
                             rhs: {
-                                type:'ID_MEMBER_EXPRESSION',
-                                ic_type: 'FLOAT',
+                                type:AST.EXPR_MEMBER_ID,
+                                ic_type: TYPES.FLOAT,
                                 name:'x',
                                 members:nomembers
                             }
                         },
                         operator:{
                             ic_function:'mul',
-                            type:'BINOP',
+                            type:AST.EXPR_BINOP,
                             value:'*'
                         },
                         rhs:{
-                            type:'INTEGER',
-                            ic_type: 'INTEGER',
-                            value:'8',
-                            members:nomembers
+                            type:TYPES.INTEGER,
+                            ic_type: TYPES.INTEGER,
+                            value:'8'
                         }
-                    },
-                    members:nomembers
+                    }
                 }
             }
         }
-        expect(ast_assign_node).eql(result);
+        expect(compiler_ast).eql(expected_ast);
     });
-
+/*
     it('Parse assign [fxy(x,y)=456 + (++x*8)] statement' , () => {
+        compiler.reset();
         const text = 'fxy(x,y)=456 + (++x*8)';
-        const parser_result = parse(text, false, 'statement');
+        const result = compiler.compile_ast(text, 'statement');
 
-        // console.log(parser_result);
+        // ERRORS
+        const expected_errors = 0;
+        const errors = compiler.get_errors();
+        expect(result).equals(expected_errors == 0);
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
-
-        const ast_assign_node = parser_result.ast;
-        const nomembers = <any>undefined;
-        const result = {
-            type:'ASSIGN_STATEMENT',
-            ic_type: 'INTEGER',
+        // TEST AST
+        const nomembers = <any>[];
+        const expected_ast = {
+            type:AST.STAT_ASSIGN,
+            ic_type: TYPES.INTEGER,
             name:'fxy',
             is_async: false,
             members:{
-                type:'ARGIDS_EXPRESSION',
-                ic_type: 'ARRAY',
-                ic_subtypes: ['INTEGER', 'INTEGER'],
+                type:AST.EXPR_ARGS_IDS,
+                ic_type: TYPES.ARRAY,
+                ic_subtypes: [TYPES.INTEGER, TYPES.INTEGER],
                 items:['x','y']
             },
             expression: {
-                type:'ADDSUB_EXPRESSION',
-                ic_type: 'INTEGER',
+                type:AST.EXPR_BINOP_ADDSUB,
+                ic_type: TYPES.INTEGER,
                 lhs:{
-                    type:'INTEGER',
-                    ic_type: 'INTEGER',
+                    type:TYPES.INTEGER,
+                    ic_type: TYPES.INTEGER,
                     value:'456',
                     members:nomembers
                 },
                 operator: {
                     ic_function:'add',
-                    type:'BINOP',
+                    type:AST.EXPR_BINOP,
                     value:'+'
                 },
                 rhs:{
-                    type:'PARENTHESIS_EXPRESSION',
-                    ic_type: 'INTEGER',
+                    type:AST.EXPR_PARENTHESIS,
+                    ic_type: TYPES.INTEGER,
                     expression: {
-                        type:'MULTDIV_EXPRESSION',
-                        ic_type: 'INTEGER',
+                        type:AST.EXPR_BINOP_MULTDIV,
+                        ic_type: TYPES.INTEGER,
                         lhs:{
-                            type:'PREUNOP_EXPRESSION',
-                            ic_type: 'INTEGER',
+                            type:AST.EXPR_UNOP_PREUNOP,
+                            ic_type: TYPES.INTEGER,
                             ic_function:'add_one',
                             operator:'++',
                             rhs: {
-                                type:'ID_MEMBER_EXPRESSION',
-                                ic_type: 'INTEGER',
+                                type:AST.EXPR_MEMBER_ID,
+                                ic_type: TYPES.INTEGER,
                                 name:'x',
                                 members:nomembers
                             }
                         },
                         operator:{
                             ic_function:'mul',
-                            type:'BINOP',
+                            type:AST.EXPR_BINOP,
                             value:'*'
                         },
                         rhs:{
-                            type:'INTEGER',
-                            ic_type: 'INTEGER',
+                            type:TYPES.INTEGER,
+                            ic_type: TYPES.INTEGER,
                             value:'8',
                             members:nomembers
                         }
@@ -345,76 +362,82 @@ describe('MathLang assign parser', () => {
                 }
             }
         }
-        expect(ast_assign_node).eql(result);
+        expect(compiler_ast).eql(expected_ast);
     });
 
     it('Parse assign [fxy(x is INTEGER,y is FLOAT)=456 + (++x*8)] statement' , () => {
+        compiler.reset();
         const text = 'fxy(x is INTEGER,y is FLOAT)=456 + (++x*8)';
-        const parser_result = parse(text, false, 'statement');
+        const result = compiler.compile_ast(text, 'statement');
 
-        // console.log(parser_result);
+        // ERRORS
+        const expected_errors = 0;
+        const errors = compiler.get_errors();
+        expect(result).equals(expected_errors == 0);
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
-
-        const ast_assign_node = parser_result.ast;
-        const nomembers = <any>undefined;
-        const result = {
-            type:'ASSIGN_STATEMENT',
-            ic_type: 'INTEGER',
+        // TEST AST
+        const nomembers = <any>[];
+        const expected_ast = {
+            type:AST.STAT_ASSIGN,
+            ic_type: TYPES.INTEGER,
             name:'fxy',
             is_async: false,
             members:{
-                type:'ARGIDS_EXPRESSION',
-                ic_type: 'ARRAY',
-                ic_subtypes: ['INTEGER', 'FLOAT'],
+                type:AST.EXPR_ARGS_IDS,
+                ic_type: TYPES.ARRAY,
+                ic_subtypes: [TYPES.INTEGER, TYPES.FLOAT],
                 items:['x','y']
             },
             expression: {
-                type:'ADDSUB_EXPRESSION',
-                ic_type: 'INTEGER',
+                type:AST.EXPR_BINOP_ADDSUB,
+                ic_type: TYPES.INTEGER,
                 lhs:{
-                    type:'INTEGER',
-                    ic_type: 'INTEGER',
+                    type:TYPES.INTEGER,
+                    ic_type: TYPES.INTEGER,
                     value:'456',
                     members:nomembers
                 },
                 operator: {
                     ic_function:'add',
-                    type:'BINOP',
+                    type:AST.EXPR_BINOP,
                     value:'+'
                 },
                 rhs:{
-                    type:'PARENTHESIS_EXPRESSION',
-                    ic_type: 'INTEGER',
+                    type:AST.EXPR_PARENTHESIS,
+                    ic_type: TYPES.INTEGER,
                     expression: {
-                        type:'MULTDIV_EXPRESSION',
-                        ic_type: 'INTEGER',
+                        type:AST.EXPR_BINOP_MULTDIV,
+                        ic_type: TYPES.INTEGER,
                         lhs:{
-                            type:'PREUNOP_EXPRESSION',
-                            ic_type: 'INTEGER',
+                            type:AST.EXPR_UNOP_PREUNOP,
+                            ic_type: TYPES.INTEGER,
                             ic_function:'add_one',
                             operator:'++',
                             rhs: {
-                                type:'ID_MEMBER_EXPRESSION',
-                                ic_type: 'INTEGER',
+                                type:AST.EXPR_MEMBER_ID,
+                                ic_type: TYPES.INTEGER,
                                 name:'x',
                                 members:nomembers
                             }
                         },
                         operator:{
                             ic_function:'mul',
-                            type:'BINOP',
+                            type:AST.EXPR_BINOP,
                             value:'*'
                         },
                         rhs:{
-                            type:'INTEGER',
-                            ic_type: 'INTEGER',
+                            type:TYPES.INTEGER,
+                            ic_type: TYPES.INTEGER,
                             value:'8',
                             members:nomembers
                         }
@@ -423,76 +446,82 @@ describe('MathLang assign parser', () => {
                 }
             }
         }
-        expect(ast_assign_node).eql(result);
+        expect(compiler_ast).eql(expected_ast);
     });
 
     it('Parse assign [fxy(x,y is FLOAT)=456 + (++x*8)] statement' , () => {
+        compiler.reset();
         const text = 'fxy(x,y is FLOAT)=456 + (++x*8)';
-        const parser_result = parse(text, false, 'statement');
+        const result = compiler.compile_ast(text, 'statement');
 
-        // console.log(parser_result);
+        // ERRORS
+        const expected_errors = 0;
+        const errors = compiler.get_errors();
+        expect(result).equals(expected_errors == 0);
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
-
-        const ast_assign_node = parser_result.ast;
-        const nomembers = <any>undefined;
-        const result = {
-            type:'ASSIGN_STATEMENT',
-            ic_type: 'INTEGER',
+        // TEST AST
+        const nomembers = <any>[];
+        const expected_ast = {
+            type:AST.STAT_ASSIGN,
+            ic_type: TYPES.INTEGER,
             name:'fxy',
             is_async: false,
             members:{
-                type:'ARGIDS_EXPRESSION',
-                ic_type: 'ARRAY',
-                ic_subtypes: ['INTEGER', 'FLOAT'],
+                type:AST.EXPR_ARGS_IDS,
+                ic_type: TYPES.ARRAY,
+                ic_subtypes: [TYPES.INTEGER, TYPES.FLOAT],
                 items:['x','y']
             },
             expression: {
-                type:'ADDSUB_EXPRESSION',
-                ic_type: 'INTEGER',
+                type:AST.EXPR_BINOP_ADDSUB,
+                ic_type: TYPES.INTEGER,
                 lhs:{
-                    type:'INTEGER',
-                    ic_type: 'INTEGER',
+                    type:TYPES.INTEGER,
+                    ic_type: TYPES.INTEGER,
                     value:'456',
                     members:nomembers
                 },
                 operator: {
                     ic_function:'add',
-                    type:'BINOP',
+                    type:AST.EXPR_BINOP,
                     value:'+'
                 },
                 rhs:{
-                    type:'PARENTHESIS_EXPRESSION',
-                    ic_type: 'INTEGER',
+                    type:AST.EXPR_PARENTHESIS,
+                    ic_type: TYPES.INTEGER,
                     expression: {
-                        type:'MULTDIV_EXPRESSION',
-                        ic_type: 'INTEGER',
+                        type:AST.EXPR_BINOP_MULTDIV,
+                        ic_type: TYPES.INTEGER,
                         lhs:{
-                            type:'PREUNOP_EXPRESSION',
-                            ic_type: 'INTEGER',
+                            type:AST.EXPR_UNOP_PREUNOP,
+                            ic_type: TYPES.INTEGER,
                             ic_function:'add_one',
                             operator:'++',
                             rhs: {
-                                type:'ID_MEMBER_EXPRESSION',
-                                ic_type: 'INTEGER',
+                                type:AST.EXPR_MEMBER_ID,
+                                ic_type: TYPES.INTEGER,
                                 name:'x',
                                 members:nomembers
                             }
                         },
                         operator:{
                             ic_function:'mul',
-                            type:'BINOP',
+                            type:AST.EXPR_BINOP,
                             value:'*'
                         },
                         rhs:{
-                            type:'INTEGER',
-                            ic_type: 'INTEGER',
+                            type:TYPES.INTEGER,
+                            ic_type: TYPES.INTEGER,
                             value:'8',
                             members:nomembers
                         }
@@ -501,44 +530,50 @@ describe('MathLang assign parser', () => {
                 }
             }
         }
-        expect(ast_assign_node).eql(result);
+        expect(compiler_ast).eql(expected_ast);
     });
 
     it('Parse assign [begin fxy=0 fxy.a=456 end] statement' , () => {
+        compiler.reset();
         const text = 'begin fxy=0 fxy.a=456 end';
-        const parser_result = parse(text, false, 'statement');
+        const result = compiler.compile_ast(text, 'statement');
 
-        // console.log(parser_result);
+        // ERRORS
+        const expected_errors = 0;
+        const errors = compiler.get_errors();
+        expect(result).equals(expected_errors == 0);
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
-
-        const ast_assign_node = parser_result.ast;
-        const nomembers = <any>undefined;
-        const result = {
-            type:'BLOCK',
+        // TEST AST
+        const nomembers = <any>[];
+        const expected_ast = {
+            type:AST.BLOCK,
             statements:[
                 {
-                    type:'ASSIGN_STATEMENT',
-                    ic_type: 'INTEGER',
+                    type:AST.STAT_ASSIGN,
+                    ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,
                     members:nomembers,
                     expression: {
-                        type:'INTEGER',
-                        ic_type: 'INTEGER',
+                        type:TYPES.INTEGER,
+                        ic_type: TYPES.INTEGER,
                         value:'0',
                         members:nomembers
                     }
                 },
                 {
-                    type:'ASSIGN_STATEMENT',
-                    ic_type: 'INTEGER',
+                    type:AST.STAT_ASSIGN,
+                    ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,
                     members:{
@@ -547,54 +582,58 @@ describe('MathLang assign parser', () => {
                         identifier:'a'
                     },
                     expression: {
-                        type:'INTEGER',
-                        ic_type: 'INTEGER',
+                        type:TYPES.INTEGER,
+                        ic_type: TYPES.INTEGER,
                         value:'456',
                         members:nomembers
                     }
                 }
             ]
         }
-        expect(ast_assign_node).eql(result);
+        expect(compiler_ast).eql(expected_ast);
     });
 
     it('Parse assign [begin fxy=0 fxy.a.b=456 end] statement' , () => {
+        compiler.reset();
         const text = 'begin fxy=0 fxy.a.b=456 end';
-        const parser_result = parse(text, false, 'blockStatement');
+        const result = compiler.compile_ast(text, 'blockStatement');
 
-        // console.log(parser_result.cst);
-        // dump_tree('cst', parser_result.cst);
-        // dump_tree('ast', parser_result.ast);
+        // ERRORS
+        const expected_errors = 0;
+        const errors = compiler.get_errors();
+        expect(result).equals(expected_errors == 0);
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
-
-        const ast_assign_node = parser_result.ast;
-        const nomembers = <any>undefined;
-        const result = {
-            type:'BLOCK',
+        // TEST AST
+        const nomembers = <any>[];
+        const expected_ast = {
+            type:AST.BLOCK,
             statements:[
                 {
-                    type:'ASSIGN_STATEMENT',
-                    ic_type: 'INTEGER',
+                    type:AST.STAT_ASSIGN,
+                    ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,
                     members:nomembers,
                     expression: {
-                        type:'INTEGER',
-                        ic_type: 'INTEGER',
+                        type:TYPES.INTEGER,
+                        ic_type: TYPES.INTEGER,
                         value:'0',
                         members:nomembers
                     }
                 },
                 {
-                    type:'ASSIGN_STATEMENT',
-                    ic_type: 'INTEGER',
+                    type:AST.STAT_ASSIGN,
+                    ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,
                     members:{
@@ -608,52 +647,58 @@ describe('MathLang assign parser', () => {
                         }
                     },
                     expression: {
-                        type:'INTEGER',
-                        ic_type: 'INTEGER',
+                        type:TYPES.INTEGER,
+                        ic_type: TYPES.INTEGER,
                         value:'456',
                         members:nomembers
                     }
                 }
             ]
         }
-        expect(ast_assign_node).eql(result);
+        expect(compiler_ast).eql(expected_ast);
     });
 
     it('Parse assign [begin fxy=0 fxy.a.b(x,y)=456 end] statement' , () => {
+        compiler.reset();
         const text = 'begin fxy=0 fxy.a.b(x,y)=456 end';
-        const parser_result = parse(text, false, 'blockStatement');
+        const result = compiler.compile_ast(text, 'blockStatement');
 
-        // console.log(parser_result);
+        // ERRORS
+        const expected_errors = 0;
+        const errors = compiler.get_errors();
+        expect(result).equals(expected_errors == 0);
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
-
-        const ast_assign_node = parser_result.ast;
-        const nomembers = <any>undefined;
-        const result = {
-            type:'BLOCK',
+        // TEST AST
+        const nomembers = <any>[];
+        const expected_ast = {
+            type:AST.BLOCK,
             statements:[
                 {
-                    type:'ASSIGN_STATEMENT',
-                    ic_type: 'INTEGER',
+                    type:AST.STAT_ASSIGN,
+                    ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,
                     members:nomembers,
                     expression: {
-                        type:'INTEGER',
-                        ic_type: 'INTEGER',
+                        type:TYPES.INTEGER,
+                        ic_type: TYPES.INTEGER,
                         value:'0',
                         members:nomembers
                     }
                 },
                 {
-                    type:'ASSIGN_STATEMENT',
-                    ic_type: 'INTEGER',
+                    type:AST.STAT_ASSIGN,
+                    ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,
                     members:{
@@ -665,60 +710,66 @@ describe('MathLang assign parser', () => {
                             ic_type: 'METHOD_IDENTIFIER',
                             identifier:'b',
                             members:{
-                                type:'ARGIDS_EXPRESSION',
-                                ic_type: 'ARRAY',
-                                ic_subtypes: ['INTEGER', 'INTEGER'],
+                                type:AST.EXPR_ARGS_IDS,
+                                ic_type: TYPES.ARRAY,
+                                ic_subtypes: [TYPES.INTEGER, TYPES.INTEGER],
                                 items:['x','y']
                             }
                         }
                     },
                     expression: {
-                        type:'INTEGER',
-                        ic_type: 'INTEGER',
+                        type:TYPES.INTEGER,
+                        ic_type: TYPES.INTEGER,
                         value:'456',
                         members:nomembers
                     }
                 }
             ]
         }
-        expect(ast_assign_node).eql(result);
+        expect(compiler_ast).eql(expected_ast);
     });
 
     it('Parse assign [begin fxy=0 fxy.a(x,y).b=456 end] statement' , () => {
+        compiler.reset();
         const text = 'begin fxy=0 fxy.a(x,y).b=456 end';
-        const parser_result = parse(text, false, 'blockStatement');
+        const result = compiler.compile_ast(text, 'blockStatement');
 
-        // console.log(parser_result);
+        // ERRORS
+        const expected_errors = 0;
+        const errors = compiler.get_errors();
+        expect(result).equals(expected_errors == 0);
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
-
-        const ast_assign_node = parser_result.ast;
-        const nomembers = <any>undefined;
-        const result = {
-            type:'BLOCK',
+        // TEST AST
+        const nomembers = <any>[];
+        const expected_ast = {
+            type:AST.BLOCK,
             statements:[
                 {
-                    type:'ASSIGN_STATEMENT',
-                    ic_type: 'INTEGER',
+                    type:AST.STAT_ASSIGN,
+                    ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,
                     members:nomembers,
                     expression: {
-                        type:'INTEGER',
-                        ic_type: 'INTEGER',
+                        type:TYPES.INTEGER,
+                        ic_type: TYPES.INTEGER,
                         value:'0',
                         members:nomembers
                     }
                 },
                 {
-                    type:'ASSIGN_STATEMENT',
-                    ic_type: 'INTEGER',
+                    type:AST.STAT_ASSIGN,
+                    ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,
                     members:{
@@ -726,9 +777,9 @@ describe('MathLang assign parser', () => {
                         ic_type: 'METHOD_IDENTIFIER',
                         identifier:'a',
                         members:{
-                            type:'ARGIDS_EXPRESSION',
-                            ic_type: 'ARRAY',
-                            ic_subtypes: ['INTEGER', 'INTEGER'],
+                            type:AST.EXPR_ARGS_IDS,
+                            ic_type: TYPES.ARRAY,
+                            ic_subtypes: [TYPES.INTEGER, TYPES.INTEGER],
                             items:['x','y'],
                             members:{
                                 type:'DOT_EXPRESSION',
@@ -738,14 +789,14 @@ describe('MathLang assign parser', () => {
                         }
                     },
                     expression: {
-                        type:'INTEGER',
-                        ic_type: 'INTEGER',
+                        type:TYPES.INTEGER,
+                        ic_type: TYPES.INTEGER,
                         value:'456',
                         members:nomembers
                     }
                 }
             ]
         }
-        expect(ast_assign_node).eql(result);
-    });
+        expect(compiler_ast).eql(expected_ast);
+    });*/
 });
