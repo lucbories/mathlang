@@ -38,10 +38,9 @@ export const program_2_ast = {
             "expression": {
                 "type": "FLOAT",
                 "ic_type": "FLOAT",
-                "value": "0.0",
-                "members":<any>undefined
+                "value": "0.0"
             },
-            "members":<any>undefined
+            "members":<any>[]
         },
         {
             "type": "ASSIGN_STATEMENT",
@@ -51,10 +50,9 @@ export const program_2_ast = {
             "expression": {
                 "type": "FLOAT",
                 "ic_type": "FLOAT",
-                "value": "3.14",
-                "members":<any>undefined
+                "value": "3.14"
             },
-            "members":<any>undefined
+            "members":<any>[]
         },
         {
             "type": "LOOP_STATEMENT",
@@ -62,20 +60,17 @@ export const program_2_ast = {
             "from": {
                 "type": "INTEGER",
                 "ic_type": "INTEGER",
-                "value": "10",
-                "members":<any>undefined
+                "value": "10"
             },
             "to": {
                 "type": "INTEGER",
                 "ic_type": "INTEGER",
-                "value": "100",
-                "members":<any>undefined
+                "value": "100"
             },
             "step": {
                 "type": "INTEGER",
                 "ic_type": "INTEGER",
-                "value": "10",
-                "members":<any>undefined
+                "value": "10"
             },
             "block": [
                 {
@@ -83,7 +78,7 @@ export const program_2_ast = {
                     "ic_type": "BIGFLOAT",
                     "name": "t",
                     "is_async": false,
-                    "members":<any>undefined,
+                    "members":<any>[],
                     "expression": {
                         "type": "ADDSUB_EXPRESSION",
                         "ic_type": "BIGFLOAT",
@@ -91,7 +86,7 @@ export const program_2_ast = {
                             "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "FLOAT",
                             "name": "t",
-                            "members":<any>undefined
+                            "members":<any>[]
                         },
                         "operator": {
                             "ic_function":"add",
@@ -99,46 +94,43 @@ export const program_2_ast = {
                             "value": "+"
                         },
                         "rhs": {
-                            "type": "ID_MEMBER_EXPRESSION",
+                            "type": "FUNCTION_CALL_EXPRESSION",
                             "ic_type": "BIGFLOAT",
                             "name": "my_float_square_add",
-                            "members": {
-                                "type": "ARGS_EXPRESSION",
-                                "ic_type": "ARRAY",
-                                "ic_subtypes": [
-                                    "FLOAT",
-                                    "FLOAT"
-                                ],
-                                "items": [
-                                    {
-                                        "type": "MULTDIV_EXPRESSION",
-                                        "ic_type": "FLOAT",
-                                        "lhs": {
-                                            "type": "ID_MEMBER_EXPRESSION",
-                                            "ic_type": "INTEGER",
-                                            "name": "i",
-                                            "members":<any>undefined
-                                        },
-                                        "operator": {
-                                            "ic_function":"mul",
-                                            "type": "BINOP",
-                                            "value": "*"
-                                        },
-                                        "rhs": {
-                                            "type": "ID_MEMBER_EXPRESSION",
-                                            "ic_type": "FLOAT",
-                                            "name": "pi",
-                                            "members":<any>undefined
-                                        }
+                            "members":<any>[],
+                            "operands_types": [
+                                "FLOAT",
+                                "FLOAT"
+                            ],
+                            "operands_expressions": [
+                                {
+                                    "type": "MULTDIV_EXPRESSION",
+                                    "ic_type": "FLOAT",
+                                    "lhs": {
+                                        "type": "ID_MEMBER_EXPRESSION",
+                                        "ic_type": "INTEGER",
+                                        "name": "i",
+                                        "members":<any>[]
                                     },
-                                    {
+                                    "operator": {
+                                        "ic_function":"mul",
+                                        "type": "BINOP",
+                                        "value": "*"
+                                    },
+                                    "rhs": {
                                         "type": "ID_MEMBER_EXPRESSION",
                                         "ic_type": "FLOAT",
                                         "name": "pi",
-                                        "members":<any>undefined
+                                        "members":<any>[]
                                     }
-                                ]
-                            }
+                                },
+                                {
+                                    "type": "ID_MEMBER_EXPRESSION",
+                                    "ic_type": "FLOAT",
+                                    "name": "pi",
+                                    "members":<any>[]
+                                }
+                            ]
                         }
                     }
                 }
@@ -151,25 +143,21 @@ export const program_2_ast = {
                 "type": "ID_MEMBER_EXPRESSION",
                 "ic_type": "FLOAT",
                 "name": "t",
-                "members":<any>undefined
+                "members":<any>[]
             }
         },
         {
             "type": "FUNCTION_STATEMENT",
             "ic_type": "INTEGER",
             "name": "my_int_square_add",
-            "operands": {
-                "type": "ARGIDS_EXPRESSION",
-                "ic_type": "ARRAY",
-                "ic_subtypes": [
-                    "INTEGER",
-                    "INTEGER"
-                ],
-                "items": [
-                    "left",
-                    "right"
-                ]
-            },
+            "operands_types": [
+                "INTEGER",
+                "INTEGER"
+            ],
+            "operands_names": [
+                "left",
+                "right"
+            ],
             "block": [
                 {
                     "type": "ASSIGN_STATEMENT",
@@ -183,7 +171,7 @@ export const program_2_ast = {
                             "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "INTEGER",
                             "name": "left",
-                            "members":<any>undefined
+                            "members":<any>[]
                         },
                         "operator": {
                             "ic_function":"mul",
@@ -194,10 +182,10 @@ export const program_2_ast = {
                             "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "INTEGER",
                             "name": "left",
-                            "members":<any>undefined
+                            "members":<any>[]
                         }
                     },
-                    "members":<any>undefined
+                    "members":<any>[]
                 },
                 {
                     "type": "ASSIGN_STATEMENT",
@@ -205,26 +193,23 @@ export const program_2_ast = {
                     "name": "b",
                     "is_async": false,
                     "expression": {
-                        "type": "ID_MEMBER_EXPRESSION",
+                        "type": "FUNCTION_CALL_EXPRESSION",
                         "ic_type": "UNKNOW",
                         "name": "square",
-                        "members": {
-                            "type": "ARGS_EXPRESSION",
-                            "ic_type": "ARRAY",
-                            "ic_subtypes": [
-                                "INTEGER"
-                            ],
-                            "items": [
-                                {
-                                    "type": "ID_MEMBER_EXPRESSION",
-                                    "ic_type": "INTEGER",
-                                    "name": "right",
-                                    "members":<any>undefined
-                                }
-                            ]
-                        }
+                        "members":<any>[],
+                        "operands_types": [
+                            "INTEGER"
+                        ],
+                        "operands_expressions": [
+                            {
+                                "type": "ID_MEMBER_EXPRESSION",
+                                "ic_type": "INTEGER",
+                                "name": "right",
+                                "members":<any>[]
+                            }
+                        ]
                     },
-                    "members":<any>undefined
+                    "members":<any>[]
                 },
                 {
                     "type": "IF_STATEMENT",
@@ -238,7 +223,7 @@ export const program_2_ast = {
                                 "type": "ID_MEMBER_EXPRESSION",
                                 "ic_type": "INTEGER",
                                 "name": "a",
-                                "members":<any>undefined
+                                "members":<any>[]
                             },
                             "operator": {
                                 "ic_function":"equal",
@@ -248,11 +233,9 @@ export const program_2_ast = {
                             "rhs": {
                                 "type": "INTEGER",
                                 "ic_type": "INTEGER",
-                                "value": "0",
-                                "members":<any>undefined
+                                "value": "0"
                             }
-                        },
-                        "members":<any>undefined
+                        }
                     },
                     "then": [
                         {
@@ -261,8 +244,7 @@ export const program_2_ast = {
                             "expression": {
                                 "type": "INTEGER",
                                 "ic_type": "INTEGER",
-                                "value": "0",
-                                "members":<any>undefined
+                                "value": "0"
                             }
                         }
                     ],
@@ -280,7 +262,7 @@ export const program_2_ast = {
                                 "type": "ID_MEMBER_EXPRESSION",
                                 "ic_type": "UNKNOW",
                                 "name": "b",
-                                "members":<any>undefined
+                                "members":<any>[]
                             },
                             "operator": {
                                 "ic_function":"equal",
@@ -290,11 +272,9 @@ export const program_2_ast = {
                             "rhs": {
                                 "type": "INTEGER",
                                 "ic_type": "INTEGER",
-                                "value": "0",
-                                "members":<any>undefined
+                                "value": "0"
                             }
-                        },
-                        "members":<any>undefined
+                        }
                     },
                     "then": [
                         {
@@ -303,8 +283,7 @@ export const program_2_ast = {
                             "expression": {
                                 "type": "INTEGER",
                                 "ic_type": "INTEGER",
-                                "value": "1",
-                                "members":<any>undefined
+                                "value": "1"
                             }
                         }
                     ],
@@ -320,7 +299,7 @@ export const program_2_ast = {
                             "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "INTEGER",
                             "name": "a",
-                            "members":<any>undefined
+                            "members":<any>[]
                         },
                         "operator": {
                             "ic_function":"add",
@@ -331,7 +310,7 @@ export const program_2_ast = {
                             "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "UNKNOW",
                             "name": "b",
-                            "members":<any>undefined
+                            "members":<any>[]
                         }
                     }
                 }
@@ -341,18 +320,14 @@ export const program_2_ast = {
             "type": "FUNCTION_STATEMENT",
             "ic_type": "BIGFLOAT",
             "name": "my_float_square_add",
-            "operands": {
-                "type": "ARGIDS_EXPRESSION",
-                "ic_type": "ARRAY",
-                "ic_subtypes": [
-                    "FLOAT",
-                    "FLOAT"
-                ],
-                "items": [
-                    "left",
-                    "right"
-                ]
-            },
+            "operands_types": [
+                "FLOAT",
+                "FLOAT"
+            ],
+            "operands_names": [
+                "left",
+                "right"
+            ],
             "block": [
                 {
                     "type": "ASSIGN_STATEMENT",
@@ -369,7 +344,7 @@ export const program_2_ast = {
                                 "type": "ID_MEMBER_EXPRESSION",
                                 "ic_type": "FLOAT",
                                 "name": "left",
-                                "members":<any>undefined
+                                "members":<any>[]
                             },
                             "operator": {
                                 "ic_function":"mul",
@@ -380,7 +355,7 @@ export const program_2_ast = {
                                 "type": "ID_MEMBER_EXPRESSION",
                                 "ic_type": "FLOAT",
                                 "name": "left",
-                                "members":<any>undefined
+                                "members":<any>[]
                             }
                         },
                         "operator": {
@@ -389,62 +364,53 @@ export const program_2_ast = {
                             "value": "+"
                         },
                         "rhs": {
-                            "type": "ID_MEMBER_EXPRESSION",
+                            "type": "FUNCTION_CALL_EXPRESSION",
                             "ic_type": "INTEGER",
                             "name": "my_int_square_add",
-                            "members": {
-                                "type": "ARGS_EXPRESSION",
-                                "ic_type": "ARRAY",
-                                "ic_subtypes": [
-                                    "UNKNOW",
-                                    "UNKNOW"
-                                ],
-                                "items": [
-                                    {
-                                        "type": "ID_MEMBER_EXPRESSION",
-                                        "ic_type": "UNKNOW",
-                                        "name": "mantissa",
-                                        "members": {
-                                            "type": "ARGS_EXPRESSION",
-                                            "ic_type": "ARRAY",
-                                            "ic_subtypes": [
-                                                "FLOAT"
-                                            ],
-                                            "items": [
-                                                {
-                                                    "type": "ID_MEMBER_EXPRESSION",
-                                                    "ic_type": "FLOAT",
-                                                    "name": "left",
-                                                    "members":<any>undefined
-                                                }
-                                            ]
+                            "members":<any>[],
+                            "operands_types": [
+                                "UNKNOW",
+                                "UNKNOW"
+                            ],
+                            "operands_expressions": [
+                                {
+                                    "type": "FUNCTION_CALL_EXPRESSION",
+                                    "ic_type": "UNKNOW",
+                                    "name": "mantissa",
+                                    "members":<any>[],
+                                    "operands_types": [
+                                        "FLOAT"
+                                    ],
+                                    "operands_expressions": [
+                                        {
+                                            "type": "ID_MEMBER_EXPRESSION",
+                                            "ic_type": "FLOAT",
+                                            "name": "left",
+                                            "members":<any>[]
                                         }
-                                    },
-                                    {
-                                        "type": "ID_MEMBER_EXPRESSION",
-                                        "ic_type": "UNKNOW",
-                                        "name": "mantissa",
-                                        "members": {
-                                            "type": "ARGS_EXPRESSION",
-                                            "ic_type": "ARRAY",
-                                            "ic_subtypes": [
-                                                "FLOAT"
-                                            ],
-                                            "items": [
-                                                {
-                                                    "type": "ID_MEMBER_EXPRESSION",
-                                                    "ic_type": "FLOAT",
-                                                    "name": "right",
-                                                    "members":<any>undefined
-                                                }
-                                            ]
+                                    ]
+                                },
+                                {
+                                    "type": "FUNCTION_CALL_EXPRESSION",
+                                    "ic_type": "UNKNOW",
+                                    "name": "mantissa",
+                                    "members":<any>[],
+                                    "operands_types": [
+                                        "FLOAT"
+                                    ],
+                                    "operands_expressions": [
+                                        {
+                                            "type": "ID_MEMBER_EXPRESSION",
+                                            "ic_type": "FLOAT",
+                                            "name": "right",
+                                            "members":<any>[]
                                         }
-                                    }
-                                ]
-                            }
+                                    ]
+                                }
+                            ]
                         }
                     },
-                    "members":<any>undefined
+                    "members":<any>[]
                 },
                 {
                     "type": "ASSIGN_STATEMENT",
@@ -452,26 +418,23 @@ export const program_2_ast = {
                     "name": "b",
                     "is_async": false,
                     "expression": {
-                        "type": "ID_MEMBER_EXPRESSION",
+                        "type": "FUNCTION_CALL_EXPRESSION",
                         "ic_type": "UNKNOW",
                         "name": "square",
-                        "members": {
-                            "type": "ARGS_EXPRESSION",
-                            "ic_type": "ARRAY",
-                            "ic_subtypes": [
-                                "FLOAT"
-                            ],
-                            "items": [
-                                {
-                                    "type": "ID_MEMBER_EXPRESSION",
-                                    "ic_type": "FLOAT",
-                                    "name": "right",
-                                    "members":<any>undefined
-                                }
-                            ]
-                        }
+                        "members":<any>[],
+                        "operands_types": [
+                            "FLOAT"
+                        ],
+                        "operands_expressions": [
+                            {
+                                "type": "ID_MEMBER_EXPRESSION",
+                                "ic_type": "FLOAT",
+                                "name": "right",
+                                "members":<any>[]
+                            }
+                        ]
                     },
-                    "members":<any>undefined
+                    "members":<any>[]
                 },
                 {
                     "type": "IF_STATEMENT",
@@ -485,7 +448,7 @@ export const program_2_ast = {
                                 "type": "ID_MEMBER_EXPRESSION",
                                 "ic_type": "INTEGER",
                                 "name": "a",
-                                "members":<any>undefined
+                                "members":<any>[]
                             },
                             "operator": {
                                 "ic_function":"equal",
@@ -495,11 +458,9 @@ export const program_2_ast = {
                             "rhs": {
                                 "type": "INTEGER",
                                 "ic_type": "INTEGER",
-                                "value": "0",
-                                "members":<any>undefined
+                                "value": "0"
                             }
-                        },
-                        "members":<any>undefined
+                        }
                     },
                     "then": [
                         {
@@ -508,8 +469,7 @@ export const program_2_ast = {
                             "expression": {
                                 "type": "INTEGER",
                                 "ic_type": "INTEGER",
-                                "value": "0",
-                                "members":<any>undefined
+                                "value": "0"
                             }
                         }
                     ],
@@ -527,7 +487,7 @@ export const program_2_ast = {
                                 "type": "ID_MEMBER_EXPRESSION",
                                 "ic_type": "UNKNOW",
                                 "name": "b",
-                                "members":<any>undefined
+                                "members":<any>[]
                             },
                             "operator": {
                                 "ic_function":"equal",
@@ -537,11 +497,9 @@ export const program_2_ast = {
                             "rhs": {
                                 "type": "INTEGER",
                                 "ic_type": "INTEGER",
-                                "value": "0",
-                                "members":<any>undefined
+                                "value": "0"
                             }
-                        },
-                        "members":<any>undefined
+                        }
                     },
                     "then": [
                         {
@@ -550,8 +508,7 @@ export const program_2_ast = {
                             "expression": {
                                 "type": "INTEGER",
                                 "ic_type": "INTEGER",
-                                "value": "1",
-                                "members":<any>undefined
+                                "value": "1"
                             }
                         }
                     ],
@@ -567,7 +524,7 @@ export const program_2_ast = {
                             "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "INTEGER",
                             "name": "a",
-                            "members":<any>undefined
+                            "members":<any>[]
                         },
                         "operator": {
                             "ic_function":"add",
@@ -578,7 +535,7 @@ export const program_2_ast = {
                             "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "UNKNOW",
                             "name": "b",
-                            "members":<any>undefined
+                            "members":<any>[]
                         }
                     }
                 }

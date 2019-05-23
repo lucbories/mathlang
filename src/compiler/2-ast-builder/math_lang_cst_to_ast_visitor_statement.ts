@@ -56,7 +56,8 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
                 cst_statement.children.visit_body = true;
 
                 ast_statement = this.visit(cst_statement);
-                ast_statement.operands = ast_function_header_nodes[ast_statement.name].operands;
+                ast_statement.operands_types = ast_function_header_nodes[ast_statement.name].operands_types;
+                ast_statement.operands_names = ast_function_header_nodes[ast_statement.name].operands_names;
                 statements.push(ast_statement);
             }
         }
@@ -363,6 +364,14 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
                 members:ast_id_left_node.members,
                 expression:ast_expr_node
             };
+
+            // DECLARE A NEW VARIABLE
+            if ( ! this.has_declared_var_symbol(assign_name) && ast_id_left_node.members.length == 0){
+                this.register_symbol_declaration(assign_name, assign_ast.ic_type, false, '', ctx, AST.STAT_ASSIGN);
+            }
+
+            // DECLARE A NEW VALUE ATTRIBUTE // TODO
+
             return assign_ast;
         }
 
@@ -429,10 +438,10 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
     functionStatement(ctx:any) {
         // console.log('functionStatement', ctx)
 
-        const function_name = ctx.functionName[0].image;
-        const returned_type = ctx.returnedType[0].image;
+        const function_name = ctx.functionName[0].image ? ctx.functionName[0].image : TYPES.UNKNOW;
+        const returned_type = this.visit(ctx.returnedType[0]);
 
-        let operands_decl = [];
+        let operands_decl;
         if (ctx.visit_header){
             operands_decl = this.visit(ctx.ArgumentsWithIds);
             const operands = [];
@@ -465,7 +474,8 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             type: AST.STAT_FUNCTION,
             ic_type:returned_type,
             name:function_name,
-            operands:operands_decl,
+            operands_types:operands_decl && operands_decl.ic_subtypes ? operands_decl.ic_subtypes : [],
+            operands_names:operands_decl && operands_decl.items ? operands_decl.items : [],
             block:statements
         }
     }

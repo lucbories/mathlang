@@ -15,7 +15,7 @@ describe('MathLang number parser', () => {
 
     it('Parse positive simple integer' , () => {
         const text = '123';
-        const parser_result = parse(text, false, 'MemberExpression');
+        const parser_result = parse(text, false, 'PrimaryExpression');
 
         // console.log(parser_result.ast);
         // dump_ast('cst', parser_result.cst);
@@ -31,19 +31,17 @@ describe('MathLang number parser', () => {
         const ast_expr_node = parser_result.ast;
         // console.log('simple integer ast expr node', ast_expr_node);
 
-        const nomembers = <any>undefined;
         const result = {
             type:'INTEGER',
             ic_type:'INTEGER',
-            value:text,
-            members:nomembers
+            value:text
         }
         expect(ast_expr_node).eql(result);
     });
 
     it('Parse positive big integer' , () => {
         const text = '1234567890145';
-        const parser_result = parse(text, false, 'MemberExpression');
+        const parser_result = parse(text, false, 'PrimaryExpression');
 
         // console.log(parser_result);
         // dump_ast('cst', parser_result.cst);
@@ -59,12 +57,10 @@ describe('MathLang number parser', () => {
         const ast_expr_node = parser_result.ast;
         // console.log('simple integer ast expr node', ast_expr_node);
 
-        const nomembers = <any>undefined;
         const result = {
             type:'BIGINTEGER',
             ic_type:'BIGINTEGER',
-            value:text,
-            members:nomembers
+            value:text
         }
         expect(ast_expr_node).eql(result);
     });
@@ -86,7 +82,6 @@ describe('MathLang number parser', () => {
         const ast_expr_node = parser_result.ast;
         // console.log('simple integer ast expr node', ast_expr_node);
 
-        const nomembers = <any>undefined;
         const result = {
             type:'PREUNOP_EXPRESSION',
             ic_type:'INTEGER',
@@ -95,8 +90,7 @@ describe('MathLang number parser', () => {
             rhs:{
                 type:'INTEGER',
                 ic_type:'INTEGER',
-                value:text.substr(1),
-                members:nomembers
+                value:text.substr(1)
             }
         }
         expect(ast_expr_node).eql(result);
@@ -119,7 +113,6 @@ describe('MathLang number parser', () => {
         const ast_expr_node = parser_result.ast;
         // console.log('simple integer ast expr node', ast_expr_node);
 
-        const nomembers = <any>undefined;
         const result = {
             type:'PREUNOP_EXPRESSION',
             ic_type:'INTEGER',
@@ -128,8 +121,7 @@ describe('MathLang number parser', () => {
             rhs:{
                 type:'INTEGER',
                 ic_type:'INTEGER',
-                value:text.substr(1),
-                members:nomembers
+                value:text.substr(1)
             }
         }
         expect(ast_expr_node).eql(result);
@@ -153,12 +145,10 @@ describe('MathLang number parser', () => {
         const ast_expr_node = parser_result.ast;
         // console.log('simple float ast expr node', ast_expr_node);
 
-        const nomembers = <any>undefined;
         const result = {
             type:'FLOAT',
             ic_type:'FLOAT',
-            value:text,
-            members:nomembers
+            value:text
         }
         expect(ast_expr_node).eql(result);
     });
@@ -180,12 +170,10 @@ describe('MathLang number parser', () => {
         const ast_expr_node = parser_result.ast;
         // console.log('simple float ast expr node', ast_expr_node);
 
-        const nomembers = <any>undefined;
         const result = {
             type:'BIGFLOAT',
             ic_type:'BIGFLOAT',
-            value:text,
-            members:nomembers
+            value:text
         }
         expect(ast_expr_node).eql(result);
     });
@@ -207,12 +195,10 @@ describe('MathLang number parser', () => {
         const ast_expr_node = parser_result.ast;
         // console.log('simple float ast expr node', ast_expr_node);
 
-        const nomembers = <any>undefined;
         const result = {
             type:'BIGFLOAT',
             ic_type:'BIGFLOAT',
-            value:text,
-            members:nomembers
+            value:text
         }
         expect(ast_expr_node).eql(result);
     });
@@ -234,7 +220,6 @@ describe('MathLang number parser', () => {
         const ast_expr_node = parser_result.ast;
         // console.log('complex float ast expr node', ast_expr_node);
 
-        const nomembers = <any>undefined;
         const result = {
             type:'PREUNOP_EXPRESSION',
             ic_type:'FLOAT',
@@ -243,8 +228,7 @@ describe('MathLang number parser', () => {
             rhs:{
                 type:'FLOAT',
                 ic_type:'FLOAT',
-                value:text.substr(1),
-                members:nomembers
+                value:text.substr(1)
             }
         }
         expect(ast_expr_node).eql(result);
@@ -267,7 +251,6 @@ describe('MathLang number parser', () => {
         const ast_expr_node = parser_result.ast;
         // console.log('complex float ast expr node', ast_expr_node);
 
-        const nomembers = <any>undefined;
         const result = {
             type:'PREUNOP_EXPRESSION',
             ic_type:'BIGFLOAT',
@@ -276,8 +259,7 @@ describe('MathLang number parser', () => {
             rhs:{
                 type:'BIGFLOAT',
                 ic_type:'BIGFLOAT',
-                value:text.substr(1),
-                members:nomembers
+                value:text.substr(1)
             }
         }
         expect(ast_expr_node).eql(result);
@@ -300,7 +282,6 @@ describe('MathLang number parser', () => {
         const ast_expr_node = parser_result.ast;
         // console.log('complex float ast expr node', ast_expr_node);
 
-        const nomembers = <any>undefined;
         const result = {
             type:'PREUNOP_EXPRESSION',
             ic_type:'BIGFLOAT',
@@ -309,8 +290,7 @@ describe('MathLang number parser', () => {
             rhs:{
                 type:'BIGFLOAT',
                 ic_type:'BIGFLOAT',
-                value:text.substr(1),
-                members:nomembers
+                value:text.substr(1)
             }
         }
         expect(ast_expr_node).eql(result);

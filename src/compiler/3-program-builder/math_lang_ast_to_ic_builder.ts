@@ -421,7 +421,7 @@ export default class MathLangAstToIcVisitor {
             return this.add_error(ast_expression, 'Type [' + ast_expression.ic_type + '] not found.')
         }
 
-        if (ast_expression.members == undefined){
+        if (ast_expression.members.length == 0){
             return {
                 ic_type:ast_expression.ic_type,
                 ic_source:ICOperandSource.FROM_ID,
@@ -434,19 +434,33 @@ export default class MathLangAstToIcVisitor {
         // LOOP ON ID OPTIONS
         const accessors:ICIdAccessor[] = [];
         let loop_accessor:ICIdAccessor;
-        let loop_member = ast_expression.members;
+        let loop_index = 0;
+        let loop_member = ast_expression.members[loop_index];
         let id_str = '';
         while(loop_member){
-            // METHOD
-            if (loop_member.type == AST.EXPR_MEMBER_FUNC_CALL){
+            // METHOD DECLARATION
+            if (loop_member.type == AST.EXPR_MEMBER_METHOD_DECL){
                 loop_accessor={
-                    id:loop_member.identifier,
+                    id:loop_member.func_name,
                     is_attribute:false,
                     is_method:true,
                     is_box_args:false,
                     box_args_count:0
                 }
-                id_str += '.' + loop_member.identifier;
+                id_str += '.' + loop_member.func_name;
+                accessors.push(loop_accessor);
+            }
+
+            // METHOD
+            if (loop_member.type == AST.EXPR_MEMBER_FUNC_CALL){
+                loop_accessor={
+                    id:loop_member.func_name,
+                    is_attribute:false,
+                    is_method:true,
+                    is_box_args:false,
+                    box_args_count:0
+                }
+                id_str += '.' + loop_member.func_name;
                 accessors.push(loop_accessor);
             }
 
@@ -476,7 +490,8 @@ export default class MathLangAstToIcVisitor {
                 accessors.push(loop_accessor);
             }
 
-            loop_member = loop_member.members ? loop_member.members : undefined;
+            loop_index++;
+            loop_member = ast_expression.members.length > loop_index ? ast_expression.members[loop_index] : undefined;
         }
 
         return {

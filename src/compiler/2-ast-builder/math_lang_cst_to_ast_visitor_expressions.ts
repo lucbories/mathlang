@@ -343,11 +343,12 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             }
 
             ast_node.type = AST.EXPR_MEMBER_FUNC_CALL;
-            ast_node.operands_names = ast_func_call_node.items;
+            ast_node.ic_type = this.get_function_type(ast_node.name);
+            ast_node.operands_expressions = ast_func_call_node.items;
             ast_node.operands_types = ast_func_call_node.ic_subtypes;
         }
 
-        // FUNCTION CALL
+        // METHOD CALL
         else if (ctx.dotIdArgsCallExpression){
             if (ctx.dotIdArgsCallExpression.length != 1){
                 this.add_error(ctx.dotIdArgsCallExpression, AST.EXPR_MEMBER_FUNC_CALL, 'Error:only one function call at end of an id expression but [' + ctx.dotIdArgsCallExpression.length + '] found.')
@@ -364,7 +365,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             if (ast_node.members.length > 0){
                 const last_member = ast_node.members[ast_node.members.length - 1];
                 const last_member_type = last_member ? last_member.ic_type : TYPES.UNKNOW;
-                this.check_method(last_member_type, id, ast_func_call_node.ic_subtypes, cst_func_call_node, AST.EXPR_MEMBER_FUNC_CALL);
+                this.check_method(last_member_type, id, ast_func_call_node.operands_types, cst_func_call_node, AST.EXPR_MEMBER_FUNC_CALL);
             }
             
             ast_node.members.push(ast_func_call_node);
@@ -400,8 +401,8 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             type: AST.EXPR_MEMBER_FUNC_DECL,
             ic_type: TYPES.UNKNOW,
             func_name:id,
-            ic_subtypes:ast_args_node.ic_subtypes,
-            items_expressions:ast_args_node.items
+            operands_types:ast_args_node.ic_subtypes,
+            operands_expressions:ast_args_node.items
         };
 
         return ast_function_declaration;
@@ -423,8 +424,8 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             type:AST.EXPR_MEMBER_FUNC_CALL,
             ic_type: func_scope? func_scope.return_type : TYPES.UNKNOW,
             func_name:id,
-            ic_subtypes:ast_args_node.ic_subtypes,
-            items_expressions:ast_args_node.items
+            operands_types:ast_args_node.ic_subtypes ? ast_args_node.ic_subtypes : [],
+            operands_expressions:ast_args_node.items ? ast_args_node.items : []
         };
 
         return ast_func_call_node;

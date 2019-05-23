@@ -13,7 +13,7 @@ export class MathLangParserStatements extends Parser {
     }
 
     // PROGRAN
-    public program = this.RULE("program", () => {
+    private program = this.RULE("program", () => {
         this.AT_LEAST_ONE( () => {
             this.OR( [
                 { ALT: () => this.SUBRULE(this.statement, { LABEL:"blockStatement" }) },

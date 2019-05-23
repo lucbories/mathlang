@@ -3,6 +3,8 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import parse from '../../../../compiler/math_lang_processor';
+import TYPES from '../../../../compiler/3-program-builder/math_lang_types';
+import AST from '../../../../compiler/2-ast-builder/math_lang_ast';
 
 
 function dump_ast(label:string, ast:any) {
@@ -11,6 +13,7 @@ function dump_ast(label:string, ast:any) {
 }
 
 
+const empty_array = <any>[];
 
 describe('MathLang call parser', () => {
 
@@ -30,17 +33,14 @@ describe('MathLang call parser', () => {
         expect(parser_result.parseErrors.length).equals(0);
 
         const ast_expr_node = parser_result.ast;
-        const nomembers = <any>undefined;
+        
         const result = {
-            type:'ID_MEMBER_EXPRESSION',
-            ic_type:'UNKNOW',
+            type:AST.EXPR_MEMBER_FUNC_CALL,
+            ic_type:TYPES.UNKNOW,
             name:'f',
-            members:{
-                type:'ARGS_EXPRESSION',
-                ic_type:'ARRAY',
-                ic_subtypes:['UNKNOW'],
-                items:<any>undefined
-            }
+            members:empty_array,
+            operands_expressions:empty_array,
+            operands_types:empty_array
         }
         expect(ast_expr_node).eql(result);
     });
@@ -61,24 +61,20 @@ describe('MathLang call parser', () => {
 
         const ast_expr_node = parser_result.ast;
         // console.log('fx(23) expr node', ast_expr_node);
-        const nomembers = <any>undefined;
+
         const result = {
-            type:'ID_MEMBER_EXPRESSION',
-            ic_type:'UNKNOW',
+            type:AST.EXPR_MEMBER_FUNC_CALL,
+            ic_type:TYPES.UNKNOW,
             name:'fx',
-            members:{
-                type:'ARGS_EXPRESSION',
-                ic_type:'ARRAY',
-                ic_subtypes:['INTEGER'],
-                items:[
-                    {
-                        type:'INTEGER',
-                        ic_type:'INTEGER',
-                        value:'23',
-                        members:nomembers
-                    }
-                ]
-            }
+            members:empty_array,
+            operands_expressions:[
+                {
+                    type:TYPES.INTEGER,
+                    ic_type:TYPES.INTEGER,
+                    value:'23'
+                }
+            ],
+            operands_types:[TYPES.INTEGER]
         }
         expect(ast_expr_node).eql(result);
     });
@@ -144,31 +140,26 @@ describe('MathLang call parser', () => {
 
         const ast_expr_node = parser_result.ast;
         // console.log('fx(23) expr node', ast_expr_node);
-        const nomembers = <any>undefined;
+        
         const result = {
-            type:'ID_MEMBER_EXPRESSION',
-            ic_type:'UNKNOW',
+            type:AST.EXPR_MEMBER_FUNC_CALL,
+            ic_type:TYPES.UNKNOW,
             name:'fx',
-            members:{
-                type:'ARGS_EXPRESSION',
-                ic_type:'ARRAY',
-                ic_subtypes:['INTEGER', 'UNKNOW'],
-                items:[
-                    {
-                        type:'INTEGER',
-                        ic_type:'INTEGER',
-                        value:'23',
-                        members:nomembers
-                    },
-                    {
-                        type:'ID_MEMBER_EXPRESSION',
-                        ic_type:'UNKNOW',
-                        name:'efg',
-                        members:nomembers
-                    }
-                ]
-            }
-            
+            members:empty_array,
+            operands_expressions:[
+                {
+                    type:TYPES.INTEGER,
+                    ic_type:TYPES.INTEGER,
+                    value:'23'
+                },
+                {
+                    type:AST.EXPR_MEMBER_ID,
+                    ic_type:TYPES.UNKNOW,
+                    name:'efg',
+                    members:empty_array
+                }
+            ],
+            operands_types:[TYPES.INTEGER, TYPES.UNKNOW]
         }
         expect(ast_expr_node).eql(result);
     });

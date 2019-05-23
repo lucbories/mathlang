@@ -73,9 +73,9 @@ none:function-declare-leave main`;
     });
     
 
-    it('Parse assign begin a=12\na.b=456 end statement' , () => {
+    it('Parse assign begin a=12\na.b()=456 end statement' , () => {
         compiler.reset();
-        const text = 'begin a=12\na.b=456 end';
+        const text = 'begin a=12\na.b()=456 end';
         const result = compiler.compile(text, 'program');
 
         // ERRORS

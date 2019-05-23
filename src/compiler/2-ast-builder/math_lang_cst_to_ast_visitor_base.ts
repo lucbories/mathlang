@@ -118,6 +118,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
 
         // CHECK METHOD OPERANDS TYPES
         const opd_types:IType[] = [];
+        
         operands_types.forEach(
             (opd_type_name, index)=>{
                 const opd_type:IType = this._types_map.get(type_name);
@@ -377,6 +378,17 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     }
 
 
+    /**
+     * Get function return type.
+     * @param func_name   function name
+     * @returns return type
+     */
+	get_function_type(func_name:string):string {
+        const func_scope = this._scopes_map.get(func_name);
+        return func_scope ? func_scope.return_type : TYPES.UNKNOW;
+    }
+
+    
     /**
      * Register a symbol declaration.
      * @param name          symbol name.

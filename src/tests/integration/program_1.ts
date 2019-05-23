@@ -27,10 +27,9 @@ export const program_1_ast = {
             "expression": {
                 "type": "INTEGER",
                 "ic_type": "INTEGER",
-                "value": "12",
-                "members":<any>undefined
+                "value": "12"
             },
-            "members":<any>undefined
+            "members":<any>[]
         },
         {
             "type": "ASSIGN_STATEMENT",
@@ -40,58 +39,50 @@ export const program_1_ast = {
             "expression": {
                 "type": "INTEGER",
                 "ic_type": "INTEGER",
-                "value": "123",
-                "members":<any>undefined
+                "value": "123"
             },
-            "members":<any>undefined
+            "members":<any>[]
         },
         {
             "type": "RETURN_STATEMENT",
             "ic_type": "INTEGER",
             "expression": {
-                "type": "ID_MEMBER_EXPRESSION",
+                "type": "FUNCTION_CALL_EXPRESSION",
                 "ic_type": "INTEGER",
                 "name": "my_int_square_add",
-                "members": {
-                    "type": "ARGS_EXPRESSION",
-                    "ic_type": "ARRAY",
-                    "ic_subtypes": [
-                        "INTEGER",
-                        "INTEGER"
-                    ],
-                    "items": [
-                        {
-                            "type": "ID_MEMBER_EXPRESSION",
-                            "ic_type": "INTEGER",
-                            "name": "left",
-                            "members":<any>undefined
-                        },
-                        {
-                            "type": "ID_MEMBER_EXPRESSION",
-                            "ic_type": "INTEGER",
-                            "name": "right",
-                            "members":<any>undefined
-                        }
-                    ]
-                }
+                "operands_expressions":[
+                    {
+                        "type": "ID_MEMBER_EXPRESSION",
+                        "ic_type": "INTEGER",
+                        "name": "left",
+                        "members":<any>[]
+                    },
+                    {
+                        "type": "ID_MEMBER_EXPRESSION",
+                        "ic_type": "INTEGER",
+                        "name": "right",
+                        "members":<any>[]
+                    }
+                ],
+                "operands_types": [
+                    "INTEGER",
+                    "INTEGER"
+                ],
+                "members":<any>[]
             }
         },
         {
             "type": "FUNCTION_STATEMENT",
             "ic_type": "INTEGER",
             "name": "my_int_square_add",
-            "operands": {
-                "type": "ARGIDS_EXPRESSION",
-                "ic_type": "ARRAY",
-                "ic_subtypes": [
-                    "INTEGER",
-                    "INTEGER"
-                ],
-                "items": [
-                    "left",
-                    "right"
-                ]
-            },
+            "operands_types": [
+                "INTEGER",
+                "INTEGER"
+            ],
+            "operands_names": [
+                "left",
+                "right"
+            ],
             "block": [
                 {
                     "type": "ASSIGN_STATEMENT",
@@ -105,7 +96,7 @@ export const program_1_ast = {
                             "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "INTEGER",
                             "name": "left",
-                            "members":<any>undefined
+                            "members":<any>[]
                         },
                         "operator": {
                             "ic_function":"mul",
@@ -116,10 +107,10 @@ export const program_1_ast = {
                             "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "INTEGER",
                             "name": "left",
-                            "members":<any>undefined
+                            "members":<any>[]
                         }
                     },
-                    "members":<any>undefined
+                    "members":<any>[]
                 },
                 {
                     "type": "ASSIGN_STATEMENT",
@@ -127,26 +118,21 @@ export const program_1_ast = {
                     "name": "b",
                     "is_async": false,
                     "expression": {
-                        "type": "ID_MEMBER_EXPRESSION",
+                        "type": "FUNCTION_CALL_EXPRESSION",
                         "ic_type": "UNKNOW",
                         "name": "square",
-                        "members": {
-                            "type": "ARGS_EXPRESSION",
-                            "ic_type": "ARRAY",
-                            "ic_subtypes": [
-                                "INTEGER"
-                            ],
-                            "items": [
-                                {
-                                    "type": "ID_MEMBER_EXPRESSION",
-                                    "ic_type": "INTEGER",
-                                    "name": "right",
-                                    "members":<any>undefined
-                                }
-                            ]
-                        }
+                        "operands_types": ["INTEGER"],
+                        "operands_expressions": [
+                            {
+                                "type": "ID_MEMBER_EXPRESSION",
+                                "ic_type": "INTEGER",
+                                "name": "right",
+                                "members":<any>[]
+                            }
+                        ],
+                        "members":<any>[]
                     },
-                    "members":<any>undefined
+                    "members":<any>[]
                 },
                 {
                     "type": "IF_STATEMENT",
@@ -160,7 +146,7 @@ export const program_1_ast = {
                                 "type": "ID_MEMBER_EXPRESSION",
                                 "ic_type": "INTEGER",
                                 "name": "a",
-                                "members":<any>undefined
+                                "members":<any>[]
                             },
                             "operator": {
                                 "ic_function":"equal",
@@ -170,11 +156,9 @@ export const program_1_ast = {
                             "rhs": {
                                 "type": "INTEGER",
                                 "ic_type": "INTEGER",
-                                "value": "0",
-                                "members":<any>undefined
+                                "value": "0"
                             }
-                        },
-                        "members":<any>undefined
+                        }
                     },
                     "then": [
                         {
@@ -183,8 +167,7 @@ export const program_1_ast = {
                             "expression": {
                                 "type": "INTEGER",
                                 "ic_type": "INTEGER",
-                                "value": "0",
-                                "members":<any>undefined
+                                "value": "0"
                             }
                         }
                     ],
@@ -202,7 +185,7 @@ export const program_1_ast = {
                                 "type": "ID_MEMBER_EXPRESSION",
                                 "ic_type": "UNKNOW",
                                 "name": "b",
-                                "members":<any>undefined
+                                "members":<any>[]
                             },
                             "operator": {
                                 "ic_function":"equal",
@@ -212,11 +195,9 @@ export const program_1_ast = {
                             "rhs": {
                                 "type": "INTEGER",
                                 "ic_type": "INTEGER",
-                                "value": "0",
-                                "members":<any>undefined
+                                "value": "0"
                             }
-                        },
-                        "members":<any>undefined
+                        }
                     },
                     "then": [
                         {
@@ -225,8 +206,7 @@ export const program_1_ast = {
                             "expression": {
                                 "type": "INTEGER",
                                 "ic_type": "INTEGER",
-                                "value": "1",
-                                "members":<any>undefined
+                                "value": "1"
                             }
                         }
                     ],
@@ -242,7 +222,7 @@ export const program_1_ast = {
                             "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "INTEGER",
                             "name": "a",
-                            "members":<any>undefined
+                            "members":<any>[]
                         },
                         "operator": {
                             "ic_function":"add",
@@ -253,7 +233,7 @@ export const program_1_ast = {
                             "type": "ID_MEMBER_EXPRESSION",
                             "ic_type": "UNKNOW",
                             "name": "b",
-                            "members":<any>undefined
+                            "members":<any>[]
                         }
                     }
                 }

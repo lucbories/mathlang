@@ -105,11 +105,6 @@ export default class MathLangCompiler {
             (loop_type)=>this._types_map.set(loop_type.get_name(), loop_type)
         );
 
-        if (this._types_map.has('NUMBER')){
-            this._types_map.set('INTEGER', this._types_map.get('NUMBER'));
-            this._types_map.set('FLOAT', this._types_map.get('NUMBER'));
-        }
-
         if (this._types_map.has('BIGNUMBER')){
             this._types_map.set('BIGINTEGER', this._types_map.get('BIGNUMBER'));
             this._types_map.set('BIGFLOAT', this._types_map.get('BIGNUMBER'));
@@ -340,6 +335,20 @@ export default class MathLangCompiler {
         math_lang_parser.reset();
         math_lang_parser.input = this._lexemes;
         const parser:any = math_lang_parser;
+        const fn = parser[parser_rule];
+        if (! fn){
+            const error:CompilerError = {
+                source:this._text,
+                step:CompilerStep.CST,
+                line:0,
+                column:0,
+                src_extract:'',
+                message:'Parser rule [' + parser_rule + '] doesn t exist on this compiler.',
+                solution:'Compiler use error, bad parser rule name [' + parser_rule + ']'
+            };
+            this._errors.push(error);
+            return false;
+        }
         this._cst = parser[parser_rule]();
 
         if (math_lang_parser.errors.length > 0) {
