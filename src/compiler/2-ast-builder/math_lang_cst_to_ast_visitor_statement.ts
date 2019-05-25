@@ -351,13 +351,14 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         const assign_name = ast_id_left_node.name;
 
         
-        // *** NOT A FUNCTION DECLARATION ***
-        if (ast_id_left_node.type != AST.EXPR_MEMBER_FUNC_DECL){
+        // *** ASSIGN A VARIABLE: NO ACCESSORS, NOT A FUNCTION DECLARATION ***
+        if (ast_id_left_node.members.length == 0 && ast_id_left_node.type == AST.EXPR_MEMBER_ID){
             // EVALUATE RIGHT EXPRESSION
             const cst_expr_node = ctx.AssignExpr;
             const ast_expr_node = this.visit(cst_expr_node);
+
             const assign_ast = {
-                type: AST.STAT_ASSIGN,
+                type: AST.STAT_ASSIGN_VARIABLE,
                 ic_type: ast_expr_node.ic_type,
                 name:assign_name,
                 is_async:ctx.Async ? true : false,
@@ -365,66 +366,155 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
                 expression:ast_expr_node
             };
 
-            // DECLARE A NEW VARIABLE
-            if ( ! this.has_declared_var_symbol(assign_name) && ast_id_left_node.members.length == 0){
-                this.register_symbol_declaration(assign_name, assign_ast.ic_type, false, '', ctx, AST.STAT_ASSIGN);
-            }
-
-            // DECLARE A NEW VALUE ATTRIBUTE // TODO
+            // DECLARE A NEW VARIABLE OR UPDATE AN EXISTING VARIABLE
+            this.register_symbol_declaration(assign_name, assign_ast.ic_type, false, '', ctx, AST.STAT_ASSIGN_VARIABLE);
 
             return assign_ast;
         }
 
 
-        // *** FUNCTION DECLARATION ***
-        let assign_ast = {
-            type: AST.STAT_ASSIGN,
-            ic_type: TYPES.UNKNOW,
-            name:assign_name,
-            is_async:ctx.Async ? true : false,
-            members:ast_id_left_node.members,
-            expression:<any>undefined,
-            operands_types:ast_id_left_node.operands_types,
-            operands_names:ast_id_left_node.operands_names
-        };
-
-        // DECLARE FUNCTION
-        const operands_types = ast_id_left_node.operands_types;
-        const operands_names = ast_id_left_node.operands_names;
-        const default_type = operands_types.length > 0 ? operands_types[0]:'INTEGER';
-        const operands = [];
-
-        let opd_index;
-        let loop_name;
-        let loop_type;
-        for(opd_index=0; opd_index < operands_names.length; opd_index++){
-            loop_name = operands_names[opd_index];
-            loop_type = opd_index < operands_types.length ?operands_types[opd_index] : default_type;
-            operands.push( { opd_name:loop_name, opd_type:loop_type } )
-        }
-
-        this.register_function_declaration(assign_name, TYPES.UNKNOW, operands, [], ctx, AST.STAT_ASSIGN);
-        
-        // EVALUATE RIGHT EXPRESSION
-        this.enter_function_declaration(assign_name);
-        const cst_expr_node = ctx.AssignExpr;
-        const ast_expr_node = this.visit(cst_expr_node);
-        this.leave_function_declaration();
-
-        // UPDATE RIGHT TYPE
-        assign_ast.ic_type = ast_expr_node.ic_type;
-        assign_ast.expression = ast_expr_node;
-
-        // UPDATE FUNCTION DECLARATION
-        this.set_function_declaration_statements(assign_name, ast_expr_node);
-        this.set_function_declaration_type(assign_name, ast_expr_node.ic_type);
+        // *** ASSIGN A FUNCTION DECLARATION: NO ACCESSORS ***
+        if (ast_id_left_node.members.length == 0 && ast_id_left_node.type == AST.EXPR_MEMBER_FUNC_DECL){
+            let assign_ast = {
+                type: AST.STAT_ASSIGN_FUNCTION,
+                ic_type: TYPES.UNKNOW,
+                name:assign_name,
+                is_async:ctx.Async ? true : false,
+                members:ast_id_left_node.members,
+                expression:<any>undefined,
+                operands_types:ast_id_left_node.operands_types,
+                operands_names:ast_id_left_node.operands_names
+            };
+    
+            // DECLARE A NEW FUNCTION OR RECREATE AN EXISTING FUNCTION
+            const operands_types = ast_id_left_node.operands_types;
+            const operands_names = ast_id_left_node.operands_names;
+            const default_type = operands_types.length > 0 ? operands_types[0]:'INTEGER';
+            const operands = [];
+    
+            let opd_index;
+            let loop_name;
+            let loop_type;
+            for(opd_index=0; opd_index < operands_names.length; opd_index++){
+                loop_name = operands_names[opd_index];
+                loop_type = opd_index < operands_types.length ?operands_types[opd_index] : default_type;
+                operands.push( { opd_name:loop_name, opd_type:loop_type } )
+            }
             
-        // CHECK LEFT TYPE == RIGHT TYPE
-        if (ast_id_left_node.ic_type != TYPES.UNKNOW && assign_ast.ic_type != ast_id_left_node.ic_type){
-            this.add_error(ctx.ArgumentsWithIds, AST.EXPR_MEMBER_FUNC_DECL, 'Error:left type [' + assign_ast.ic_type + '] and right type [' + ast_id_left_node.ic_type + '] are different for function declaration.')
+            this.register_function_declaration(assign_name, TYPES.UNKNOW, operands, [], ctx, AST.STAT_ASSIGN_FUNCTION);
+            
+            // EVALUATE RIGHT EXPRESSION
+            this.enter_function_declaration(assign_name);
+            const cst_expr_node = ctx.AssignExpr;
+            const ast_expr_node = this.visit(cst_expr_node);
+            this.leave_function_declaration();
+    
+            // UPDATE RIGHT TYPE
+            assign_ast.ic_type = ast_expr_node.ic_type;
+            assign_ast.expression = ast_expr_node;
+    
+            // UPDATE FUNCTION DECLARATION
+            this.set_function_declaration_statements(assign_name, ast_expr_node);
+            this.set_function_declaration_type(assign_name, ast_expr_node.ic_type);
+                
+            // CHECK LEFT TYPE == RIGHT TYPE
+            if (ast_id_left_node.ic_type != TYPES.UNKNOW && assign_ast.ic_type != ast_id_left_node.ic_type){
+                this.add_error(ctx.ArgumentsWithIds, AST.EXPR_MEMBER_FUNC_DECL, 'Error:left type [' + assign_ast.ic_type + '] and right type [' + ast_id_left_node.ic_type + '] are different for function declaration.')
+            }
+
+            return assign_ast;
         }
 
-        return assign_ast;
+
+        // *** ASSIGN AN ATTRIBUTE ***
+        if (ast_id_left_node.members.length > 0 && ast_id_left_node.type == AST.EXPR_MEMBER_ATTRIBUTE){
+            // EVALUATE RIGHT EXPRESSION
+            const cst_expr_node = ctx.AssignExpr;
+            const ast_expr_node = this.visit(cst_expr_node);
+
+            if (ast_id_left_node.ic_type == TYPES.UNKNOW){
+                ast_id_left_node.ic_type = ast_expr_node.ic_type;
+                
+                // LOOP ON LEFT MEMBERS
+                let loop_index;
+                let loop_member;
+                const last_index = ast_id_left_node.members.length - 1;
+                for(loop_index=last_index; loop_index >= 0; loop_index--){
+                    loop_member = ast_id_left_node.members[loop_index];
+                    if (loop_member.ic_type == TYPES.UNKNOW){
+                        loop_member.ic_type = ast_expr_node.ic_type;
+                    }
+                }
+            }
+
+            const assign_ast = {
+                type: AST.STAT_ASSIGN_ATTRIBUTE,
+                ic_type: ast_expr_node.ic_type,
+                name:assign_name,
+                is_async:ctx.Async ? true : false,
+                members:ast_id_left_node.members,
+                expression:ast_expr_node
+            };
+
+            return assign_ast;
+        }
+
+
+        // *** METHOD DECLARATION ***
+        if (ast_id_left_node.members.length > 0 && ast_id_left_node.type == AST.EXPR_MEMBER_METHOD_DECL){
+            const last_member = ast_id_left_node.members[ast_id_left_node.members.length - 1];
+            const operands_types = last_member.operands_types;
+            const operands_names = last_member.operands_names;
+            const default_type = operands_types.length > 0 ? operands_types[0]:'INTEGER';
+            const method_value_type = ast_id_left_node.members.length  > 1 ? ast_id_left_node.members[ast_id_left_node.members.length - 2].ic_type : ast_id_left_node.ic_type;
+            const method_name = method_value_type + '.' + last_member.func_name;
+            const operands = [];
+    
+            let opd_index;
+            let loop_name;
+            let loop_type;
+            for(opd_index=0; opd_index < operands_names.length; opd_index++){
+                loop_name = operands_names[opd_index];
+                loop_type = opd_index < operands_types.length ?operands_types[opd_index] : default_type;
+                operands.push( { opd_name:loop_name, opd_type:loop_type } )
+            }
+            
+            this.register_function_declaration(method_name, TYPES.INTEGER, operands, [], ctx, AST.STAT_ASSIGN_METHOD);
+            
+            // EVALUATE RIGHT EXPRESSION
+            this.enter_function_declaration(method_name);
+            const cst_expr_node = ctx.AssignExpr;
+            const ast_expr_node = this.visit(cst_expr_node);
+            this.leave_function_declaration();
+
+            this.set_function_declaration_statements(method_name, ast_expr_node);
+            this.set_function_declaration_type(method_name, ast_expr_node.ic_type);
+            
+            const assign_ast = {
+                type: AST.STAT_ASSIGN_METHOD,
+                ic_type: ast_expr_node.ic_type,
+                name:assign_name,
+                is_async:ctx.Async ? true : false,
+                members:ast_id_left_node.members,
+                expression:ast_expr_node
+            };
+
+            if (ast_expr_node.ic_type != TYPES.INTEGER){
+                this._scopes_map.delete(method_name);
+                const method_new_name = ast_expr_node.ic_type + '.' + last_member.func_name;
+                this.register_function_declaration(method_new_name, ast_expr_node.ic_type, operands, ast_expr_node, ctx, AST.STAT_ASSIGN_METHOD);
+            }
+
+            // CHECK LEFT TYPE == RIGHT TYPE
+            // if (ast_id_left_node.ic_type != TYPES.UNKNOW && assign_ast.ic_type != ast_id_left_node.ic_type){
+            //     this.add_error(ctx, AST.EXPR_MEMBER_METHOD_DECL, 'Error:left type [' + assign_ast.ic_type + '] and right type [' + ast_id_left_node.ic_type + '] are different for method [' + method_name + '] declaration.')
+            // }
+
+            return assign_ast;
+        }
+
+        // NOTHING
+        return undefined;
     }
     
 

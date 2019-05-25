@@ -4,7 +4,6 @@ import { math_lang_parser } from '../1-cst-builder/math_lang_parser';
 import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES,  TYPES } from '../3-program-builder/math_lang_types';
 import { SymbolDeclarationRecord, FunctionScope } from '../3-program-builder/math_lang_function_scope';
 import IMethod from '../../core/imethod';
-import { type } from 'os';
 
 /**
  * CST visitor base class.
@@ -164,17 +163,6 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
             this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
             has_error = true;
         }
-
-        // CHECK VALUE TYPE METHOD
-        // if (! has_error){
-        //     const has_attribute:I = value_type.has_attribute(attribute_name, attribute_type);   // TODO NOT YET IMPLEMENTED
-        //     if (! has_attribute){
-        //         this.add_error(cst_context, ast_node_type, 'Error:attribute not found  with [' + attribute_name + '] and type [' + attribute_type + '] for value type [' + type_name + ']');
-        //         has_error = true;
-        //     }
-        // }
-
-        // return ! has_error;
 
         return false;
     }

@@ -39,7 +39,7 @@ describe('MathLang assign parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.STAT_ASSIGN,
+            type:AST.STAT_ASSIGN_VARIABLE,
             ic_type: TYPES.INTEGER,
             name:'a',
             is_async: false,
@@ -82,7 +82,7 @@ describe('MathLang assign parser', () => {
             type:AST.BLOCK,
             statements:[
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_VARIABLE,
                     ic_type: TYPES.INTEGER,
                     name:'a',
                     is_async: false,
@@ -94,7 +94,7 @@ describe('MathLang assign parser', () => {
                     }
                 },
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_ATTRIBUTE,
                     ic_type: TYPES.INTEGER,
                     name:'a',
                     is_async: false,
@@ -140,7 +140,7 @@ describe('MathLang assign parser', () => {
             type:AST.PROGRAM,
             block:[
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_VARIABLE,
                     ic_type: TYPES.INTEGER,
                     name:'b',
                     is_async: false,
@@ -152,7 +152,7 @@ describe('MathLang assign parser', () => {
                     }
                 },
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_VARIABLE,
                     ic_type: TYPES.INTEGER,
                     name:'a',
                     is_async: false,
@@ -233,7 +233,7 @@ describe('MathLang assign parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.STAT_ASSIGN,
+            type:AST.STAT_ASSIGN_FUNCTION,
             ic_type: TYPES.FLOAT,
             name:'f',
             is_async: false,
@@ -314,7 +314,7 @@ describe('MathLang assign parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.STAT_ASSIGN,
+            type:AST.STAT_ASSIGN_FUNCTION,
             ic_type: TYPES.INTEGER,
             name:'fxy',
             is_async: false,
@@ -395,7 +395,7 @@ describe('MathLang assign parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.STAT_ASSIGN,
+            type:AST.STAT_ASSIGN_FUNCTION,
             ic_type: TYPES.INTEGER,
             name:'fxy',
             is_async: false,
@@ -476,7 +476,7 @@ describe('MathLang assign parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.STAT_ASSIGN,
+            type:AST.STAT_ASSIGN_FUNCTION,
             ic_type: TYPES.INTEGER,
             name:'fxy',
             is_async: false,
@@ -560,7 +560,7 @@ describe('MathLang assign parser', () => {
             type:AST.BLOCK,
             statements:[
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_VARIABLE,
                     ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,
@@ -572,7 +572,7 @@ describe('MathLang assign parser', () => {
                     }
                 },
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_METHOD,
                     ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,
@@ -625,7 +625,7 @@ describe('MathLang assign parser', () => {
             type:AST.BLOCK,
             statements:[
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_VARIABLE,
                     ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,
@@ -637,7 +637,7 @@ describe('MathLang assign parser', () => {
                     }
                 },
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_METHOD,
                     ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,
@@ -695,7 +695,7 @@ describe('MathLang assign parser', () => {
             type:AST.BLOCK,
             statements:[
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_VARIABLE,
                     ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,
@@ -707,7 +707,7 @@ describe('MathLang assign parser', () => {
                     }
                 },
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_METHOD,
                     ic_type: TYPES.INTEGER,
                     name:'fxy',
                     is_async: false,

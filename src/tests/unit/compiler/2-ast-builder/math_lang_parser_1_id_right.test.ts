@@ -69,7 +69,7 @@ describe('MathLang id expression for right part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_ATTRIBUTE,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -106,7 +106,7 @@ describe('MathLang id expression for right part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_ATTRIBUTE,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -148,7 +148,7 @@ describe('MathLang id expression for right part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_INDEXED,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -202,7 +202,7 @@ describe('MathLang id expression for right part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_ATTRIBUTE,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -336,12 +336,12 @@ describe('MathLang id expression for right part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_METHOD_CALL,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
                 {
-                    type:AST.EXPR_MEMBER_FUNC_CALL,
+                    type:AST.EXPR_MEMBER_METHOD_CALL,
                     ic_type:TYPES.UNKNOW,
                     func_name:'b',
                     operands_types:<any>[],
@@ -375,12 +375,12 @@ describe('MathLang id expression for right part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_METHOD_CALL,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
                 {
-                    type:AST.EXPR_MEMBER_FUNC_CALL,
+                    type:AST.EXPR_MEMBER_METHOD_CALL,
                     ic_type:TYPES.UNKNOW,
                     func_name:'b',
                     operands_types:[TYPES.UNKNOW],
@@ -420,12 +420,12 @@ describe('MathLang id expression for right part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_METHOD_CALL,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
                 {
-                    type:AST.EXPR_MEMBER_FUNC_CALL,
+                    type:AST.EXPR_MEMBER_METHOD_CALL,
                     ic_type:TYPES.UNKNOW,
                     func_name:'b',
                     operands_types:[TYPES.UNKNOW, TYPES.UNKNOW],
@@ -471,7 +471,7 @@ describe('MathLang id expression for right part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_METHOD_CALL,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -481,7 +481,7 @@ describe('MathLang id expression for right part parser', () => {
                     attribute_name:'b'
                 },
                 {
-                    type:AST.EXPR_MEMBER_FUNC_CALL,
+                    type:AST.EXPR_MEMBER_METHOD_CALL,
                     ic_type:TYPES.UNKNOW,
                     func_name:'c',
                     operands_expressions:<any>[],

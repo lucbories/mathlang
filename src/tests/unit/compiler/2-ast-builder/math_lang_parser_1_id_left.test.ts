@@ -71,7 +71,7 @@ describe('MathLang id expression for left part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_ATTRIBUTE,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -108,7 +108,7 @@ describe('MathLang id expression for left part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_ATTRIBUTE,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -150,7 +150,7 @@ describe('MathLang id expression for left part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_INDEXED,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -204,7 +204,7 @@ describe('MathLang id expression for left part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_ATTRIBUTE,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -322,7 +322,7 @@ describe('MathLang id expression for left part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_METHOD_DECL,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -358,7 +358,7 @@ describe('MathLang id expression for left part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_METHOD_DECL,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -394,7 +394,7 @@ describe('MathLang id expression for left part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_ID,
+            type:AST.EXPR_MEMBER_METHOD_DECL,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[

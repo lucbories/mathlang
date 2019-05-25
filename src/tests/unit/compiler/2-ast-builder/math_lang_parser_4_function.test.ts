@@ -291,7 +291,7 @@ describe('MathLang function declaration parser', () => {
                     "type": "BLOCK",
                     "statements":[
                         {
-                            "type": "ASSIGN_STATEMENT",
+                            "type": "ASSIGN_STATEMENT_VARIABLE",
                             "ic_type": "INTEGER",
                             "name": "b",
                             "is_async":false,
@@ -314,7 +314,7 @@ describe('MathLang function declaration parser', () => {
                     ]
                 },
                 {
-                    "type": "ASSIGN_STATEMENT",
+                    "type": "ASSIGN_STATEMENT_VARIABLE",
                     "ic_type": "INTEGER",
                     "name": "a",
                     "is_async":false,

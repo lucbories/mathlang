@@ -6,7 +6,8 @@ import IType from '../core/itype';
 import { math_lang_lexer, math_lang_parser } from './1-cst-builder/math_lang_parser';
 import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visitor';
 import {FunctionScope} from './3-program-builder/math_lang_function_scope';
-import MathLangAstToIcVisitor, { ICFunction } from './3-program-builder/math_lang_ast_to_ic_builder';
+import { ICFunction } from './3-program-builder/math_lang_ast_to_ic_builder_base';
+import MathLangAstToIcVisitor from './3-program-builder/math_lang_ast_to_ic_builder';
 
 
 

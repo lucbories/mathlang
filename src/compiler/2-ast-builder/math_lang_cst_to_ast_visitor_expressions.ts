@@ -245,6 +245,8 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
                     member_index: cst_node_index,
                     indexes_expressions:indexes
                 }
+
+                ast_node.type = AST.EXPR_MEMBER_INDEXED;
                 ast_node.members.push(member_ast_node);
             }
             
@@ -260,6 +262,8 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
                     ic_type: this.get_attribute_type(member_previous_ic_type, attribute_id, ctx, ast_node.type),
                     attribute_name:attribute_id
                 }
+
+                ast_node.type = AST.EXPR_MEMBER_ATTRIBUTE;
                 ast_node.members.push(member_ast_node)
             }
 
@@ -298,7 +302,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
         // METHOD DECLARATION
         else if (ctx.dotIdArgsDeclarationExpression){
             if (ctx.dotIdArgsDeclarationExpression.length != 1){
-                this.add_error(ctx.dotIdArgsDeclarationExpression, AST.EXPR_MEMBER_FUNC_DECL, 'Error:only one method declaration at end of an id expression but [' + ctx.dotIdArgsDeclarationExpression.length + '] found.')
+                this.add_error(ctx.dotIdArgsDeclarationExpression, AST.EXPR_MEMBER_METHOD_DECL, 'Error:only one method declaration at end of an id expression but [' + ctx.dotIdArgsDeclarationExpression.length + '] found.')
             }
 
             const cst_func_decl_node:any = ctx.dotIdArgsDeclarationExpression[0];
@@ -306,6 +310,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
             // NO TEST OF EXISTING FUNCTION/METHOD TO BE ABLE TO DECLARE NEW ONE
 
+            ast_node.type = AST.EXPR_MEMBER_METHOD_DECL;
             ast_func_decl_node.type = AST.EXPR_MEMBER_METHOD_DECL;
             ast_node.members.push(ast_func_decl_node);
         }
@@ -351,7 +356,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
         // METHOD CALL
         else if (ctx.dotIdArgsCallExpression){
             if (ctx.dotIdArgsCallExpression.length != 1){
-                this.add_error(ctx.dotIdArgsCallExpression, AST.EXPR_MEMBER_FUNC_CALL, 'Error:only one function call at end of an id expression but [' + ctx.dotIdArgsCallExpression.length + '] found.')
+                this.add_error(ctx.dotIdArgsCallExpression, AST.EXPR_MEMBER_METHOD_CALL, 'Error:only one function call at end of an id expression but [' + ctx.dotIdArgsCallExpression.length + '] found.')
             }
 
             const cst_func_call_node:any = ctx.dotIdArgsCallExpression[0];
@@ -360,14 +365,16 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
             // TEST IF CALLED FUNCTION/METHOD EXISTS
             if (ast_node.members.length == 0 && ! this.has_declared_func_symbol(id)){
-                this.add_error(ctx, AST.EXPR_MEMBER_FUNC_CALL, 'Error:unknow called function [' + id + ']');
+                this.add_error(ctx, AST.EXPR_MEMBER_METHOD_CALL, 'Error:unknow called function [' + id + ']');
             }
             if (ast_node.members.length > 0){
                 const last_member = ast_node.members[ast_node.members.length - 1];
                 const last_member_type = last_member ? last_member.ic_type : TYPES.UNKNOW;
-                this.check_method(last_member_type, id, ast_func_call_node.operands_types, cst_func_call_node, AST.EXPR_MEMBER_FUNC_CALL);
+                this.check_method(last_member_type, id, ast_func_call_node.operands_types, cst_func_call_node, AST.EXPR_MEMBER_METHOD_CALL);
             }
             
+            ast_node.type = AST.EXPR_MEMBER_METHOD_CALL;
+            ast_node.ic_type = ast_func_call_node.ic_type;
             ast_node.members.push(ast_func_call_node);
         }
 
@@ -398,11 +405,11 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
         const ast_args_node:any = this.visit(cst_args_node);
 
         const ast_function_declaration = {
-            type: AST.EXPR_MEMBER_FUNC_DECL,
+            type: AST.EXPR_MEMBER_METHOD_DECL,
             ic_type: TYPES.UNKNOW,
             func_name:id,
             operands_types:ast_args_node.ic_subtypes,
-            operands_expressions:ast_args_node.items
+            operands_names:ast_args_node.items
         };
 
         return ast_function_declaration;
@@ -421,7 +428,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
         const func_scope = this.get_scopes_map().get(id);
 
         const ast_func_call_node = {
-            type:AST.EXPR_MEMBER_FUNC_CALL,
+            type:AST.EXPR_MEMBER_METHOD_CALL,
             ic_type: func_scope? func_scope.return_type : TYPES.UNKNOW,
             func_name:id,
             operands_types:ast_args_node.ic_subtypes ? ast_args_node.ic_subtypes : [],

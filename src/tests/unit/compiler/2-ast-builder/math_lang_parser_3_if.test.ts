@@ -48,7 +48,7 @@ describe('MathLang if parser', () => {
             },
             then:[
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_VARIABLE,
                     ic_type:TYPES.INTEGER,
                     name:'a',
                     is_async:false,
@@ -116,7 +116,7 @@ describe('MathLang if parser', () => {
                     },
                     "then": [
                         {
-                            "type":AST.STAT_ASSIGN,
+                            "type":AST.STAT_ASSIGN_VARIABLE,
                             "ic_type":TYPES.INTEGER,
                             "name": "a",
                             "is_async":false,
@@ -128,7 +128,7 @@ describe('MathLang if parser', () => {
                             }
                         },
                         {
-                            "type": AST.STAT_ASSIGN,
+                            "type": AST.STAT_ASSIGN_VARIABLE,
                             "ic_type": TYPES.INTEGER,
                             "name": "b",
                             "is_async":false,
@@ -181,7 +181,7 @@ describe('MathLang if parser', () => {
             },
             then:[
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_VARIABLE,
                     ic_type:TYPES.INTEGER,
                     name:'a',
                     is_async:false,
@@ -195,7 +195,7 @@ describe('MathLang if parser', () => {
             ],
             else:<any>[
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_VARIABLE,
                     ic_type:TYPES.FLOAT,
                     name:'a',
                     is_async:false,
