@@ -37,6 +37,7 @@
     "test-ast-assign":   "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/2-ast-builder/math_lang_parser_3_assign.test.ts",
     "test-ast-function": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/2-ast-builder/math_lang_parser_4_function.test.ts",
     "test-ic-assign":    "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/3-ic-builder/math_lang_ic_assign.test.ts",
+    "test-ic-if":        "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/3-ic-builder/math_lang_ic_if.test.ts",
     "testjs":            "mocha  dest/tests/unit/**/*.test.js",
     "watch-test":        "mocha --reporter spec --require ts-node/register --watch --watch-extensions ts src/**/*.test.ts"
   },

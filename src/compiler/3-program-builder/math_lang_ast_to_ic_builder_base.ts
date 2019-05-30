@@ -4,26 +4,9 @@ import AST from '../2-ast-builder/math_lang_ast';
 
 import { FunctionScope } from './math_lang_function_scope';
 import TYPES from './math_lang_types';
+import IC from './math_lang_ic';
 
 
-
-export enum IC {
-    FUNCTION_DECLARE_ENTER      ='function-declare-enter',
-    FUNCTION_DECLARE_LEAVE      ='function-declare-leave',
-    FUNCTION_CALL               ='function-call',
-    FUNCTION_RETURN             ='function-return',
-
-    REGISTER_GET                ='register-get',
-    REGISTER_SET                ='register-set',
-
-    STACK_PUSH                  ='stack-push',
-    STACK_PUSH_FROM_REGISTER    ='stack-push-from-register',
-    STACK_POP                   ='stack-pop',
-    STACK_POP_TO_REGISTER       ='stack-pop-to-register',
-
-    MESSAGE_SEND                ='message-send',
-    MESSAGE_RECEIVE             ='message-receive'
-}
 
 
 export type ICFunction = {
@@ -78,6 +61,11 @@ export type ICInstruction = {
     text:string
 };
 
+export type ICLabel = {
+    label_name:string,
+    label_index:number
+};
+
 
 
 /**
@@ -89,6 +77,7 @@ export type ICInstruction = {
 export default class MathLangAstToIcVisitorBase {
     protected _ic_functions:Map<string,ICFunction> = new Map();
     private _errors:ICError[] = [];
+    private _functions_labels:Map<string,ICLabel[]> = new Map();
 
 
     /**
@@ -258,6 +247,113 @@ export default class MathLangAstToIcVisitorBase {
             }
         });
         return symbol_type;
+    }
+
+
+    /**
+     * Get True operand.
+     * @returns true operand
+     */
+    get_true_operand():ICOperand{
+        return {
+            ic_type:TYPES.BOOLEAN,
+            ic_source:ICOperandSource.FROM_INLINE,
+            ic_name:'###TRUE',
+            ic_id_accessors:[],
+            ic_id_accessors_str:''
+        };
+    }
+
+
+    /**
+     * Get False operand.
+     * @returns false operand
+     */
+    get_false_operand():ICOperand{
+        return {
+            ic_type:TYPES.UNKNOW,
+            ic_source:ICOperandSource.FROM_INLINE,
+            ic_name:'###FALSE',
+            ic_id_accessors:[],
+            ic_id_accessors_str:''
+        };
+    }
+
+
+    /**
+     * Get Null operand.
+     * @returns null operand
+     */
+    get_null_operand():ICOperand{
+        return {
+            ic_type:TYPES.UNKNOW,
+            ic_source:ICOperandSource.FROM_INLINE,
+            ic_name:'###NULL',
+            ic_id_accessors:[],
+            ic_id_accessors_str:''
+        };
+    }
+
+
+    /**
+     * Add IC function label. By default, label index is at future statement position.
+     * @param ic_function   function object.
+     * @param target_index  label index.
+     * @returns label name.
+     */
+    add_function_label(ic_function:ICFunction, target_index?:number):string{
+        if (! this._functions_labels.has(ic_function.func_name) ){
+            this._functions_labels.set(ic_function.func_name, []);
+        }
+        const labels = this._functions_labels.get(ic_function.func_name);
+        const label_name = ic_function.func_name + '_label_' + labels.length;
+        const label_index = target_index ? target_index : ic_function.statements.length;
+        const label = { label_name:label_name, label_index:label_index };
+        labels.push(label);
+        return label_name;
+    }
+
+
+    /**
+     * Update IC function label index.
+     * @param label_name    label name.
+     * @param ic_function   function object.
+     * @param target_index  label index.
+     * @returns nothing.
+     */
+    update_function_label_index(label_name:string, ic_function:ICFunction, target_index?:number){
+        if (! this._functions_labels.has(ic_function.func_name) ){
+            return;
+        }
+        const labels = this._functions_labels.get(ic_function.func_name);
+        if (labels.length == 0){
+            return;
+        }
+
+        // SEARCH LABEL RECORD WITH GIVEN NAME FROM THE END
+        const label_index = target_index ? target_index : ic_function.statements.length;
+        let labels_index = labels.length;
+        let label:ICLabel;
+        do{
+            --labels_index;
+            label = labels[labels_index];
+            if (label.label_name == label_name){
+                labels_index = -99;
+            }
+        } while(labels_index >= 0);
+
+        if (labels_index == -99){
+            label.label_index = label_index;
+        }
+    }
+
+
+    /**
+     * Get IC functions labels Map.
+     * @returns functions labels Map.
+     */
+    get_ic_functions_labels_map(){
+        return this._functions_labels;
     }
 }
 

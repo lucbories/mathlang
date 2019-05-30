@@ -7,9 +7,9 @@ import DEFAULT_TYPES from '../../../../features/default_types';
 
 
 
-describe('MathLang assign parser', () => {
+describe('MathLang assign IC builder', () => {
     const compiler = new MathLangCompiler(DEFAULT_TYPES);
-/*
+
     it('Parse assign a=456 statement' , () => {
         compiler.reset();
         const text = 'a=456';
@@ -143,9 +143,9 @@ FLOAT:function-return FLOAT:[456.0]
 none:function-declare-leave INTEGER.b`;
         expect(ic_source).equals(expected_ic_source);
     });
-    */
+    
 
-    it('Parse assign begin a=12\na.b(x is FLOAT)=456.0 end statement' , () => {
+    it('Parse assign begin a=12\na.b(x is FLOAT)=x + 456.0 end statement' , () => {
         compiler.reset();
         const text = 'begin a=12\na.b(x is FLOAT)=x + 456.0 end';
         const result = compiler.compile(text, 'program');

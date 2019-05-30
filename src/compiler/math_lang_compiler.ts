@@ -8,6 +8,7 @@ import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visito
 import {FunctionScope} from './3-program-builder/math_lang_function_scope';
 import { ICFunction } from './3-program-builder/math_lang_ast_to_ic_builder_base';
 import MathLangAstToIcVisitor from './3-program-builder/math_lang_ast_to_ic_builder';
+import {ICLabel} from './3-program-builder/math_lang_ast_to_ic_builder_base';
 
 
 
@@ -88,6 +89,7 @@ export default class MathLangCompiler {
     private _cst:any;
     private _ast:any;
     private _ic_functions:Map<string,ICFunction>;
+    private _ic_functions_labels:Map<string,ICLabel[]>;
     private _program:IProgram;
 
     private _ast_builder:MathLangCstToAstVisitor;
@@ -419,6 +421,7 @@ export default class MathLangCompiler {
         const ic_builder = new MathLangAstToIcVisitor(functions_map, this._types_map);
         ic_builder.visit();
         this._ic_functions = ic_builder.get_ic_functions_map();
+        this._ic_functions_labels = ic_builder.get_ic_functions_labels_map();
 
         if (ic_builder.has_error()){
             const errors = ic_builder.get_errors();
@@ -505,5 +508,35 @@ export default class MathLangCompiler {
             }
         );
         return ic_source;
+    }
+
+
+    /**
+     * Dump IC functions labels to a string and optionaly to console.
+     * 
+     * @param ic_functions_map IC functions map
+     * @param dump_functions should dump to console ? (boolean)
+     * 
+     * @returns dumped string.
+     */
+    dump_ic_functions_labels(dump_functions:boolean):string{
+        let labels_str:string='';
+        this._ic_functions_labels.forEach(
+            (function_labels:ICLabel[], func_name)=>{
+                labels_str += 'ICFunction:' + func_name + ' labels:\n';
+
+                function_labels.forEach(
+                    (label_record:ICLabel, index:number)=>{
+                        labels_str += index + ':' + label_record.label_name + '=' + label_record.label_index + '\n';
+                    }
+                );
+            }
+        );
+
+        if (dump_functions){
+            console.log(labels_str);
+        }
+
+        return labels_str;
     }
 }
