@@ -2,12 +2,12 @@ import * as mocha from 'mocha';
 import * as chai from 'chai';
 const expect = chai.expect;
 
-import TYPES from '../../compiler/3-program-builder/math_lang_types';
+import TYPES from '../../compiler/math_lang_types';
 import AST from '../../compiler/2-ast-builder/math_lang_ast';
 import MathLangCompiler from '../../compiler/math_lang_compiler';
 import DEFAULT_TYPES from '../../features/default_types';
 
-import { program_1_source, program_1_ast } from './program_1';
+import { program_1_source, program_1_ast, program_1_ic, program_1_ic_labels } from './program_1';
 import { program_2_source, program_2_ast } from './program_2';
 
 
@@ -42,7 +42,7 @@ describe('MathLang compiler test', () => {
 
         // TEST AST
         const expected_ast = {
-            type:'ASSIGN_STATEMENT',
+            type:AST.STAT_ASSIGN_VARIABLE,
             ic_type: 'INTEGER',
             name:'a',
             is_async: false,
@@ -120,7 +120,7 @@ describe('MathLang compiler test', () => {
             type:AST.BLOCK,
             statements:[
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_VARIABLE,
                     ic_type: TYPES.INTEGER,
                     name:'a',
                     is_async: false,
@@ -132,7 +132,7 @@ describe('MathLang compiler test', () => {
                     }
                 },
                 {
-                    type:AST.STAT_ASSIGN,
+                    type:AST.STAT_ASSIGN_ATTRIBUTE,
                     ic_type: TYPES.INTEGER,
                     name:'a',
                     is_async: false,
@@ -162,7 +162,7 @@ describe('MathLang compiler test', () => {
         const errors = compiler.get_errors();
 
         // ERRORS
-        const expected_errors = 3;
+        const expected_errors = 0;
         if (errors.length != expected_errors){
             console.log('errors', errors);
 
@@ -183,6 +183,20 @@ describe('MathLang compiler test', () => {
         // TEST AST
         const expected_ast = program_1_ast;
         expect(compiler_ast).eql(expected_ast);
+
+        // GET IC CODE
+        const DEBUG_IC = false;
+        const ic_functions_map = compiler.get_ic_functions_map();
+        // console.log('ic_functions_map', ic_functions_map);
+        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, DEBUG_IC);
+        const labels_str = compiler.dump_ic_functions_labels(DEBUG_IC);
+
+        // TEST IC TEXT
+        const expected_ic_source = program_1_ic;
+        const expected_labels_str = program_1_ic_labels;
+
+        expect(ic_source).equals(expected_ic_source);
+        expect(labels_str).equals(expected_labels_str);
     });
 
 
@@ -193,7 +207,7 @@ describe('MathLang compiler test', () => {
         const errors = compiler.get_errors();
 
         // ERRORS
-        const expected_errors = 11;
+        const expected_errors = 13;
         if (errors.length != expected_errors){
             console.log('errors', errors);
 

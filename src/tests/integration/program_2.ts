@@ -1,3 +1,7 @@
+
+import AST from '../../compiler/2-ast-builder/math_lang_ast';
+
+
 export const program_2_source = `
 
 function my_int_square_add(left is INTEGER, right is INTEGER) return INTEGER
@@ -31,7 +35,7 @@ export const program_2_ast = {
     "type": "PROGRAM",
     "block": [
         {
-            "type": "ASSIGN_STATEMENT",
+            "type": AST.STAT_ASSIGN_VARIABLE,
             "ic_type": "FLOAT",
             "name": "t",
             "is_async": false,
@@ -43,7 +47,7 @@ export const program_2_ast = {
             "members":<any>[]
         },
         {
-            "type": "ASSIGN_STATEMENT",
+            "type": AST.STAT_ASSIGN_VARIABLE,
             "ic_type": "FLOAT",
             "name": "pi",
             "is_async": false,
@@ -74,7 +78,7 @@ export const program_2_ast = {
             },
             "block": [
                 {
-                    "type": "ASSIGN_STATEMENT",
+                    "type": AST.STAT_ASSIGN_VARIABLE,
                     "ic_type": "BIGFLOAT",
                     "name": "t",
                     "is_async": false,
@@ -160,7 +164,7 @@ export const program_2_ast = {
             ],
             "block": [
                 {
-                    "type": "ASSIGN_STATEMENT",
+                    "type": AST.STAT_ASSIGN_VARIABLE,
                     "ic_type": "INTEGER",
                     "name": "a",
                     "is_async": false,
@@ -188,7 +192,7 @@ export const program_2_ast = {
                     "members":<any>[]
                 },
                 {
-                    "type": "ASSIGN_STATEMENT",
+                    "type": AST.STAT_ASSIGN_VARIABLE,
                     "ic_type": "UNKNOW",
                     "name": "b",
                     "is_async": false,
@@ -330,7 +334,7 @@ export const program_2_ast = {
             ],
             "block": [
                 {
-                    "type": "ASSIGN_STATEMENT",
+                    "type": AST.STAT_ASSIGN_VARIABLE,
                     "ic_type": "FLOAT",
                     "name": "a",
                     "is_async": false,
@@ -413,7 +417,7 @@ export const program_2_ast = {
                     "members":<any>[]
                 },
                 {
-                    "type": "ASSIGN_STATEMENT",
+                    "type": AST.STAT_ASSIGN_VARIABLE,
                     "ic_type": "UNKNOW",
                     "name": "b",
                     "is_async": false,

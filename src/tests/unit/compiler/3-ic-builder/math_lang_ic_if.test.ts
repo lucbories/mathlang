@@ -7,7 +7,7 @@ import DEFAULT_TYPES from '../../../../features/default_types';
 
 
 
-describe('MathLang assign IC builder', () => {
+describe('MathLang If IC builder', () => {
     const compiler = new MathLangCompiler(DEFAULT_TYPES);
 
     const src_code_1 = 't=12 if t == 13 then a=456 end if b=789.0';

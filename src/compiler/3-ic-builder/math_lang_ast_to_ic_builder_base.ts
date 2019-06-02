@@ -3,7 +3,7 @@ import IType from '../../core/itype';
 import AST from '../2-ast-builder/math_lang_ast';
 
 import { FunctionScope } from './math_lang_function_scope';
-import TYPES from './math_lang_types';
+import TYPES from '../math_lang_types';
 import IC from './math_lang_ic';
 
 
@@ -214,7 +214,7 @@ export default class MathLangAstToIcVisitorBase {
         // LEAVE FUNCTON
         ic_function.statements.push({
             ic_type:ic_function.return_type,
-            ic_code:IC.FUNCTION_DECLARE_ENTER,
+            ic_code:IC.FUNCTION_DECLARE_LEAVE,
             operands:[],
             text:ic_function.return_type + ':' + IC.FUNCTION_DECLARE_LEAVE + ' ' + func_name
         });
@@ -231,6 +231,10 @@ export default class MathLangAstToIcVisitorBase {
         let symbol_type = TYPES.UNKNOW;
         this._ast_functions.forEach(loop_scope => { // TODO OPTIMIZE SEARCH IN LOOP
             if (symbol_type != TYPES.UNKNOW){
+                return;
+            }
+            if (loop_scope.func_name == name){
+                symbol_type = loop_scope.return_type;
                 return;
             }
             if (loop_scope.symbols_consts_table.has(name)) {

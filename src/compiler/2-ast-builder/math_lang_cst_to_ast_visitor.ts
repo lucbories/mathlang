@@ -1,7 +1,7 @@
 
 import IType from '../../core/itype';
 import AST from '../2-ast-builder/math_lang_ast';
-import TYPES from '../3-program-builder/math_lang_types';
+import TYPES from '../math_lang_types';
 import MathLangCstToAstVisitorExpression from './math_lang_cst_to_ast_visitor_expressions';
 
 

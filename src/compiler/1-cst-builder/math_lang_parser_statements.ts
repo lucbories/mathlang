@@ -125,7 +125,6 @@ export class MathLangParserStatements extends Parser {
     private switchStatementItem = this.RULE("switchStatementItem", () => {
         this.SUBRULE(this.expression, { LABEL:"caseExpression" });
         this.MANY( () => this.SUBRULE(this.statement, { LABEL:"blockStatement" }) );
-        this.CONSUME(t.End);
     });
 
 

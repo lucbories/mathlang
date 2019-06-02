@@ -1,8 +1,8 @@
 
 import IType from '../../core/itype';
 import { math_lang_parser } from '../1-cst-builder/math_lang_parser';
-import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES,  TYPES } from '../3-program-builder/math_lang_types';
-import { SymbolDeclarationRecord, FunctionScope } from '../3-program-builder/math_lang_function_scope';
+import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES,  TYPES } from '../math_lang_types';
+import { SymbolDeclarationRecord, FunctionScope } from '../3-ic-builder/math_lang_function_scope';
 import IMethod from '../../core/imethod';
 
 /**

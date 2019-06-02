@@ -4,11 +4,15 @@ import IProgram from '../core/iprogram';
 import IType from '../core/itype';
 
 import { math_lang_lexer, math_lang_parser } from './1-cst-builder/math_lang_parser';
+
 import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visitor';
-import {FunctionScope} from './3-program-builder/math_lang_function_scope';
-import { ICFunction } from './3-program-builder/math_lang_ast_to_ic_builder_base';
-import MathLangAstToIcVisitor from './3-program-builder/math_lang_ast_to_ic_builder';
-import {ICLabel} from './3-program-builder/math_lang_ast_to_ic_builder_base';
+
+import {FunctionScope} from './3-ic-builder/math_lang_function_scope';
+import { ICFunction } from './3-ic-builder/math_lang_ast_to_ic_builder_base';
+import MathLangAstToIcVisitor from './3-ic-builder/math_lang_ast_to_ic_builder';
+import {ICLabel} from './3-ic-builder/math_lang_ast_to_ic_builder_base';
+
+import MathLangIcToMcVisitor from './4-mc-builder/math_lang_ic_to_mc_builder';
 
 
 
@@ -90,7 +94,7 @@ export default class MathLangCompiler {
     private _ast:any;
     private _ic_functions:Map<string,ICFunction>;
     private _ic_functions_labels:Map<string,ICLabel[]>;
-    private _program:IProgram;
+    private _mc_program:IProgram;
 
     private _ast_builder:MathLangCstToAstVisitor;
 
@@ -128,7 +132,8 @@ export default class MathLangCompiler {
         this._cst = undefined;
         this._ast = undefined;
         this._ic_functions = undefined;
-        this._program = undefined;
+        this._ic_functions_labels = undefined;
+        this._mc_program = undefined;
     }
 
 
@@ -189,11 +194,19 @@ export default class MathLangCompiler {
 
 
     /**
+     * Get compiled IC functions labels.
+     * 
+     * @return Map<string,ICLabel>.
+     */
+    get_ic_functions_labels_map() { return this._ic_functions_labels; }
+
+
+    /**
      * Get compiled program.
      * 
      * @return IProgram.
      */
-    get_program() { return this._program; }
+    get_mc_program() { return this._mc_program; }
 
 
     /**
@@ -270,6 +283,11 @@ export default class MathLangCompiler {
 
         // BUILD IC
         if (! this.build_ic()){
+            return false;
+        }
+
+        // BUILD MC
+        if (! this.build_mc()){
             return false;
         }
 
@@ -462,6 +480,37 @@ export default class MathLangCompiler {
      * @returns boolean (true:success, false:error occures).
      */
     build_mc():boolean{
+        const mc_program_options = {
+            registers:20, // registers count
+            stack:50, // stack max size
+            instructions:100, // instructions max size
+            entry_label:'main' // program entry point label
+        };
+
+        const mc_builder = new MathLangIcToMcVisitor('', mc_program_options, this._ic_functions, this._ic_functions_labels);
+
+        mc_builder.visit();
+
+        this._mc_program = mc_builder.get_mc_program();
+
+        if (mc_builder.has_error()){
+            const errors = mc_builder.get_errors();
+            // let mc_build_error;
+            // for(mc_build_error of errors){                
+            //     const error:CompilerError = {
+            //         source:this._text,
+            //         step:CompilerStep.IC,
+            //         line:0,
+            //         column:0,
+            //         src_extract:'',
+            //         message:mc_build_error.message + ' with [ic_type=' + mc_build_error.ic_type + ', ic_source=' + mc_build_error.ic_source + ', ic_name=' + mc_build_error.ic_name + ', ic_index=' + mc_build_error.ic_index + ']',
+            //         solution:'IC build error [' + mc_build_error.message + ']'
+            //     };
+            //     this._errors.push(error);
+            // }
+            return false;
+        }
+
         return true;
     }
 
@@ -492,7 +541,7 @@ export default class MathLangCompiler {
         ic_functions_map.forEach(
             (value:any, key)=>{
                 if (dump_functions){
-                    console.log('ic' + '-' + key + '(instr): returns ' + value.return_type);
+                    console.log('\nic' + '-' + key + '(instructions objects): returns ' + value.return_type);
                 }
                 value.statements.forEach(
                     (value:any, index:number)=>{
@@ -503,7 +552,7 @@ export default class MathLangCompiler {
                     }
                 );
                 if (dump_functions){
-                    console.log('\nic-' + key + '(text):', ic_source);
+                    console.log('\nic-' + key + '(instructions text):', ic_source);
                 }
             }
         );
@@ -523,7 +572,7 @@ export default class MathLangCompiler {
         let labels_str:string='';
         this._ic_functions_labels.forEach(
             (function_labels:ICLabel[], func_name)=>{
-                labels_str += 'ICFunction:' + func_name + ' labels:\n';
+                labels_str += '\nICFunction:' + func_name + ' labels:\n';
 
                 function_labels.forEach(
                     (label_record:ICLabel, index:number)=>{

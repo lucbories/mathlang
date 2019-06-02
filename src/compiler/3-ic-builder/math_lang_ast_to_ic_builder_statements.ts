@@ -3,7 +3,7 @@ import IType from '../../core/itype';
 import AST from '../2-ast-builder/math_lang_ast';
 
 import { FunctionScope } from './math_lang_function_scope';
-import TYPES from './math_lang_types';
+import TYPES from '../math_lang_types';
 import IC from './math_lang_ic';
 import MathLangAstToIcVisitorBase from './math_lang_ast_to_ic_builder_base';
 import { ICError, ICFunction, ICIdAccessor, ICInstruction, ICOperand, ICOperandSource} from './math_lang_ast_to_ic_builder_base';
@@ -37,9 +37,16 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * Visit the AST entry point.
      */
     visit() {
-        const main_scope:FunctionScope = this._ast_functions.get('main');
+        // const main_scope:FunctionScope = this._ast_functions.get('main');
 
-        this.visit_function(main_scope);
+        // this.visit_function(main_scope);
+
+
+        this._ast_functions.forEach(
+            (loop_function_scope, loop_function_name)=>{
+                this.visit_function(loop_function_scope);
+            }
+        )
     }
 
 
@@ -123,6 +130,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
                 }
                 return;
             }
+
             case AST.STAT_ASSIGN_VARIABLE:{
                 this.visit_assign_variable_statement(ast_statement, ast_func_scope, ic_function);
                 return;
@@ -139,27 +147,61 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
                 this.visit_assign_function_or_method_statement(ast_statement, ast_func_scope, ic_function);
                 return;
             }
-            // case AST.STAT_FOR:{
-            //     this.visit_assign_statement(ast_statement, ast_func_scope, ic_function);
-            //     return;
-            // }
+
+            case AST.STAT_RETURN:{
+                this.visit_return_statement(ast_statement, ast_func_scope, ic_function);
+                return;
+            }
+
             case AST.STAT_IF:{
                 this.visit_if_statement(ast_statement, ast_func_scope, ic_function);
                 return;
             }
-            // case AST.STAT_LOOP:{
-            //     this.visit_assign_statement(ast_statement, ast_func_scope, ic_function);
+            case AST.STAT_SWITCH:{
+                this.visit_switch_statement(ast_statement, ast_func_scope, ic_function);
+                return;
+            }
+
+            // case AST.STAT_FOR:{
+            //     this.visit_for_statement(ast_statement, ast_func_scope, ic_function);
             //     return;
             // }
-            // case AST.STAT_RETURN:{
-            //     this.visit_assign_statement(ast_statement, ast_func_scope, ic_function);
+            // case AST.STAT_LOOP:{
+            //     this.visit_loop_statement(ast_statement, ast_func_scope, ic_function);
             //     return;
             // }
             // case AST.STAT_WHILE:{
-            //     this.visit_assign_statement(ast_statement, ast_func_scope, ic_function);
+            //     this.visit_while_statement(ast_statement, ast_func_scope, ic_function);
             //     return;
             // }
         }
+    }
+
+
+    /**
+     * Visit AST Return statement.
+     * 
+     * @param ast_statement AST statement
+     * @param ast_func_scope AST functions scopes
+     * @param ic_function Intermediate Code function
+     */
+    visit_return_statement(ast_statement:any, ast_func_scope:FunctionScope, ic_function:ICFunction){
+        const ast_expression = ast_statement.expression;
+        const ic_expression_opd = this.visit_expression(ast_expression, ast_func_scope, ic_function);
+
+        if (this.test_if_error(ic_expression_opd)){
+            return this.add_error(ast_expression, 'Error in return expression:not a valid expression');
+        }
+
+        const ic_expression_opd_str:string = this.get_operand_source_str(ic_expression_opd);
+        const ic_return = {
+            ic_type:ast_statement.ic_type,
+            ic_code:IC.FUNCTION_RETURN,
+            operands:[ic_expression_opd],
+            text:ic_expression_opd.ic_type + ':' + IC.FUNCTION_RETURN +  ' ' + ic_expression_opd.ic_type+ ':' + ic_expression_opd_str
+        }
+
+        ic_function.statements.push(ic_return);
     }
 
 
@@ -245,27 +287,119 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
 
         // ADD IF THEN IC STATEMENTS
         this.visit_statements(ast_statement.then, ast_func_scope, ic_function);
-        const else_label_index = ic_function.statements.length;
+        
+        // ADD GOTO END IF IC STATEMENT
+        const ic_if_then_goto_statement = {
+            ic_type:TYPES.UNKNOW,
+            ic_code:IC.GOTO,
+            ic_label:endif_label,
+            operands:<any>[],
+            text:TYPES.UNKNOW + ':' + IC.GOTO + ' LABEL:[' + endif_label + ']'
+        };
+        ic_function.statements.push(ic_if_then_goto_statement);
 
+        const else_label_index = ic_function.statements.length;
+        
         // ADD ELSE IC STATEMENTS
         if (ast_statement.else) {
-            // ADD GOTO IC STATEMENT
+            // ADD ELSE IC STATEMENTS
+            this.visit_statements(ast_statement.else, ast_func_scope, ic_function);
+
+            // ADD GOTO END IF IC STATEMENT
             const ic_if_then_goto_statement = {
                 ic_type:TYPES.UNKNOW,
                 ic_code:IC.GOTO,
+                ic_label:endif_label,
                 operands:<any>[],
                 text:TYPES.UNKNOW + ':' + IC.GOTO + ' LABEL:[' + endif_label + ']'
             };
             ic_function.statements.push(ic_if_then_goto_statement);
-
-            // ADD ELSE IC STATEMENTS
-            this.visit_statements(ast_statement.else, ast_func_scope, ic_function);
         }
+        
         const endif_label_index = ic_function.statements.length;
 
         this.update_function_label_index(then_label,  ic_function, then_label_index);
         this.update_function_label_index(else_label,  ic_function, else_label_index);
         this.update_function_label_index(endif_label, ic_function, endif_label_index);
+    }
+
+
+    /**
+     * Visit AST Switch statement.
+     * 
+     * @param ast_statement AST statement
+     * @param ast_func_scope AST functions scopes
+     * @param ic_function Intermediate Code function
+     */
+    visit_switch_statement(ast_statement:any, ast_func_scope:FunctionScope, ic_function:ICFunction){
+        // BUILD THEN LABEL
+        const switch_var = ast_statement.var;
+        const switch_var_type = this.get_symbol_type(switch_var);
+        const switch_items = ast_statement.items;
+
+        // CHECK TYPE
+        if (! this.has_type(switch_var_type) ){
+            return this.add_error(ast_statement, 'Type [' + switch_var_type + '] not found for var [' + switch_var + '].')
+        }
+
+        // EXIT SWITCH IC INSTRUCTION
+        // const endswitch_label = this.add_function_label(ic_function);
+        // let exit_switch_statement = {
+        //     ic_type:TYPES.UNKNOW,
+        //     ic_code:IC.GOTO,
+        //     operands:<any>[],
+        //     text:TYPES.UNKNOW + ':' + IC.GOTO + ' LABEL:[' + endswitch_label + ']'
+        // };
+
+        // LOOP ON ITEMS
+        let all_endif_labels:string[] = [];
+        let loop_item:any;
+        let loop_item_expr;
+        let loop_item_block;
+        let loop_ast_if;
+        let loop_ast_if_condition;
+        let loop_last_index:number;
+        let loop_endif_label:string;
+        for(loop_item of switch_items){
+            loop_item_expr = loop_item.item_expression;
+
+            loop_item_block = loop_item.item_block;
+
+            loop_ast_if_condition = {
+                type: AST.EXPR_BINOP_COMPARE,
+                ic_type: TYPES.BOOLEAN,
+                lhs: {
+                    type: AST.EXPR_MEMBER_ID,
+                    ic_type: switch_var_type,
+                    name: switch_var,
+                    members:<any>[]
+                },
+                operator: {
+                    type: AST.EXPR_BINOP,
+                    value: '==',
+                    ic_function: 'equal'
+                },
+                rhs: loop_item_expr
+            };
+
+            loop_ast_if = {
+                type: AST.STAT_IF,
+                condition:loop_ast_if_condition,
+                then:loop_item_block,
+                else:undefined
+            };
+
+            this.visit_if_statement(loop_ast_if, ast_func_scope, ic_function);
+            
+            loop_last_index = ic_function.statements.length - 1;
+            loop_endif_label = ic_function.statements[loop_last_index].ic_label;
+            all_endif_labels.push(loop_endif_label);
+        }
+
+        const endswitch_index= ic_function.statements.length;
+        for(loop_endif_label of all_endif_labels){
+            this.update_function_label_index(loop_endif_label,  ic_function, endswitch_index);
+        }
     }
 
 

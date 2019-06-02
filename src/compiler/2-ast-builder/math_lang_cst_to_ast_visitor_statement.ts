@@ -2,7 +2,7 @@
 import IType from '../../core/itype';
 import MathLangCstToAstVisitorBase from './math_lang_cst_to_ast_visitor_base'
 import AST from '../2-ast-builder/math_lang_ast';
-import TYPES from '../3-program-builder/math_lang_types';
+import TYPES from '../math_lang_types';
 
 
 
@@ -115,6 +115,10 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         if (ctx.ifStatement) {
             return this.visit(ctx.ifStatement);
         }
+        
+        if (ctx.switchStatement) {
+            return this.visit(ctx.switchStatement);
+        }
 
         if (ctx.whileStatement) {
             return this.visit(ctx.whileStatement);
@@ -147,10 +151,6 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         if (ctx.onStatement) {
             return this.visit(ctx.onStatement);
         }
-        
-        // if (ctx.switchStatement) { // TODO SWITCH STATEMENT
-        //     return this.visit(ctx.switchStatement);
-        // }
 
         return {
             type: AST.STAT_UNKNOW,
@@ -294,6 +294,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         // console.log('switchStatement', ctx)
 
         const ast_var = ctx.switchVariable[0].image;
+        const ast_var_type = this.get_symbol_type(ast_var);
 
         const ast_items=[];
         let cst_item;
@@ -305,6 +306,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
         return {
             type: AST.STAT_SWITCH,
+            ic_type:ast_var_type,
             var:ast_var,
             items:ast_items
         }
