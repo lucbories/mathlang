@@ -1,6 +1,6 @@
-import IValue from '../../core/ivalue';
+import IValue from '../../../core/ivalue';
 
-import VMMethod from '../../engine/vm/vmmethod';
+import VMMethod from '../../../engine/vm/vmmethod';
 
 import BOOLEAN_TYPE from './vmboolean_type';
 

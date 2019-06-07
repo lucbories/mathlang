@@ -1,9 +1,9 @@
-import IValue from '../../core/ivalue';
+import IValue from '../../../core/ivalue';
 
-import VMMethod from '../../engine/vm/vmmethod';
+import VMMethod from '../../../engine/vm/vmmethod';
 
-import BOOLEAN_TYPE from '../logic/vmboolean_type';
-import NUMBER_TYPE from '../numbers/vmnumber_type';
+import BOOLEAN_TYPE from '../boolean/vmboolean_type';
+import NUMBER_TYPE from '../number/vmnumber_type';
 import STRING_TYPE from './vmstring_type';
 
 

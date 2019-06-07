@@ -15,7 +15,6 @@ export type ICFunction = {
     statements:any[]
 };
 
-
 export enum ICOperandSource {
     FROM_STACK       = 'FROM_STACK',
     FROM_REGISTER    = 'FROM_REGISTER',
@@ -185,7 +184,7 @@ export default class MathLangAstToIcVisitorBase {
     }
 
 
-    declare_function(func_name:string, return_type:string, opds_records:[], opds_records_str:string, ic_statements:ICInstruction[]){
+    declare_function(func_name:string, return_type:string, opds_records:ICOperand[], opds_records_str:string, ic_statements:ICInstruction[]){
         const ic_function = {
             func_name:func_name,
             return_type:return_type,

@@ -1,6 +1,6 @@
-import IValue from '../../core/ivalue';
+import IValue from '../../../core/ivalue';
 
-import VMMethod from '../../engine/vm/vmmethod';
+import VMMethod from '../../../engine/vm/vmmethod';
 
 import NUMBER_TYPE from './vmnumber_type';
 

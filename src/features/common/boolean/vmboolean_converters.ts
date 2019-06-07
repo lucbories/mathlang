@@ -1,5 +1,5 @@
 
-import IMethod from '../../core/imethod';
+import IMethod from '../../../core/imethod';
 
 
 // import {

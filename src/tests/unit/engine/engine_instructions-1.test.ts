@@ -10,8 +10,8 @@ import VMValue from '../../../engine/vm/vmvalue';
 // import VMProgramOptions from '../../../engine/vm/vmprogramoptions';
 // import VMProgram from '../../../engine/vm/vmprogram';
 
-import VMNumberType from '../../../features/numbers/vmnumber_type';
-import VMNumberMathFt from '../../../features/numbers/vmnumber_math_ft';
+import VMNumberType from '../../../features/common/number/vmnumber_type';
+import VMNumberMathFt from '../../../features/common/number/vmnumber_math_ft';
 
 // import VMMethodCall from '../../../engine/instructions/vmcallmethod';
 

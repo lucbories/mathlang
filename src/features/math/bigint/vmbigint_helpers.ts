@@ -1,11 +1,11 @@
 import * as BigIntegerStatic from 'big-integer/BigInteger';
 
-import IValue from '../../core/ivalue';
+import IValue from '../../../core/ivalue';
 
-import VMMethod from '../../engine/vm/vmmethod';
+import VMMethod from '../../../engine/vm/vmmethod';
 
 import BIGINT_TYPE from './vmbigint_type';
-import NUMBER_TYPE from '../numbers/vmnumber_type';
+import NUMBER_TYPE from '../../common/number/vmnumber_type';
 
 
 

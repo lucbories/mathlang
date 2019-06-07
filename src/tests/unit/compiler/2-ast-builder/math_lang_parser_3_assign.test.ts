@@ -582,7 +582,7 @@ describe('MathLang assign parser', () => {
                             ic_type: TYPES.UNKNOW,
                             func_name:'a',
                             operands_types:EMPTY_ARRAY,
-                            operands_expressions:EMPTY_ARRAY
+                            operands_names:EMPTY_ARRAY
                         }
                     ],
                     expression: {
@@ -652,7 +652,7 @@ describe('MathLang assign parser', () => {
                             ic_type: TYPES.UNKNOW,
                             func_name:'b',
                             operands_types:EMPTY_ARRAY,
-                            operands_expressions:EMPTY_ARRAY
+                            operands_names:EMPTY_ARRAY
                         }
                     ],
                     expression: {
@@ -723,7 +723,7 @@ describe('MathLang assign parser', () => {
                             ic_type: TYPES.UNKNOW,
                             func_name:'b',
                             operands_types:<any>[TYPES.INTEGER, TYPES.INTEGER],
-                            operands_expressions:<any>['x', 'y']
+                            operands_names:<any>['x', 'y']
                         }
                     ],
                     expression: {

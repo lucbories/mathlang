@@ -64,7 +64,14 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         }
     
         // LOOP ON FUNCTION OPERANDS
-        let opds_records = <any>[ast_func_scope.func_name];
+        const func_definition:ICOperand = {
+            ic_type:ast_func_scope.return_type,
+            ic_source:ICOperandSource.FROM_ID,
+            ic_name:ast_func_scope.func_name,
+            ic_id_accessors:[],
+            ic_id_accessors_str:''
+        }
+        let opds_records = [func_definition];
         let opds_records_str = ast_func_scope.func_name;
     
         let loop_opd_nane;
@@ -73,8 +80,11 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
             loop_opd_record = ast_func_scope.symbols_opds_table.get(loop_opd_nane);
     
             opds_records.push({
-                name:loop_opd_record.name,
-                ic_type:loop_opd_record.ic_type
+                ic_type:loop_opd_record.ic_type,
+                ic_source:ICOperandSource.FROM_ID,
+                ic_name:loop_opd_record.name,
+                ic_id_accessors:[],
+                ic_id_accessors_str:''
             });
             opds_records_str += ' ' + loop_opd_record.ic_type + ':' + loop_opd_record.name;
         }

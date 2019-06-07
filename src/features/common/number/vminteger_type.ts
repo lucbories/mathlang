@@ -1,5 +1,5 @@
-import VMType from '../../engine/vm/vmtype';
-import IFeature from '../../core/ifeature';
+import VMType from '../../../engine/vm/vmtype';
+import IFeature from '../../../core/ifeature';
 
 
 const TYPE_NAME:string='INTEGER';

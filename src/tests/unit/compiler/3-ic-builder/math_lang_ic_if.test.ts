@@ -38,12 +38,12 @@ describe('MathLang If IC builder', () => {
         // TEST IC TEXT
         const expected_ic_source = `
 none:function-declare-enter main
-INTEGER:register-set INTEGER:@t INTEGER:[12]
-BOOLEAN:function-call equal INTEGER:@t INTEGER:[13]
+INTEGER:register-set INTEGER:@main/t INTEGER:[12]
+BOOLEAN:function-call equal INTEGER:@main/t INTEGER:[13]
 BOOLEAN:function-call equal BOOLEAN:FROM_STACK BOOLEAN:[###TRUE]
 UNKNOW:if-then LABEL:[main_label_0] LABEL:[main_label_2]
-INTEGER:register-set INTEGER:@a INTEGER:[456]
-FLOAT:register-set FLOAT:@b FLOAT:[789.0]
+INTEGER:register-set INTEGER:@main/a INTEGER:[456]
+FLOAT:register-set FLOAT:@main/b FLOAT:[789.0]
 none:function-declare-leave main`;
 
         const expected_labels_str = `ICFunction:main labels:
@@ -85,14 +85,14 @@ none:function-declare-leave main`;
         // TEST IC TEXT
         const expected_ic_source = `
 none:function-declare-enter main
-INTEGER:register-set INTEGER:@t INTEGER:[12]
-BOOLEAN:function-call equal INTEGER:@t INTEGER:[13]
+INTEGER:register-set INTEGER:@main/t INTEGER:[12]
+BOOLEAN:function-call equal INTEGER:@main/t INTEGER:[13]
 BOOLEAN:function-call equal BOOLEAN:FROM_STACK BOOLEAN:[###TRUE]
 UNKNOW:if-then-else LABEL:[main_label_0] LABEL:[main_label_1] LABEL:[main_label_2]
-INTEGER:register-set INTEGER:@a INTEGER:[456]
+INTEGER:register-set INTEGER:@main/a INTEGER:[456]
 UNKNOW:goto LABEL:[main_label_2]
-INTEGER:register-set INTEGER:@a INTEGER:[654]
-FLOAT:register-set FLOAT:@b FLOAT:[789.0]
+INTEGER:register-set INTEGER:@main/a INTEGER:[654]
+FLOAT:register-set FLOAT:@main/b FLOAT:[789.0]
 none:function-declare-leave main`;
 
 const expected_labels_str = `ICFunction:main labels:
@@ -134,17 +134,17 @@ const expected_labels_str = `ICFunction:main labels:
         // TEST IC TEXT
         const expected_ic_source = `
 none:function-declare-enter main
-INTEGER:register-set INTEGER:@t INTEGER:[12]
-BOOLEAN:function-call equal INTEGER:@t INTEGER:[13]
+INTEGER:register-set INTEGER:@main/t INTEGER:[12]
+BOOLEAN:function-call equal INTEGER:@main/t INTEGER:[13]
 BOOLEAN:function-call equal BOOLEAN:FROM_STACK BOOLEAN:[###TRUE]
 UNKNOW:if-then-else LABEL:[main_label_0] LABEL:[main_label_1] LABEL:[main_label_2]
-INTEGER:register-set INTEGER:@a INTEGER:[456]
-INTEGER:register-set INTEGER:@a INTEGER:[789]
-INTEGER:register-set INTEGER:@a INTEGER:[123]
+INTEGER:register-set INTEGER:@main/a INTEGER:[456]
+INTEGER:register-set INTEGER:@main/a INTEGER:[789]
+INTEGER:register-set INTEGER:@main/a INTEGER:[123]
 UNKNOW:goto LABEL:[main_label_2]
-INTEGER:register-set INTEGER:@a INTEGER:[654]
-INTEGER:register-set INTEGER:@a INTEGER:[987]
-FLOAT:register-set FLOAT:@b FLOAT:[789.0]
+INTEGER:register-set INTEGER:@main/a INTEGER:[654]
+INTEGER:register-set INTEGER:@main/a INTEGER:[987]
+FLOAT:register-set FLOAT:@main/b FLOAT:[789.0]
 none:function-declare-leave main`;
 
 const expected_labels_str = `ICFunction:main labels:

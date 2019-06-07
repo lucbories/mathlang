@@ -1,7 +1,7 @@
 import * as BigIntegerStatic from 'big-integer/BigInteger';
 
-import VMMethod from '../../engine/vm/vmmethod';
-import VMFeature from '../../engine/vm/vmfeature';
+import VMMethod from '../../../engine/vm/vmmethod';
+import VMFeature from '../../../engine/vm/vmfeature';
 
 import {
     bigint_method,

@@ -3,8 +3,8 @@ import * as chai from 'chai';
 
 import VMValue from '../../../engine/vm/vmvalue';
 
-import VMNumberType from '../../../features/numbers/vmnumber_type';
-import VMNumberMathFt from '../../../features/numbers/vmnumber_math_ft';
+import VMNumberType from '../../../features/common/number/vmnumber_type';
+import VMNumberMathFt from '../../../features/common/number/vmnumber_math_ft';
 
 import IInstruction from '../../../core/iinstruction';
 

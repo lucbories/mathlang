@@ -4,10 +4,10 @@ import * as chai from 'chai';
 import VMValue from '../../../engine/vm/vmvalue';
 import VMMethodCall from '../../../engine/instructions/vmcallmethod';
 
-import VMNumberType from '../../../features/numbers/vmnumber_type';
-import VMNumberMathFt from '../../../features/numbers/vmnumber_math_ft';
-import VMBigIntType from '../../../features/bigint/vmbigint_type';
-import VMBigIntMathFt from '../../../features/bigint/vmbigint_math_ft';
+import VMNumberType from '../../../features/common/number/vmnumber_type';
+import VMNumberMathFt from '../../../features/common/number/vmnumber_math_ft';
+import VMBigIntType from '../../../features/math/bigint/vmbigint_type';
+import VMBigIntMathFt from '../../../features/math/bigint/vmbigint_math_ft';
 
 import { test_simple_program } from '../common.test';
 

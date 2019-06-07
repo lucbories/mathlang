@@ -1,6 +1,6 @@
 import * as BigIntegerStatic from 'big-integer/BigInteger';
 
-import IMethod from '../../core/imethod';
+import IMethod from '../../../core/imethod';
 
 import {
     // bigint_method,

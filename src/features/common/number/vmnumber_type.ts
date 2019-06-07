@@ -1,12 +1,12 @@
-import VMType from '../../engine/vm/vmtype';
-import IFeature from '../../core/ifeature';
+import VMType from '../../../engine/vm/vmtype';
+import IFeature from '../../../core/ifeature';
 
 
-const TYPE_NAME:string='FLOAT';
+const TYPE_NAME:string='NUMBER';
 const TYPE_FEATURES:IFeature[]=[];
 
 
-class VMFloatType extends VMType {
+class VMNumberType extends VMType {
     constructor() {
         super(TYPE_NAME, TYPE_FEATURES);
     }
@@ -26,6 +26,6 @@ class VMFloatType extends VMType {
     }
 }
 
-const TYPE_SINGLETON = new VMFloatType();
+const TYPE_SINGLETON = new VMNumberType();
 
 export default  TYPE_SINGLETON;

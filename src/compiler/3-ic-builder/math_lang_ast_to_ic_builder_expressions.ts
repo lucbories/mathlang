@@ -316,7 +316,8 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
         if (! this.has_type(ast_expression.ic_type) ){
             return this.add_error(ast_expression, 'Type [' + ast_expression.ic_type + '] not found for var  [' + ast_expression.name + '].')
         }
-        if (ast_expression.ic_type != id_value_type){
+        // VAR ASSIGN
+        if (ast_expression.members.length = 0 && ast_expression.ic_type != id_value_type){
             return this.add_error(ast_expression, 'Expression type [' + ast_expression.ic_type + '] is different of var [' + ast_expression.name + '] type [' + id_value_type + '].')
         }
 

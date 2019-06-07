@@ -468,10 +468,14 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             const operands_types = last_member.operands_types;
             const operands_names = last_member.operands_names;
             const default_type = operands_types.length > 0 ? operands_types[0]:'INTEGER';
+            const method_decl_member_index = ast_id_left_node.members.length  > 1 ? ast_id_left_node.members.length - 2 : 0;
             const method_value_type = ast_id_left_node.members.length  > 1 ? ast_id_left_node.members[ast_id_left_node.members.length - 2].ic_type : ast_id_left_node.ic_type;
             const method_name = method_value_type + '.' + last_member.func_name;
             const operands = [];
     
+            // UPDATE METHODE DECLARATION MEMBER TYPE
+            ast_id_left_node.members[method_decl_member_index].ic_type = method_value_type;
+            
             let opd_index;
             let loop_name;
             let loop_type;
@@ -489,7 +493,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             const ast_expr_node = this.visit(cst_expr_node);
             this.leave_function_declaration();
 
-            this.set_function_declaration_statements(method_name, ast_expr_node);
+            this.set_function_declaration_statements(method_name, [ast_expr_node]);
             this.set_function_declaration_type(method_name, ast_expr_node.ic_type);
             
             const assign_ast = {
@@ -504,7 +508,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             if (ast_expr_node.ic_type != TYPES.INTEGER){
                 this._scopes_map.delete(method_name);
                 const method_new_name = ast_expr_node.ic_type + '.' + last_member.func_name;
-                this.register_function_declaration(method_new_name, ast_expr_node.ic_type, operands, ast_expr_node, ctx, AST.STAT_ASSIGN_METHOD);
+                this.register_function_declaration(method_new_name, ast_expr_node.ic_type, operands, [ast_expr_node], ctx, AST.STAT_ASSIGN_METHOD);
             }
 
             // CHECK LEFT TYPE == RIGHT TYPE

@@ -2,6 +2,10 @@ import { OPCODES } from '../../core/iinstruction';
 import IInstruction from '../../core/iinstruction';
 import IValue from '../../core/ivalue';
 import { IProgramOptions } from './vmprogramoptions';
+import VMValue from './vmvalue';
+import VMArrayType from '../../features/common/array/vmarray_type';
+
+
 
 /**
  * VMProgram class instances contain the program instructions, stack and registers.
@@ -58,9 +62,12 @@ export default class VMProgram {
 
     private _registers:IValue[];
     private _registers_size:number = 5;
+    private _registers_stack:IValue[];
+    private _registers_stack_size = 100;
+    private _registers_stack_top:number = -1;
 
     private _stack:IValue[];
-    private _stack_size:number = 10;
+    private _stack_size:number = 100;
     private _stack_top:number = -1;
 
     private _instructions:IInstruction[];
@@ -78,6 +85,7 @@ export default class VMProgram {
             this._registers_size = options.registers;
         }
         this._registers = new Array(this._registers_size);
+        this._registers_stack = new Array(this._registers_stack_size);
 
         // Init stack
         if ( options.stack ) {
@@ -102,7 +110,48 @@ export default class VMProgram {
     public get_error_message() : string { return this._error_message; }
     public get_error_cursor() : number { return this._error_cursor; }
 
-    // Stack
+
+    /**
+     * Push current context onto the stack.
+     */
+    push_context(){
+        if (this._registers_stack_top >= this._registers_stack_size - 1)
+        {
+            this.error_registers_stack_overflow();
+            return;
+        }
+
+        const current_registers_value = new VMValue(VMArrayType, this._registers);
+        ++this._registers_stack_top;
+        this._registers_stack[this._registers_stack_top] = current_registers_value;
+
+        this._registers = new Array(this._registers_size);
+    }
+
+
+    /**
+     * Pop previous context from the stack.
+     */
+    pop_context(){
+        if (this._registers_stack_top < 0)
+        {
+            this.error_registers_stack_underflow();
+            return;
+        }
+        
+        --this._registers_stack_top;
+        const registers_value = this._registers_stack[this._stack_top + 1];
+
+        if (registers_value && Array.isArray(registers_value.get_value()) ){
+            this._registers = registers_value.get_value();
+        }
+    }
+
+
+    /**
+     * Push a value onto the stack.
+     * @param value IValue to put on the stack.
+     */
     push_value(value:IValue){
         if (this._stack_top >= this._stack_size - 1)
         {
@@ -295,7 +344,7 @@ export default class VMProgram {
         return this._is_running && (this._instructions_cursor < this._instructions_count);
     }
 
-
+    
     // Errors
     error_stack_overflow() {
         this._has_error = true;
@@ -307,6 +356,18 @@ export default class VMProgram {
         this._has_error = true;
         this._error_cursor = this._instructions_cursor;
         this._error_message = 'stack underflow: actual size=[' + this._stack_size + ']';
+    }
+
+    error_registers_stack_overflow() {
+        this._has_error = true;
+        this._error_cursor = this._instructions_cursor;
+        this._error_message = 'registers stack overflow: actual size=[' + this._registers_stack_size + ']';
+    }
+
+    error_registers_stack_underflow() {
+        this._has_error = true;
+        this._error_cursor = this._instructions_cursor;
+        this._error_message = 'registers stack underflow: actual size=[' + this._registers_stack_size + ']';
     }
 
     error_stack_bad_value() {

@@ -96,6 +96,16 @@ export default class VMEngine {
                     break;
                 }
 
+                // CONTEXT STACK
+                case OPCODES['CALL_ENTER']:{
+                    program.push_context();
+                    break;
+                }
+                case OPCODES['CALL_LEAVE']:{
+                    program.pop_context();
+                    break;
+                }
+
                 // STACK OP
                 case OPCODES['POPV']:{
                     cursor_value = program.pop_value(); // unused value

@@ -8,7 +8,7 @@ import {IProgramOptions} from '../../engine/vm/vmprogramoptions';
 
 
 
-export interface MCError {
+export type MCError = {
     mc_type:string,
     mc_name:string,
     mc_index:number,
@@ -16,6 +16,13 @@ export interface MCError {
     message:string
 };
 
+
+export type MCFunction = {
+    func_name:string,
+    cursor_begin:number,
+    cursor_end:number,
+    labels:Map<string,number>
+};
 
 
 
@@ -30,6 +37,8 @@ export default abstract class MathLangIcToMcVisitorBase {
 
     protected _mc_program_options:IProgramOptions;
     protected _mc_program:IProgram;
+
+    protected _functions:Map<string, MCFunction> = new Map();
 
 
     /**

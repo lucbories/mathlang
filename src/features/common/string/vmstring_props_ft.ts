@@ -1,6 +1,6 @@
 
-import VMMethod from '../../engine/vm/vmmethod';
-import VMFeature from '../../engine/vm/vmfeature';
+import VMMethod from '../../../engine/vm/vmmethod';
+import VMFeature from '../../../engine/vm/vmfeature';
 
 import {
     string_const_method,

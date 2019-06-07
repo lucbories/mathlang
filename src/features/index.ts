@@ -1,15 +1,15 @@
 
-import VMNumberType     from './numbers/vmnumber_type';
-import VMNumberMathFt   from './numbers/vmnumber_math_ft';
+import VMNumberType     from './common/number/vmnumber_type';
+import VMNumberMathFt   from './common/number/vmnumber_math_ft';
 
-import VMBooleanType    from './logic/vmboolean_type';
-import VMBooleanMathFt  from './logic/vmboolean_logic_ft';
+import VMBooleanType    from './common/boolean/vmboolean_type';
+import VMBooleanMathFt  from './common/boolean/vmboolean_logic_ft';
 
-import VMStringType     from './text/vmstring_type';
-import VMStringPropsFt  from './text/vmstring_props_ft';
+import VMStringType     from './common/string/vmstring_type';
+import VMStringPropsFt  from './common/string/vmstring_props_ft';
 
-import VMBigIntType from './bigint/vmbigint_type';
-import VMBigIntMathFt from './bigint/vmbigint_math_ft';
+import VMBigIntType from './math/bigint/vmbigint_type';
+import VMBigIntMathFt from './math/bigint/vmbigint_math_ft';
 
 export {
     VMNumberType,   VMNumberMathFt,

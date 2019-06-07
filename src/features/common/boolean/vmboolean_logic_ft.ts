@@ -1,6 +1,6 @@
 
-import VMMethod from '../../engine/vm/vmmethod';
-import VMFeature from '../../engine/vm/vmfeature';
+import VMMethod from '../../../engine/vm/vmmethod';
+import VMFeature from '../../../engine/vm/vmfeature';
 
 import {
     boolean_const_method,

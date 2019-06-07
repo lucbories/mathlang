@@ -21,7 +21,7 @@ export default interface IInstruction {
 
     compile_to_js_source():string;
     compile_to_js_function():Function;
-}
+};
 
 
 export const OPCODES = {
@@ -43,4 +43,9 @@ export const OPCODES = {
     "INCNUMTOP":50, "DECNUMTOP":51, "INCNUMREG":52, "DECNUMREG":53,
     "EQNUMTOP":54, "NEQNUMTOP":55, "EQNUMREG":56, "NEQNUMREG":57,
     
-    "EXIT":999}
+    // CALL
+    "CALL_ENTER":60,
+    "CALL_LEAVE":61,
+
+    "EXIT":999
+};

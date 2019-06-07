@@ -6,7 +6,7 @@ import IC from '../3-ic-builder/math_lang_ic';
 import {ICLabel, ICFunction, ICInstruction} from '../3-ic-builder/math_lang_ast_to_ic_builder_base';
 import {IProgramOptions} from '../../engine/vm/vmprogramoptions';
 import MathLangIcToMcVisitorBase from './math_lang_ic_to_mc_builder_base';
-// import {MCError} from './math_lang_ic_to_mc_builder_base';
+import {MCFunction} from './math_lang_ic_to_mc_builder_base';
 
 
 // VM
@@ -16,8 +16,8 @@ import VMValue from '../../engine/vm/vmvalue';
 // import VMProgramOptions from '../../engine/vm/vmprogramoptions';
 // import VMProgram from '../../engine/vm/vmprogram';
 
-import VMNumberType from '../../features/numbers/vmnumber_type';
-import VMNumberMathFt from '../../features/numbers/vmnumber_math_ft';
+import VMNumberType from '../../features/common/number/vmnumber_type';
+import VMNumberMathFt from '../../features/common/number/vmnumber_math_ft';
 
 // import VMMethodCall from '../../engine/instructions/vmcallmethod';
 
@@ -36,6 +36,10 @@ import VMGoto from '../../engine/instructions/vmgoto';
 import VMRegV from '../../engine/instructions/vmregv';
 // import VMUnRegV from '../../engine/instructions/vmunrv';
 import VMGetRegV from '../../engine/instructions/vmgetrv';
+
+import VMCallEnter from '../../engine/instructions/vmcall_enter';
+import VMCallLeave from '../../engine/instructions/vmcall_leave';
+
 import IInstruction from '../../core/iinstruction';
 
 
@@ -93,9 +97,25 @@ export default abstract class MathLangIcToMcVisitorStatements extends MathLangIc
      */
     visit_statement(ic_statement:ICInstruction){
         switch(ic_statement.ic_code){
-            case IC.FUNCTION_DECLARE_ENTER:{}
-            case IC.FUNCTION_DECLARE_LEAVE:{}
-            case IC.FUNCTION_CALL:{}
+            case IC.FUNCTION_DECLARE_ENTER:{
+                const function_name:string = ic_statement.operands[0].ic_name;
+                this._mc_program.add_instruction( new VMCallEnter() );
+                const func_record:MCFunction = {
+                    func_name:function_name,
+                    cursor_begin:this._mc_program.get_cursor(),
+                    cursor_end:undefined,
+                    labels:new Map()
+                };
+                this._functions.set(function_name, func_record);
+                break;
+            }
+
+            case IC.FUNCTION_DECLARE_LEAVE:{ this._mc_program.add_instruction( new VMCallLeave() ); break; }
+
+            case IC.FUNCTION_CALL:{
+                // PUSH OPERANDS
+                // GOTO
+            }
             case IC.FUNCTION_RETURN:{}
 
             case IC.IF_THEN:{}

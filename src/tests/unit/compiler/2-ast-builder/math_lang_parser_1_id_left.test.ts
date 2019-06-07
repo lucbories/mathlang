@@ -331,7 +331,7 @@ describe('MathLang id expression for left part parser', () => {
                     ic_type:TYPES.UNKNOW,
                     func_name:'b',
                     operands_types:EMPTY_ARRAY,
-                    operands_expressions:EMPTY_ARRAY
+                    operands_names:EMPTY_ARRAY
                 }
             ]
         }
@@ -367,7 +367,7 @@ describe('MathLang id expression for left part parser', () => {
                     ic_type:TYPES.UNKNOW,
                     func_name:'b',
                     operands_types:[TYPES.INTEGER],
-                    operands_expressions:['c']
+                    operands_names:['c']
                 }
             ]
         }
@@ -403,7 +403,7 @@ describe('MathLang id expression for left part parser', () => {
                     ic_type:TYPES.UNKNOW,
                     func_name:'b',
                     operands_types:[TYPES.INTEGER, TYPES.FLOAT],
-                    operands_expressions:['x', 'y']
+                    operands_names:['x', 'y']
                 }
             ]
         }

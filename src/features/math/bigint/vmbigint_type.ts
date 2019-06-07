@@ -1,6 +1,6 @@
 import * as BigIntegerStatic from 'big-integer/BigInteger';
-import VMType from '../../engine/vm/vmtype';
-import IFeature from '../../core/ifeature';
+import VMType from '../../../engine/vm/vmtype';
+import IFeature from '../../../core/ifeature';
 
 // type BigNumber = BigIntegerStatic.BigNumber;
 type BigInteger = BigIntegerStatic.BigInteger;
