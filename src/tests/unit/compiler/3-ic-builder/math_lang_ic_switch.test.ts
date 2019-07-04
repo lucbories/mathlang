@@ -47,23 +47,24 @@ describe('MathLang Switch IC builder', () => {
         // TEST IC TEXT
         const expected_ic_source = `
 none:function-declare-enter main
-INTEGER:register-set INTEGER:@a INTEGER:[12]
-INTEGER:register-set INTEGER:@b INTEGER:[0]
-BOOLEAN:function-call equal INTEGER:@a INTEGER:[12]
+INTEGER:register-set INTEGER:@main/a INTEGER:[12]
+INTEGER:register-set INTEGER:@main/b INTEGER:[0]
+BOOLEAN:function-call equal INTEGER:@main/a INTEGER:[12]
 BOOLEAN:function-call equal BOOLEAN:FROM_STACK BOOLEAN:[###TRUE]
 UNKNOW:if-then LABEL:[main_label_0] LABEL:[main_label_2]
-INTEGER:register-set INTEGER:@b INTEGER:[1]
+INTEGER:register-set INTEGER:@main/b INTEGER:[1]
 UNKNOW:goto LABEL:[main_label_2]
 INTEGER:function-call mul INTEGER:[2] INTEGER:[3]
 INTEGER:function-call add INTEGER:FROM_STACK INTEGER:[1]
-BOOLEAN:function-call equal INTEGER:@a INTEGER:FROM_STACK
+BOOLEAN:function-call equal INTEGER:@main/a INTEGER:FROM_STACK
 BOOLEAN:function-call equal BOOLEAN:FROM_STACK BOOLEAN:[###TRUE]
 UNKNOW:if-then LABEL:[main_label_3] LABEL:[main_label_5]
-INTEGER:register-set INTEGER:@b INTEGER:[2]
+INTEGER:register-set INTEGER:@main/b INTEGER:[2]
 UNKNOW:goto LABEL:[main_label_5]
 none:function-declare-leave main`;
 
-        const expected_labels_str = `ICFunction:main labels:
+        const expected_labels_str = `
+ICFunction:main labels:
 0:main_label_0=6
 1:main_label_1=8
 2:main_label_2=15

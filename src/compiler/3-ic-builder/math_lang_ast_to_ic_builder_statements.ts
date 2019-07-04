@@ -571,7 +571,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         }
 
         // DECLARE METHOD
-        this.declare_function(assign_function_name, ast_func_scope.return_type, opds_records, opds_records_str, []);
+        this.declare_function(assign_function_name, ic_left_type, opds_records, opds_records_str, []);
         const assign_function = this._ic_functions.get(assign_function_name);
 
 

@@ -579,7 +579,7 @@ describe('MathLang assign parser', () => {
                     members:[
                         {
                             type:AST.EXPR_MEMBER_METHOD_DECL,
-                            ic_type: TYPES.UNKNOW,
+                            ic_type: TYPES.INTEGER,
                             func_name:'a',
                             operands_types:EMPTY_ARRAY,
                             operands_names:EMPTY_ARRAY

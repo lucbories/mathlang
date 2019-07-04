@@ -307,7 +307,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
      * @returns ICOperand
      */
     visit_value_id(ast_expression:any, ast_func_scope:FunctionScope, ic_function:ICFunction):ICOperand|ICError{
-        const id_value_type = this.get_symbol_type(ast_expression.name);
+        const id_value_type = ast_expression.ic_type ? ast_expression.ic_type : this.get_symbol_type(ast_expression.name);
 
         // CHECK TYPE
         if (! this.has_type(id_value_type) ){
@@ -317,7 +317,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
             return this.add_error(ast_expression, 'Type [' + ast_expression.ic_type + '] not found for var  [' + ast_expression.name + '].')
         }
         // VAR ASSIGN
-        if (ast_expression.members.length = 0 && ast_expression.ic_type != id_value_type){
+        if (ast_expression.members.length == 0 && ast_expression.ic_type != id_value_type){
             return this.add_error(ast_expression, 'Expression type [' + ast_expression.ic_type + '] is different of var [' + ast_expression.name + '] type [' + id_value_type + '].')
         }
 

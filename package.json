@@ -41,6 +41,12 @@
     "test-ic-assign":    "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/3-ic-builder/math_lang_ic_assign.test.ts",
     "test-ic-if":        "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/3-ic-builder/math_lang_ic_if.test.ts",
     "test-ic-switch":    "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/3-ic-builder/math_lang_ic_switch.test.ts",
+    "test-vm":           "mocha --reporter spec --require ts-node/register src/tests/unit/engine/*.test.ts",
+    "test-vm-instr1":    "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_instructions-1.test.ts",
+    "test-vm-instr2":    "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_instructions-2.test.ts",
+    "test-vm-instr3":    "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_instructions-3.test.ts",
+    "test-vm-reg":       "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_registers.test.ts",
+    "test-vm-stack":     "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_stack.test.ts",
     "testjs":            "mocha  dest/tests/unit/**/*.test.js",
     "watch-test":        "mocha --reporter spec --require ts-node/register --watch --watch-extensions ts src/**/*.test.ts"
   },

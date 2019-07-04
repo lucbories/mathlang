@@ -2,6 +2,7 @@
 import IType from '../../core/itype';
 import MathLangCstToAstVisitorBase from './math_lang_cst_to_ast_visitor_base'
 import AST from '../2-ast-builder/math_lang_ast';
+import { SymbolDeclarationRecord, FunctionScope } from '../3-ic-builder/math_lang_function_scope';
 import TYPES from '../math_lang_types';
 
 
@@ -476,6 +477,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             // UPDATE METHODE DECLARATION MEMBER TYPE
             ast_id_left_node.members[method_decl_member_index].ic_type = method_value_type;
             
+            // REGISTER OPERANDS
             let opd_index;
             let loop_name;
             let loop_type;
@@ -483,6 +485,11 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
                 loop_name = operands_names[opd_index];
                 loop_type = opd_index < operands_types.length ?operands_types[opd_index] : default_type;
                 operands.push( { opd_name:loop_name, opd_type:loop_type } )
+
+                // const opd_record:SymbolDeclarationRecord = { name:loop_name, path:method_name, ic_type:loop_type, is_constant:true, init_value:undefined, uses_count:0, uses_scopes:[method_name] };
+                // func_scope.symbols_opds_table.set(loop_name, opd_record);
+                // func_scope.symbols_opds_ordered_list.push(loop_name);
+    
             }
             
             this.register_function_declaration(method_name, TYPES.INTEGER, operands, [], ctx, AST.STAT_ASSIGN_METHOD);
@@ -493,9 +500,11 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             const ast_expr_node = this.visit(cst_expr_node);
             this.leave_function_declaration();
 
-            this.set_function_declaration_statements(method_name, [ast_expr_node]);
-            this.set_function_declaration_type(method_name, ast_expr_node.ic_type);
+            // this.set_function_declaration_statements(method_name, [ast_expr_node]);
+            // this.set_function_declaration_type(method_name, ast_expr_node.ic_type);
             
+            this.unregister_function_declaration(method_name);
+
             const assign_ast = {
                 type: AST.STAT_ASSIGN_METHOD,
                 ic_type: ast_expr_node.ic_type,
@@ -505,18 +514,21 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
                 expression:ast_expr_node
             };
 
-            if (ast_expr_node.ic_type != TYPES.INTEGER){
-                this._scopes_map.delete(method_name);
-                const method_new_name = ast_expr_node.ic_type + '.' + last_member.func_name;
-                this.register_function_declaration(method_new_name, ast_expr_node.ic_type, operands, [ast_expr_node], ctx, AST.STAT_ASSIGN_METHOD);
-            }
-
-            // CHECK LEFT TYPE == RIGHT TYPE
-            // if (ast_id_left_node.ic_type != TYPES.UNKNOW && assign_ast.ic_type != ast_id_left_node.ic_type){
-            //     this.add_error(ctx, AST.EXPR_MEMBER_METHOD_DECL, 'Error:left type [' + assign_ast.ic_type + '] and right type [' + ast_id_left_node.ic_type + '] are different for method [' + method_name + '] declaration.')
+            // if (ast_expr_node.ic_type != TYPES.INTEGER){
+            //     this._scopes_map.delete(method_name);
+            //     const method_new_name = ast_expr_node.ic_type + '.' + last_member.func_name;
+            //     assign_ast.name = method_new_name;
+            //     this.register_function_declaration(method_new_name, ast_expr_node.ic_type, operands, [ast_expr_node], ctx, AST.STAT_ASSIGN_METHOD);
             // }
 
+            // CHECK LEFT TYPE == RIGHT TYPE
+            if (ast_id_left_node.ic_type != TYPES.UNKNOW && assign_ast.ic_type != ast_id_left_node.ic_type){
+                ast_id_left_node.ic_type = assign_ast.ic_type;
+                // this.add_error(ctx, AST.EXPR_MEMBER_METHOD_DECL, 'Error:left type [' + assign_ast.ic_type + '] and right type [' + ast_id_left_node.ic_type + '] are different for method [' + method_name + '] declaration.')
+            }
+
             return assign_ast;
+            // return undefined;
         }
 
         // NOTHING

@@ -412,7 +412,6 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param instructions          function instruction block.
      * @param cst_context           CST context for error log.
      * @param ast_node_type         AST node type for error log.
-     * @returns true for success or false for failure
      */
     register_function_declaration(func_name:string, return_type:string, operands_declarations:any[], instructions:any[], cst_context:any, ast_node_type:string) {
         const func_scope:FunctionScope = {
@@ -438,6 +437,14 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
 
             this.check_type(opd_record.ic_type, cst_context, ast_node_type);
         }
+    }
+
+    /**
+     * Unregister a function declaration.
+     * @param func_name             function name.
+     */
+    unregister_function_declaration(func_name:string) {
+        this._scopes_map.delete(func_name);
     }
 
     set_function_declaration_statements(func_name:string, instructions:any[]){

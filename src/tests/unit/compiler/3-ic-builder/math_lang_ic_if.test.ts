@@ -43,13 +43,15 @@ BOOLEAN:function-call equal INTEGER:@main/t INTEGER:[13]
 BOOLEAN:function-call equal BOOLEAN:FROM_STACK BOOLEAN:[###TRUE]
 UNKNOW:if-then LABEL:[main_label_0] LABEL:[main_label_2]
 INTEGER:register-set INTEGER:@main/a INTEGER:[456]
+UNKNOW:goto LABEL:[main_label_2]
 FLOAT:register-set FLOAT:@main/b FLOAT:[789.0]
 none:function-declare-leave main`;
 
-        const expected_labels_str = `ICFunction:main labels:
+        const expected_labels_str = `
+ICFunction:main labels:
 0:main_label_0=5
-1:main_label_1=6
-2:main_label_2=6
+1:main_label_1=7
+2:main_label_2=7
 `;
 
         expect(ic_source).equals(expected_ic_source);
@@ -92,13 +94,15 @@ UNKNOW:if-then-else LABEL:[main_label_0] LABEL:[main_label_1] LABEL:[main_label_
 INTEGER:register-set INTEGER:@main/a INTEGER:[456]
 UNKNOW:goto LABEL:[main_label_2]
 INTEGER:register-set INTEGER:@main/a INTEGER:[654]
+UNKNOW:goto LABEL:[main_label_2]
 FLOAT:register-set FLOAT:@main/b FLOAT:[789.0]
 none:function-declare-leave main`;
 
-const expected_labels_str = `ICFunction:main labels:
+const expected_labels_str = `
+ICFunction:main labels:
 0:main_label_0=5
-1:main_label_1=6
-2:main_label_2=8
+1:main_label_1=7
+2:main_label_2=9
 `;
 
         expect(ic_source).equals(expected_ic_source);
@@ -144,13 +148,15 @@ INTEGER:register-set INTEGER:@main/a INTEGER:[123]
 UNKNOW:goto LABEL:[main_label_2]
 INTEGER:register-set INTEGER:@main/a INTEGER:[654]
 INTEGER:register-set INTEGER:@main/a INTEGER:[987]
+UNKNOW:goto LABEL:[main_label_2]
 FLOAT:register-set FLOAT:@main/b FLOAT:[789.0]
 none:function-declare-leave main`;
 
-const expected_labels_str = `ICFunction:main labels:
+const expected_labels_str = `
+ICFunction:main labels:
 0:main_label_0=5
-1:main_label_1=8
-2:main_label_2=11
+1:main_label_1=9
+2:main_label_2=12
 `;
 
         expect(ic_source).equals(expected_ic_source);

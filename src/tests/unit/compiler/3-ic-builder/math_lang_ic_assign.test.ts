@@ -10,69 +10,69 @@ import DEFAULT_TYPES from '../../../../features/default_types';
 describe('MathLang assign IC builder', () => {
     const compiler = new MathLangCompiler(DEFAULT_TYPES);
 
-//     it('Parse assign a=456 statement' , () => {
-//         compiler.reset();
-//         const text = 'a=456';
-//         const result = compiler.compile(text, 'program');
+    it('Parse assign a=456 statement' , () => {
+        compiler.reset();
+        const text = 'a=456';
+        const result = compiler.compile(text, 'program');
 
-//         // ERRORS
-//         if (! result){
-//             const errors = compiler.get_errors();
-//             console.log('errors', errors);
+        // ERRORS
+        if (! result){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
 
-//             expect(errors.length).equals(0);
-//             return;
-//         }
+            expect(errors.length).equals(0);
+            return;
+        }
         
-//         // GET AST
-//         // const compiler_ast = compiler.get_ast();
-//         // compiler.dump_tree('ast', compiler_ast);
+        // GET AST
+        // const compiler_ast = compiler.get_ast();
+        // compiler.dump_tree('ast', compiler_ast);
 
-//         // GET IC CODE
-//         const ic_functions_map = compiler.get_ic_functions_map();
-//         // console.log('ic_functions_map', ic_functions_map);
-//         const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        // GET IC CODE
+        const ic_functions_map = compiler.get_ic_functions_map();
+        // console.log('ic_functions_map', ic_functions_map);
+        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
 
-//         // TEST IC TEXT
-//         const expected_ic_source = `
-// none:function-declare-enter main
-// INTEGER:register-set INTEGER:@main/a INTEGER:[456]
-// none:function-declare-leave main`;
-//         expect(ic_source).equals(expected_ic_source);
-//     });
+        // TEST IC TEXT
+        const expected_ic_source = `
+none:function-declare-enter main
+INTEGER:register-set INTEGER:@main/a INTEGER:[456]
+none:function-declare-leave main`;
+        expect(ic_source).equals(expected_ic_source);
+    });
 
 
-//     it('Parse assign a=456+789 statement' , () => {
-//         compiler.reset();
-//         const text = 'a=456+789';
-//         const result = compiler.compile(text, 'program');
+    it('Parse assign a=456+789 statement' , () => {
+        compiler.reset();
+        const text = 'a=456+789';
+        const result = compiler.compile(text, 'program');
 
-//         // ERRORS
-//         if (! result){
-//             const errors = compiler.get_errors();
-//             console.log('errors', errors);
+        // ERRORS
+        if (! result){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
 
-//             expect(errors.length).equals(0);
-//             return;
-//         }
+            expect(errors.length).equals(0);
+            return;
+        }
         
-//         // GET AST
-//         // const compiler_ast = compiler.get_ast();
-//         // compiler.dump_tree('ast', compiler_ast);
+        // GET AST
+        // const compiler_ast = compiler.get_ast();
+        // compiler.dump_tree('ast', compiler_ast);
 
-//         // GET IC CODE
-//         const ic_functions_map = compiler.get_ic_functions_map();
-//         // console.log('ic_functions_map', ic_functions_map);
-//         const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        // GET IC CODE
+        const ic_functions_map = compiler.get_ic_functions_map();
+        // console.log('ic_functions_map', ic_functions_map);
+        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
 
-//         // TEST IC TEXT
-//         const expected_ic_source = `
-// none:function-declare-enter main
-// INTEGER:function-call add INTEGER:[456] INTEGER:[789]
-// INTEGER:register-set INTEGER:@main/a INTEGER:FROM_STACK
-// none:function-declare-leave main`;
-//         expect(ic_source).equals(expected_ic_source);
-//     });
+        // TEST IC TEXT
+        const expected_ic_source = `
+none:function-declare-enter main
+INTEGER:function-call add INTEGER:[456] INTEGER:[789]
+INTEGER:register-set INTEGER:@main/a INTEGER:FROM_STACK
+none:function-declare-leave main`;
+        expect(ic_source).equals(expected_ic_source);
+    });
     
 
     it('Parse assign begin a=12\na.b()=456 end statement' , () => {
@@ -103,9 +103,9 @@ describe('MathLang assign IC builder', () => {
 none:function-declare-enter main
 INTEGER:register-set INTEGER:@main/a INTEGER:[12]
 none:function-declare-leave main
-none:function-declare-enter INTEGER.b
+INTEGER:function-declare-enter INTEGER.b
 INTEGER:function-return INTEGER:[456]
-none:function-declare-leave INTEGER.b`;
+INTEGER:function-declare-leave INTEGER.b`;
         expect(ic_source).equals(expected_ic_source);
     });
     
@@ -138,12 +138,12 @@ none:function-declare-leave INTEGER.b`;
 none:function-declare-enter main
 INTEGER:register-set INTEGER:@main/a INTEGER:[12]
 none:function-declare-leave main
-none:function-declare-enter INTEGER.b
+FLOAT:function-declare-enter FLOAT.b
 FLOAT:function-return FLOAT:[456.0]
-none:function-declare-leave INTEGER.b`;
+FLOAT:function-declare-leave FLOAT.b`;
         expect(ic_source).equals(expected_ic_source);
     });
-    
+   
 
     it('Parse assign begin a=12\na.b(x is FLOAT)=x + 456.0 end statement' , () => {
         compiler.reset();
@@ -173,10 +173,10 @@ none:function-declare-leave INTEGER.b`;
 none:function-declare-enter main
 INTEGER:register-set INTEGER:@main/a INTEGER:[12]
 none:function-declare-leave main
-none:function-declare-enter INTEGER.b
-FLOAT:function-call add FLOAT:@x FLOAT:[456.0]
+FLOAT:function-declare-enter FLOAT.b
+FLOAT:function-call add FLOAT:@FLOAT.b/x FLOAT:[456.0]
 FLOAT:function-return FLOAT:FROM_STACK
-none:function-declare-leave INTEGER.b`;
+FLOAT:function-declare-leave FLOAT.b`;
         expect(ic_source).equals(expected_ic_source);
     });
     
