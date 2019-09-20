@@ -121,7 +121,13 @@ export const WhiteSpace = createToken({
 export const Null      = createToken({ name: "Null",       pattern: /null/ }, true);
 export const True      = createToken({ name: "True",       pattern: /true/ }, true);
 export const False     = createToken({ name: "False",      pattern: /false/ }, true);
+
+export const Module    = createToken({ name: "Module",     pattern: /module/ }, true);
+export const Use       = createToken({ name: "Use",        pattern: /use/ }, true);
+export const As        = createToken({ name: "As",         pattern: /as/ }, true);
+export const All       = createToken({ name: "All",        pattern: /all/ }, true);
 export const Is        = createToken({ name: "Is",         pattern: /is/ }, true);
+export const Export    = createToken({ name: "Export",     pattern: /export/ }, true);
 
 export const Async     = createToken({ name: "Async",      pattern: /async/ }, true);
 export const Wait      = createToken({ name: "Wait",       pattern: /wait/ }, true);
