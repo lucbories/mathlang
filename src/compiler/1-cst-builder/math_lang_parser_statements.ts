@@ -16,10 +16,26 @@ export class MathLangParserStatements extends Parser {
     private program = this.RULE("program", () => {
         this.AT_LEAST_ONE( () => {
             this.OR( [
+                { ALT: () => this.SUBRULE(this.useStatement, { LABEL:"useStatement" }) },
+                { ALT: () => this.SUBRULE(this.moduleStatement, { LABEL:"moduleStatement" }) },
                 { ALT: () => this.SUBRULE(this.statement, { LABEL:"blockStatement" }) },
                 { ALT: () => this.SUBRULE(this.functionStatement) }
             ] );
         });
+    });
+
+
+    // USE
+    private useStatement = this.RULE("useStatement", () => {
+        this.CONSUME(t.Use);
+        this.CONSUME(t.ID);
+    });
+
+
+    // MODULE
+    private moduleStatement = this.RULE("moduleStatement", () => {
+        this.CONSUME(t.Module);
+        this.CONSUME(t.ID);
     });
 
 

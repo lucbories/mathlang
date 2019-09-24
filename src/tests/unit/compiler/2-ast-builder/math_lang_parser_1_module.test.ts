@@ -2,7 +2,12 @@ import * as mocha from 'mocha';
 import * as chai from 'chai';
 const expect = chai.expect;
 
-import parse from '../../../../compiler/math_lang_processor';
+import TYPES from '../../../../compiler/math_lang_types';
+import AST from '../../../../compiler/2-ast-builder/math_lang_ast';
+import MathLangCompiler from '../../../../compiler/math_lang_compiler';
+import DEFAULT_TYPES from '../../../../features/default_types';
+
+// import parse from '../../../../compiler/math_lang_processor';
 
 
 function dump_ast(label:string, ast:any) {
@@ -11,49 +16,69 @@ function dump_ast(label:string, ast:any) {
 }
 
 
+const EMPTY_ARRAY = <any>[];
 
 describe('MathLang define module parser', () => {
+    const compiler = new MathLangCompiler(DEFAULT_TYPES);
 
     it('Parse define module ModuleA' , () => {
         const text = 'module ModuleA function funcA() return INTEGER begin return 12 end';
-        const parser_result = parse(text, false, 'program');
 
-        // console.log(parser_result);
+        const result = compiler.compile_ast(text, 'program');
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
+        // ERRORS
+        const expected_errors = 9;
+        const errors = compiler.get_errors();
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
 
-        const ast_expr_node = parser_result.ast;
-        // console.log('simple string ast expr node', ast_expr_node);
+            // GET AST
+            const compiler_ast = compiler.get_ast();
+            compiler.dump_tree('ast', compiler_ast);
 
-        expect(ast_expr_node.type).equals('STRING');
-        expect(ast_expr_node.value).equals('\'\'');
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
+
+        // TEST AST
+        const expected_ast = {
+            type:AST.PROGRAM,
+            block:[
+				{
+					type:AST.STAT_USE,
+                    ic_type: TYPES.STRING,
+                    name: 'ModuleA'
+				},
+                {
+                    type:AST.STAT_FUNCTION,
+                    ic_type: TYPES.INTEGER,
+                    name: 'funcA',
+                    operands_types:EMPTY_ARRAY,
+                    operands_names:EMPTY_ARRAY,
+                    block: [
+                        {
+                            type:AST.STAT_RETURN,
+                            ic_type:TYPES.INTEGER,
+                            expression:{
+                                type:AST.EXPR_PRIMARY_INTEGER,
+                                ic_type:TYPES.INTEGER,
+                                value:12
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+        expect(compiler_ast).eql(expected_ast);
     });
 	
     it('Parse define modules ModuleA and ModuleB' , () => {
         const text = 'module ModuleA function funcA() return INTEGER begin return 12 end module ModuleB function funcB() return INTEGER begin return 12 end';
-        const parser_result = parse(text, false, 'program');
-
-        // console.log(parser_result);
-
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
-
-        const ast_expr_node = parser_result.ast;
-        // console.log('simple string ast expr node', ast_expr_node);
-
-        expect(ast_expr_node.type).equals('STRING');
-        expect(ast_expr_node.value).equals('\'\'');
     });
 });
 	
@@ -74,7 +99,7 @@ describe('MathLang use module parser', () => {
 				return ModuleA.funcA() * 2
 			end
 		`;
-		...
+		// ...
     });
 	
 	
@@ -92,7 +117,7 @@ describe('MathLang use module parser', () => {
 				return MA.funcA() * 2
 			end
 		`;
-		...
+		// ...
     });
 	
 	
@@ -118,7 +143,7 @@ describe('MathLang use module parser', () => {
 				return MA.funcA1() * 2
 			end
 		`;
-		...
+		// ...
     });
 	
 	
@@ -144,7 +169,7 @@ describe('MathLang use module parser', () => {
 				return MA.funcA1() * 2 + MA.funcA2()
 			end
 		`;
-		...
+		// ...
     });
 	
 	
@@ -173,7 +198,7 @@ describe('MathLang use module parser', () => {
 			
 			return funcB()
 		`;
-		...
+		// ...
     });
 	
 	
@@ -210,7 +235,7 @@ describe('MathLang use module parser', () => {
 			
 			return funcB()
 		`;
-		...
+		// ...
     });
 	
 	
@@ -247,7 +272,7 @@ describe('MathLang use module parser', () => {
 			
 			return funcB()
 		`;
-		...
+		// ...
 		// => error with ModuleA exports, miss
     });
 });

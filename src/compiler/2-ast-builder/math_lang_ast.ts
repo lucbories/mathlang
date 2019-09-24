@@ -2,6 +2,8 @@ enum AST {
     PROGRAM                 ='PROGRAM',
     BLOCK                   ='BLOCK',
 
+    STAT_USE                ='USE_STATEMENT',
+    STAT_MODULE             ='MODULE_STATEMENT',
     STAT_UNKNOW             ='UNKNOW_STATEMENT',
     STAT_IF                 ='IF_STATEMENT',
     STAT_WHILE              ='WHILE_STATEMENT',

@@ -29,6 +29,20 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         let cst_statement;
         let ast_statement;
 
+        // LOOP ON USE MODULES STATEMENTS
+        if (ctx.useStatement){
+            for(cst_statement of ctx.useStatement){
+                ast_statement = this.visit(cst_statement);
+            }
+        }
+
+        // LOOP ON MODULE DECLARATION STATEMENTS
+        if (ctx.moduleStatement){
+            for(cst_statement of ctx.moduleStatement){
+                ast_statement = this.visit(cst_statement);
+            }
+        }
+
         // LOOP ON FUNCTIONS DECLARATIONS STATEMENTS HEADERS
         let ast_function_header_nodes:any = {};
         if (ctx.functionStatement){
@@ -66,6 +80,56 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         return {
             type: AST.PROGRAM,
             block: statements
+        }
+    }
+
+    
+    /**
+     * Visit CST Use module node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    useStatement(ctx:any) {
+        // console.log('useStatement', ctx)
+
+        let statements:any[] = [];
+        let statement;
+
+        // LOOP ON STATEMENTS
+        for(statement of ctx.useStatement){
+            statements.push( this.visit(statement) );
+        }
+
+        return {
+            type: AST.STAT_USE,
+            statements: statements
+        }
+    }
+
+    
+    /**
+     * Visit CST module declaraion node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    moduleStatement(ctx:any) {
+        // console.log('moduleStatement', ctx)
+
+        let statements:any[] = [];
+        let statement;
+
+        // LOOP ON STATEMENTS
+        for(statement of ctx.useStatement){
+            statements.push( this.visit(statement) );
+        }
+
+        return {
+            type: AST.STAT_MODULE,
+            statements: statements
         }
     }
 
