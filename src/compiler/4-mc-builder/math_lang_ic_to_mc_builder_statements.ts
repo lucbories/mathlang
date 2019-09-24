@@ -1,9 +1,9 @@
-// import IType from '../../core/itype';
+import IType from '../../core/itype';
 // import IProgram from '../../core/iprogram';
 // import VMProgram from '../../engine/vm/vmprogram';
 // import TYPES from '../math_lang_types';
 import IC from '../3-ic-builder/math_lang_ic';
-import {ICLabel, ICFunction, ICInstruction} from '../3-ic-builder/math_lang_ast_to_ic_builder_base';
+import {ICLabel, ICFunction, ICInstruction, ICOperand, ICOperandSource} from '../3-ic-builder/math_lang_ast_to_ic_builder_base';
 import {IProgramOptions} from '../../engine/vm/vmprogramoptions';
 import MathLangIcToMcVisitorBase from './math_lang_ic_to_mc_builder_base';
 import {MCFunction} from './math_lang_ic_to_mc_builder_base';
@@ -41,6 +41,7 @@ import VMCallEnter from '../../engine/instructions/vmcall_enter';
 import VMCallLeave from '../../engine/instructions/vmcall_leave';
 
 import IInstruction from '../../core/iinstruction';
+import IValue from '../../core/ivalue';
 
 
 
@@ -55,13 +56,14 @@ export default abstract class MathLangIcToMcVisitorStatements extends MathLangIc
     /**
      * Constructor.
      * 
+     * @param engine_types        VM engine types map.
      * @param program_name        MC program name.
      * @param program_options     MC program options.
      * @param ic_functions        IC functions.
      * @param ic_functions_labels IC functions labels.
      */
-    constructor(program_name:string, program_options:IProgramOptions, ic_functions:Map<string,ICFunction>, ic_functions_labels:Map<string,ICLabel[]>) {
-        super(program_name, program_options, ic_functions, ic_functions_labels);
+    constructor(engine_types:Map<string,IType>, program_name:string, program_options:IProgramOptions, ic_functions:Map<string,ICFunction>, ic_functions_labels:Map<string,ICLabel[]>) {
+        super(engine_types, program_name, program_options, ic_functions, ic_functions_labels);
     }
 
 
@@ -96,6 +98,13 @@ export default abstract class MathLangIcToMcVisitorStatements extends MathLangIc
      * @param ic_statement IC statement.
      */
     visit_statement(ic_statement:ICInstruction){
+        let symbol_full_name = '';
+        let symbol_register_index:number = -1;
+        let instruction:IInstruction = undefined;
+        let left_opd:ICOperand = undefined;
+        let right_opd:ICOperand = undefined;
+        let value:IValue = undefined;
+
         switch(ic_statement.ic_code){
             case IC.FUNCTION_DECLARE_ENTER:{
                 const function_name:string = ic_statement.operands[0].ic_name;
@@ -110,25 +119,103 @@ export default abstract class MathLangIcToMcVisitorStatements extends MathLangIc
                 break;
             }
 
-            case IC.FUNCTION_DECLARE_LEAVE:{ this._mc_program.add_instruction( new VMCallLeave() ); break; }
+            case IC.FUNCTION_DECLARE_LEAVE:{
+                this._mc_program.add_instruction( new VMCallLeave() );
+                break;
+            }
 
             case IC.FUNCTION_CALL:{
                 // PUSH OPERANDS
                 // GOTO
+                break;
             }
-            case IC.FUNCTION_RETURN:{}
+            case IC.FUNCTION_RETURN:{
+                break;
+            }
 
-            case IC.IF_THEN:{}
-            case IC.IF_THEN_ELSE:{}
+            case IC.IF_THEN:{
+                break;
+            }
+            case IC.IF_THEN_ELSE:{
+                break;
+            }
 
             case IC.REGISTER_GET:{
-                const symbol_full_name = '';
-                const register_index = this.get_symbol_register(symbol_full_name);
-                const instr_getregv = new VMGetRegV(register_index);
-            }
-            case IC.REGISTER_SET:{}
+                // GET LEFT SYMBOL INDEX
+                left_opd = ic_statement.operands[0];
+                if (! left_opd.ic_name){
+                    this.left_operand_name_is_undefined_error(ic_statement);
+                    return;
+                }
+                symbol_full_name = left_opd.ic_type  + ':@' + left_opd.ic_name + left_opd.ic_id_accessors_str;
+                symbol_register_index = this.get_symbol_register(symbol_full_name, ic_statement);
+                if (symbol_register_index < 0){
+                    return;
+                }
 
-            case IC.GOTO:{}
+                // GET REGISTER VQLUE
+                instruction = new VMGetRegV(symbol_register_index);
+                this._mc_program.add_instruction(instruction);
+                break;
+            }
+
+            case IC.REGISTER_SET:{
+                // GET RIGHT SYMBOL INDEX
+                right_opd = ic_statement.operands[1];
+                if (! right_opd.ic_name){
+                    this.left_operand_name_is_undefined_error(ic_statement);
+                    return;
+                }
+                symbol_full_name = right_opd.ic_type  + ':@' + right_opd.ic_name + right_opd.ic_id_accessors_str;
+                symbol_register_index = this.get_symbol_register(symbol_full_name, ic_statement);
+                if (symbol_register_index < 0){
+                    return;
+                }
+
+                // GET RIGHT VALUE
+                // this.get_operand_value(right_opd);
+                switch(right_opd.ic_source){
+                    case ICOperandSource.FROM_ID:{
+                        // TODO
+                        break;
+                    }
+                    case ICOperandSource.FROM_INLINE:{
+                        value = this.get_operand_inline_value(right_opd);
+                        this._mc_program.push_value(value);
+                        break;
+                    }
+                    case ICOperandSource.FROM_REGISTER:{
+                        instruction = new VMGetRegV(symbol_register_index);
+                        this._mc_program.add_instruction(instruction);
+                        break;
+                    }
+                    case ICOperandSource.FROM_STACK:{
+                        // NOTHING TO DO, VALUE ALREADY ON THE STACK
+                        break;
+                    }
+                }
+
+                // GET LEFT SYMBOL INDEX
+                left_opd = ic_statement.operands[0];
+                if (! left_opd.ic_name){
+                    this.left_operand_name_is_undefined_error(ic_statement);
+                    return;
+                }
+                symbol_full_name = left_opd.ic_type  + ':@' + left_opd.ic_name + left_opd.ic_id_accessors_str;
+                symbol_register_index = this.set_symbol_register_value(symbol_full_name, ic_statement);
+                if (symbol_register_index < 0){
+                    return;
+                }
+
+                // SET REGISTER VALUE
+                instruction = new VMRegV(symbol_register_index);
+                this._mc_program.add_instruction(instruction);
+                break;
+            }
+
+            case IC.GOTO:{
+                break;
+            }
 
             // case IC.STACK_POP:{}
             // case IC.STACK_POP_TO_REGISTER:{}
@@ -144,13 +231,6 @@ export default abstract class MathLangIcToMcVisitorStatements extends MathLangIc
             // case IC:{}
             // case IC:{}
         }
-    }
-
-
-    get_symbol_register(full_name:string):number{
-        const function_name = '';
-        const symbol_name = '';
-        return 2;
     }
 
 

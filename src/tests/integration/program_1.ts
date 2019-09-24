@@ -328,3 +328,8 @@ ICFunction:my_int_square_add labels:
 4:my_int_square_add_label_4=15
 5:my_int_square_add_label_5=15
 `;
+
+
+export const program_1_run_result = {
+    result:999 // TBD
+};

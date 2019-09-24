@@ -7,7 +7,9 @@ import AST from '../../compiler/2-ast-builder/math_lang_ast';
 import MathLangCompiler from '../../compiler/math_lang_compiler';
 import DEFAULT_TYPES from '../../features/default_types';
 
-import { program_1_source, program_1_ast, program_1_ic, program_1_ic_labels } from './program_1';
+import VMEngine from '../../engine/vm/vmengine';
+
+import { program_1_source, program_1_ast, program_1_ic, program_1_ic_labels, program_1_run_result } from './program_1';
 import { program_2_source, program_2_ast } from './program_2';
 
 
@@ -20,7 +22,7 @@ describe('MathLang compiler test', () => {
     it('Compile a=456' , () => {
         compiler.reset();
         const text = 'a=456';
-        const result = compiler.compile(text, 'statement');
+        const result = compiler.compile(text, 'program');
         const errors = compiler.get_errors();
 
         // ERRORS
@@ -42,18 +44,42 @@ describe('MathLang compiler test', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.STAT_ASSIGN_VARIABLE,
-            ic_type: 'INTEGER',
-            name:'a',
-            is_async: false,
-            members:EMPTY_ARRAY,
-            expression: {
-                type:'INTEGER',
-                ic_type: 'INTEGER',
-                value:'456'
-            }
-        }
+            type:AST.PROGRAM,
+            block:[
+                {
+                    type:AST.STAT_ASSIGN_VARIABLE,
+                    ic_type: 'INTEGER',
+                    name:'a',
+                    is_async: false,
+                    members:EMPTY_ARRAY,
+                    expression: {
+                        type:'INTEGER',
+                        ic_type: 'INTEGER',
+                        value:'456'
+                    }
+                }
+            ]
+        };
         expect(compiler_ast).eql(expected_ast);
+        
+        // GET IC CODE
+        const ic_functions_map = compiler.get_ic_functions_map();
+        // console.log('ic_functions_map', ic_functions_map);
+        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+
+        // TEST IC TEXT
+        const expected_ic_source = `
+none:function-declare-enter main
+INTEGER:register-set INTEGER:@main/a INTEGER:[456]
+none:function-declare-leave main`;
+        expect(ic_source).equals(expected_ic_source);
+
+        // RUN
+        const program = compiler.get_mc_program();
+        const engine = new VMEngine('engine');
+        const engine_result = engine.run(program);
+        const expected_engine_result:any = undefined;
+        expect(engine_result).equal(expected_engine_result);
     });
 
 
@@ -95,7 +121,7 @@ describe('MathLang compiler test', () => {
 
     it('Compile [begin a=12\\na#b=456 end]' , () => {
         const text = 'begin a=12\na#b=456 end';
-        const result = compiler.compile(text, 'blockStatement');
+        const result = compiler.compile(text, 'program');
         const errors = compiler.get_errors();
 
         // ERRORS
@@ -117,41 +143,59 @@ describe('MathLang compiler test', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.BLOCK,
-            statements:[
+            type:AST.PROGRAM,
+            block:[
                 {
-                    type:AST.STAT_ASSIGN_VARIABLE,
-                    ic_type: TYPES.INTEGER,
-                    name:'a',
-                    is_async: false,
-                    members:EMPTY_ARRAY,
-                    expression: {
-                        type:TYPES.INTEGER,
-                        ic_type: TYPES.INTEGER,
-                        value:'12'
-                    }
-                },
-                {
-                    type:AST.STAT_ASSIGN_ATTRIBUTE,
-                    ic_type: TYPES.INTEGER,
-                    name:'a',
-                    is_async: false,
-                    members:[
+                    type:AST.BLOCK,
+                    statements:[
                         {
-                            type: AST.EXPR_MEMBER_ATTRIBUTE,
+                            type:AST.STAT_ASSIGN_VARIABLE,
                             ic_type: TYPES.INTEGER,
-                            attribute_name: 'b'
+                            name:'a',
+                            is_async: false,
+                            members:EMPTY_ARRAY,
+                            expression: {
+                                type:TYPES.INTEGER,
+                                ic_type: TYPES.INTEGER,
+                                value:'12'
+                            }
+                        },
+                        {
+                            type:AST.STAT_ASSIGN_ATTRIBUTE,
+                            ic_type: TYPES.INTEGER,
+                            name:'a',
+                            is_async: false,
+                            members:[
+                                {
+                                    type: AST.EXPR_MEMBER_ATTRIBUTE,
+                                    ic_type: TYPES.INTEGER,
+                                    attribute_name: 'b'
+                                }
+                            ],
+                            expression: {
+                                type:TYPES.INTEGER,
+                                ic_type: TYPES.INTEGER,
+                                value:'456'
+                            }
                         }
-                    ],
-                    expression: {
-                        type:TYPES.INTEGER,
-                        ic_type: TYPES.INTEGER,
-                        value:'456'
-                    }
+                    ]
                 }
             ]
-        }
+        };
         expect(compiler_ast).eql(expected_ast);
+        
+        // GET IC CODE
+        const ic_functions_map = compiler.get_ic_functions_map();
+        // console.log('ic_functions_map', ic_functions_map);
+        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+
+        // TEST IC TEXT
+        const expected_ic_source = `
+none:function-declare-enter main
+INTEGER:register-set INTEGER:@main/a INTEGER:[12]
+INTEGER:register-set INTEGER:@main/a#b INTEGER:[456]
+none:function-declare-leave main`;
+        expect(ic_source).equals(expected_ic_source);
     });
 
 
@@ -197,6 +241,13 @@ describe('MathLang compiler test', () => {
 
         expect(ic_source).equals(expected_ic_source);
         expect(labels_str).equals(expected_labels_str);
+
+        // RUN
+        const program = compiler.get_mc_program();
+        const engine = new VMEngine('engine');
+        const engine_result = engine.run(program);
+        const expected_engine_result = program_1_run_result.result;
+        expect(engine_result).equal(expected_engine_result);
     });
 
 

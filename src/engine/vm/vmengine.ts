@@ -3,6 +3,7 @@ import IInstruction from '../../core/iinstruction';
 import { OPCODES } from '../../core/iinstruction';
 
 import VMProgram from './vmprogram';
+import IProgram from '../../core/iprogram';
 import VMError from './vmerror';
 
 
@@ -33,7 +34,7 @@ export default class VMEngine {
     public get_error_message() : string { return this._error_message; }
     public get_error_cursor() : number { return this._error_cursor; }
 
-    public run(program: VMProgram) : IValue {
+    public run(program: IProgram) : IValue {
         const entry_point = program.get_entry_point();
         let running = true;
 
@@ -99,10 +100,12 @@ export default class VMEngine {
                 // CONTEXT STACK
                 case OPCODES['CALL_ENTER']:{
                     program.push_context();
+                    program.move_cursor(1);
                     break;
                 }
                 case OPCODES['CALL_LEAVE']:{
                     program.pop_context();
+                    program.move_cursor(1);
                     break;
                 }
 

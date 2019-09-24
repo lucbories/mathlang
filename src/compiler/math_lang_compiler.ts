@@ -487,7 +487,7 @@ export default class MathLangCompiler {
             entry_label:'main' // program entry point label
         };
 
-        const mc_builder = new MathLangIcToMcVisitor('', mc_program_options, this._ic_functions, this._ic_functions_labels);
+        const mc_builder = new MathLangIcToMcVisitor(this._types_map, '', mc_program_options, this._ic_functions, this._ic_functions_labels);
 
         mc_builder.visit();
 

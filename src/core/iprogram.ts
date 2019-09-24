@@ -7,6 +7,10 @@ export default interface IProgram {
     get_error_message():string;
     get_error_cursor():number;
 
+    // Context
+    push_context():void;
+    pop_context():void;
+
     // Stack
     push_value(value:IValue):void;
     pop_value(): IValue;
@@ -18,6 +22,7 @@ export default interface IProgram {
     unregister_value(index:number):void;
     register_value(index:number, value:IValue):void;
     push_register_value(index:number):void;
+    get_register_value(index:number):IValue;
 
 
     // Values
