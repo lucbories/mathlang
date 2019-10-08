@@ -41,11 +41,13 @@ describe('MathLang function declaration parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.PROGRAM,
+            modules:EMPTY_ARRAY,
             block:[
                 {
                     type:AST.STAT_FUNCTION,
                     ic_type: 'boolean',
                     name: 'f',
+                    is_exported:false,
                     operands_types:EMPTY_ARRAY,
                     operands_names:EMPTY_ARRAY,
                     block: [
@@ -91,11 +93,13 @@ describe('MathLang function declaration parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.PROGRAM,
+            modules:EMPTY_ARRAY,
             block:[
                 {
                     type:AST.STAT_FUNCTION,
                     ic_type: 'boolean',
                     name: 'f',
+                    is_exported:false,
                     operands_types:[TYPES.INTEGER],
                     operands_names:['x'],
                     block: [
@@ -141,11 +145,13 @@ describe('MathLang function declaration parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.PROGRAM,
+            modules:EMPTY_ARRAY,
             block:[
                 {
                     type:AST.STAT_FUNCTION,
                     ic_type: 'boolean',
                     name: 'f',
+                    is_exported:false,
                     operands_types:['bigfloat'],
                     operands_names:['x'],
                     block: [
@@ -206,11 +212,13 @@ describe('MathLang function declaration parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.PROGRAM,
+            modules:EMPTY_ARRAY,
             block:[
                 {
                     type:AST.STAT_FUNCTION,
                     ic_type: TYPES.STRING,
                     name: 'f',
+                    is_exported:false,
                     operands_types:[TYPES.BIGFLOAT, TYPES.STRING],
                     operands_names:['x', 'y'],
                     block: [
@@ -286,6 +294,7 @@ describe('MathLang function declaration parser', () => {
         // TEST AST
         const json_result = `{
             "type": "PROGRAM",
+            "modules":[],
             "block": [
                 {
                     "type": "BLOCK",
@@ -329,6 +338,7 @@ describe('MathLang function declaration parser', () => {
                     "type": "FUNCTION_STATEMENT",
                     "ic_type": "BIGFLOAT",
                     "name": "myfunc",
+                    "is_exported":false,
                     "operands_types": ["BIGFLOAT","INTEGER"],
                     "operands_names": ["x", "y"],
                     "block": [
@@ -452,6 +462,7 @@ describe('MathLang function declaration parser', () => {
                     "type": "FUNCTION_STATEMENT",
                     "ic_type": "INTEGER",
                     "name": "m2",
+                    "is_exported":false,
                     "operands_types": ["INTEGER"],
                     "operands_names": ["x"],
                     "block": [

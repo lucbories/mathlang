@@ -12,11 +12,10 @@ export class MathLangParserStatements extends Parser {
         super(t.math_lang_tokens);
     }
 
-    // PROGRAN
+    // PROGRAM
     private program = this.RULE("program", () => {
         this.AT_LEAST_ONE( () => {
             this.OR( [
-                { ALT: () => this.SUBRULE(this.useStatement, { LABEL:"useStatement" }) },
                 { ALT: () => this.SUBRULE(this.moduleStatement, { LABEL:"moduleStatement" }) },
                 { ALT: () => this.SUBRULE(this.statement, { LABEL:"blockStatement" }) },
                 { ALT: () => this.SUBRULE(this.functionStatement) }
@@ -25,17 +24,37 @@ export class MathLangParserStatements extends Parser {
     });
 
 
-    // USE
-    private useStatement = this.RULE("useStatement", () => {
-        this.CONSUME(t.Use);
-        this.CONSUME(t.ID);
-    });
-
-
     // MODULE
     private moduleStatement = this.RULE("moduleStatement", () => {
         this.CONSUME(t.Module);
         this.CONSUME(t.ID);
+        this.AT_LEAST_ONE(() => {
+            this.OR( [
+                { ALT: () => this.SUBRULE(this.useStatement, { LABEL:"useStatement" }) },
+                { ALT: () => this.SUBRULE(this.functionStatement, { LABEL:'functionStatement' } ) },
+                { ALT: () => this.SUBRULE(this.exportableAssignStatement, { LABEL:'exportableAssignStatement' } ) }
+            ]);
+        });
+    });
+
+
+    // USE MODULE
+    private useStatement = this.RULE("useStatement", () => {
+        this.CONSUME(t.Use);
+        this.CONSUME(t.ID);
+        this.OPTION(() => {
+            this.CONSUME(t.LParen);
+            this.CONSUME2(t.ID, { LABEL:'importedModuleItem' } )
+            this.MANY(() => {
+                this.CONSUME(t.Comma);
+                this.CONSUME3(t.ID, { LABEL:'importedModuleItem' } )
+            } )
+            this.CONSUME(t.RParen);
+        });
+        this.OPTION2(() => {
+            this.CONSUME(t.As);
+            this.CONSUME4(t.ID, { LABEL:'alias' } );
+        });
     });
 
 
@@ -145,6 +164,13 @@ export class MathLangParserStatements extends Parser {
 
 
     // ASSIGN
+    private exportableAssignStatement = this.RULE("exportableAssignStatement", () => {
+        this.OPTION(
+            ()=>{ this.CONSUME(t.Export); }
+        );
+        this.SUBRULE(this.assignStatement);
+    });
+
     private assignStatement = this.RULE("assignStatement", () => {
         this.SUBRULE(this.idLeft);
         this.CONSUME(t.Assign);
@@ -156,6 +182,9 @@ export class MathLangParserStatements extends Parser {
 
     // FUNCTION DECLARATION
     private functionStatement = this.RULE("functionStatement", () => {
+        this.OPTION(
+            ()=>{ this.CONSUME(t.Export); }
+        );
         this.CONSUME(t.Function);
         this.CONSUME2(t.ID, { LABEL:"functionName" } );
         this.SUBRULE(this.ArgumentsWithIds);

@@ -26,20 +26,15 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         // console.log('program', ctx)
 
         const statements = [];
+        const modules = [];
         let cst_statement;
         let ast_statement;
-
-        // LOOP ON USE MODULES STATEMENTS
-        if (ctx.useStatement){
-            for(cst_statement of ctx.useStatement){
-                ast_statement = this.visit(cst_statement);
-            }
-        }
 
         // LOOP ON MODULE DECLARATION STATEMENTS
         if (ctx.moduleStatement){
             for(cst_statement of ctx.moduleStatement){
                 ast_statement = this.visit(cst_statement);
+                modules.push(ast_statement);
             }
         }
 
@@ -79,7 +74,63 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
         return {
             type: AST.PROGRAM,
-            block: statements
+            block: statements,
+            modules:modules
+        }
+    }
+
+    
+    /**
+     * Visit CST module declaraion node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    moduleStatement(ctx:any) {
+        // console.log('moduleStatement', ctx)
+        
+        let cst_statement;
+        let ast_statement;
+        let functions:any[] = [];
+        let variables:any[] = [];
+        let uses:any[] = [];
+
+        // LOOP ON USE MODULE STATEMENTS
+        if (ctx.useStatement){
+            for(cst_statement of ctx.useStatement){
+
+                ast_statement = this.visit(cst_statement);
+                uses.push( { name:ast_statement.module_name, alias:ast_statement.module_alias, imports:ast_statement.modules_imports } );
+            }
+        }
+
+        // LOOP ON FUNCTIONS DECLARATIONS STATEMENTS BODY
+        if (ctx.functionStatement){
+            for(cst_statement of ctx.functionStatement){
+                cst_statement.children.visit_header = true;
+                cst_statement.children.visit_body = true;
+
+                ast_statement = this.visit(cst_statement);
+                functions.push(ast_statement);
+            }
+        }
+
+        // LOOP ON VARIABLES DECLARATIONS STATEMENTS
+        if (ctx.exportableAssignStatement){
+            for(cst_statement of ctx.exportableAssignStatement){
+
+                ast_statement = this.visit(cst_statement);
+                variables.push(ast_statement);
+            }
+        }
+
+        return {
+            type: AST.STAT_MODULE,
+            module_name: ctx.ID[0].image,
+            uses:uses,
+            functions:functions,
+            variables:variables
         }
     }
 
@@ -94,42 +145,11 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
     useStatement(ctx:any) {
         // console.log('useStatement', ctx)
 
-        let statements:any[] = [];
-        let statement;
-
-        // LOOP ON STATEMENTS
-        for(statement of ctx.useStatement){
-            statements.push( this.visit(statement) );
-        }
-
         return {
             type: AST.STAT_USE,
-            statements: statements
-        }
-    }
-
-    
-    /**
-     * Visit CST module declaraion node.
-     * 
-     * @param ctx CST nodes
-     * 
-     * @returns AST node
-     */
-    moduleStatement(ctx:any) {
-        // console.log('moduleStatement', ctx)
-
-        let statements:any[] = [];
-        let statement;
-
-        // LOOP ON STATEMENTS
-        for(statement of ctx.useStatement){
-            statements.push( this.visit(statement) );
-        }
-
-        return {
-            type: AST.STAT_MODULE,
-            statements: statements
+            module_name: ctx.ID[0].image,
+            module_alias: ctx.alias ? ctx.alias[0].image : ctx.ID[0].image,
+            modules_imports: ctx.importedModuleItem ? ctx.importedModuleItem.map((x:any)=>x.image) : []
         }
     }
 
@@ -410,6 +430,25 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
      * 
      * @returns AST node
      */
+    exportableAssignStatement(ctx:any) {
+        // console.log('exportableAssignStatement', ctx)
+
+        let ast_assign = this.visit(ctx.assignStatement);
+        if (ctx.Export && ctx.Export[0].image){
+            ast_assign.is_exported = true;
+        }
+
+        return ast_assign
+    }
+
+
+    /**
+     * Visit CST Assign node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
     assignStatement(ctx:any) {
         // console.log('assignStatement', ctx)
 
@@ -646,6 +685,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             type: AST.STAT_FUNCTION,
             ic_type:returned_type,
             name:function_name,
+            is_exported: ctx.Export && ctx.Export[0] ? true : false,
             operands_types:operands_decl && operands_decl.ic_subtypes ? operands_decl.ic_subtypes : [],
             operands_names:operands_decl && operands_decl.items ? operands_decl.items : [],
             block:statements
