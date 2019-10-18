@@ -20,7 +20,7 @@ VMBigIntType.add_feature(VMBigIntMathFt);
 
 
 
-describe('Feature: number operations', () => {
+describe('Feature: Cpu operations', () => {
 
   it('add two integer, expect an integer' , () => {
     const value1 = new VMValue(VMNumberType, 123);
