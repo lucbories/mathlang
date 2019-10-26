@@ -1,36 +1,59 @@
 
-import ICompilerAstNode from './icompiler_ast_node';
-import ICompilerIcNode  from './icompiler_ic_node';
+import {ICompilerAstNode} from './icompiler_ast_node';
+import {ICompilerIcNode}  from './icompiler_ic_node';
 
 
-export type TSymbolDeclarationRecord = {
-    name:string, path:string,
-    type:string,
-    is_constant:boolean,
-    init_value:string,
-    uses_count:number,
-    uses_scopes:string[]
-};
+export class SymbolDeclaration {
+    name:string;
+    path:string;
+    type:string;
+    is_constant:boolean;
+    init_value:string;
+    uses_count:number;
+    // uses_scopes:string[];
+}
 
-export type SymbolsTable = Map<string, SymbolDeclarationRecord>;
+export type SymbolsTable = Map<string, SymbolDeclaration>;
 
-export default interface ICompilerFunction {
+export interface ICompilerFunction {
 	// COMMON
-	get_func_name():string
-	get_returned_type():string
+	get_func_module():string;
+    get_func_name():string;
+    
+    set_returned_type(returned_type:string):void;
+	get_returned_type():string;
 	
     // AST
-	get_ast_node():ICompilerAstNode
-    get_ast_statements:ICompilerAstNode[]
-	
-	// IC
-	get_ic_node():ICompilerIcNode
-    get_ic_statements:ICompilerIcNode[]
+    set_ast_node(node:ICompilerAstNode):void;
+    get_ast_node():ICompilerAstNode;
     
-	// SYMBOLS
-	get_symbols_consts_table():SymbolsTable
-    get_symbols_vars_table():SymbolsTable
-    get_symbols_opds_table():SymbolsTable
-    get_symbols_opds_ordered_list():string[]
-    get_used_by_functions():string[]
+    set_ast_statements(nodes:ICompilerAstNode[]):void;
+    get_ast_statements():ICompilerAstNode[];
+	
+    // IC
+    set_ic_node(node:ICompilerIcNode):void;
+    get_ic_node():ICompilerIcNode;
+    
+    set_ic_statements(nodes:ICompilerIcNode[]):void;
+    get_ic_statements():ICompilerIcNode[];
+    
+    // SYMBOLS
+    has_symbol_const(symbol_name:string):boolean;
+    get_symbol_const(symbol_name:string):SymbolDeclaration;
+    add_symbol_const(symbol_name:string, symbol_type:string, symbol_value:string):void;
+    get_symbols_consts_table():SymbolsTable;
+
+    has_symbol_var(symbol_name:string):boolean;
+    get_symbol_var(symbol_name:string):SymbolDeclaration;
+    add_symbol_var(symbol_name:string, symbol_type:string, symbol_value:string):void;
+    get_symbols_vars_table():SymbolsTable;
+
+    has_symbol_operand(symbol_name:string):boolean;
+    get_symbol_operand(symbol_name:string):SymbolDeclaration;
+    add_symbol_operand(symbol_name:string, symbol_type:string, symbol_value:string):void;
+    get_symbols_opds_table():SymbolsTable;
+    get_symbols_opds_ordered_list():string[];
+
+    add_used_by_function(func_name:string):void;
+    get_used_by_functions():string[];
 }

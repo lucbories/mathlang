@@ -2,7 +2,7 @@ import IType from '../../core/itype';
 
 import AST from '../2-ast-builder/math_lang_ast';
 
-import { FunctionScope } from './math_lang_function_scope';
+import { FunctionScope, ModuleScope } from './math_lang_function_scope';
 import TYPES from '../math_lang_types';
 import IC from './math_lang_ic';
 import MathLangAstToIcVisitorBase from './math_lang_ast_to_ic_builder_base';
@@ -24,8 +24,8 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * 
      * @param _ast_functions AST functions scopes
      */
-    constructor(ast_functions:Map<string,FunctionScope>, types_map:Map<string,IType>) {
-        super(ast_functions, types_map);
+    constructor(ast_modules:Map<string,ModuleScope>, types_map:Map<string,IType>) {
+        super(ast_modules, types_map);
     }
 
 
@@ -37,14 +37,13 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * Visit the AST entry point.
      */
     visit() {
-        // const main_scope:FunctionScope = this._ast_functions.get('main');
-
-        // this.visit_function(main_scope);
-
-
-        this._ast_functions.forEach(
-            (loop_function_scope, loop_function_name)=>{
-                this.visit_function(loop_function_scope);
+        this._ast_modules.forEach(
+            (loop_module_scope, loop_module_name)=>{
+                loop_module_scope.module_functions.forEach(
+                    (loop_function_scope, loop_function_name)=>{
+                        this.visit_function(loop_function_scope);
+                    }
+                )
             }
         )
     }
@@ -91,8 +90,8 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
 
         // REGISTER IC FUNCTION
         const ic_statements:ICInstruction[] = [];
-        this.declare_function(ast_func_scope.func_name, ast_func_scope.return_type, opds_records, opds_records_str, ic_statements);
-        const ic_function = this._ic_functions.get(ast_func_scope.func_name);
+        this.declare_function(ast_func_scope.module_name, ast_func_scope.func_name, ast_func_scope.return_type, opds_records, opds_records_str, ic_statements);
+        const ic_function = this._ic_modules.get(ast_func_scope.module_name).module_functions.get(ast_func_scope.func_name);
         if (! ic_function){
             this.add_error(ast_func_scope, 'Error:function registration error [' + ast_func_scope.func_name + ']');
             return;
@@ -105,7 +104,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
             this.visit_statement(loop_ast_statement, ast_func_scope, ic_function);
         }
 
-        this.leave_function_declaration(ast_func_scope.func_name);
+        this.leave_function_declaration(ast_func_scope.module_name, ast_func_scope.func_name);
     }
 
 
@@ -344,7 +343,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
     visit_switch_statement(ast_statement:any, ast_func_scope:FunctionScope, ic_function:ICFunction){
         // BUILD THEN LABEL
         const switch_var = ast_statement.var;
-        const switch_var_type = this.get_symbol_type(switch_var);
+        const switch_var_type = this.get_symbol_type(ast_func_scope.module_name, switch_var);
         const switch_items = ast_statement.items;
 
         // CHECK TYPE
@@ -571,8 +570,8 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         }
 
         // DECLARE METHOD
-        this.declare_function(assign_function_name, ic_left_type, opds_records, opds_records_str, []);
-        const assign_function = this._ic_functions.get(assign_function_name);
+        this.declare_function(ast_func_scope.module_name, assign_function_name, ic_left_type, opds_records, opds_records_str, []);
+        const assign_function = this._ic_modules.get(ast_func_scope.module_name).module_functions.get(assign_function_name);
 
 
         // GET RIGHT
@@ -608,6 +607,6 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
 
 
         // DECLARE METHOD
-        this.leave_function_declaration(assign_function_name);
+        this.leave_function_declaration(ast_func_scope.module_name, assign_function_name);
     }
 }

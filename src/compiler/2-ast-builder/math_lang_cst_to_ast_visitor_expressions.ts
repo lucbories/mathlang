@@ -348,34 +348,52 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             }
 
             ast_node.type = AST.EXPR_MEMBER_FUNC_CALL;
-            ast_node.ic_type = this.get_function_type(ast_node.name);
+            ast_node.ic_type = this.get_function_type(this._current_module, ast_node.name);
             ast_node.operands_expressions = ast_func_call_node.items;
             ast_node.operands_types = ast_func_call_node.ic_subtypes;
         }
 
-        // METHOD CALL
+        // MODULE.FUNCTION or OBJECT.METHOD CALL
         else if (ctx.dotIdArgsCallExpression){
             if (ctx.dotIdArgsCallExpression.length != 1){
                 this.add_error(ctx.dotIdArgsCallExpression, AST.EXPR_MEMBER_METHOD_CALL, 'Error:only one function call at end of an id expression but [' + ctx.dotIdArgsCallExpression.length + '] found.')
             }
 
+            const object_or_module_name = ast_node.name;
             const cst_func_call_node:any = ctx.dotIdArgsCallExpression[0];
             const ast_func_call_node:any = this.visit(cst_func_call_node);
             const id = ast_func_call_node.func_name;
 
-            // TEST IF CALLED FUNCTION/METHOD EXISTS
-            if (ast_node.members.length == 0 && ! this.has_declared_func_symbol(id)){
-                this.add_error(ctx, AST.EXPR_MEMBER_METHOD_CALL, 'Error:unknow called function [' + id + ']');
-            }
-            if (ast_node.members.length > 0){
-                const last_member = ast_node.members[ast_node.members.length - 1];
-                const last_member_type = last_member ? last_member.ic_type : TYPES.UNKNOW;
-                this.check_method(last_member_type, id, ast_func_call_node.operands_types, cst_func_call_node, AST.EXPR_MEMBER_METHOD_CALL);
-            }
+            // PROCESS A MODULE.FUNCTION
+            if (this._scopes_map.has(object_or_module_name)) {
+                const func_scope = this.get_scopes_map().get(object_or_module_name).module_functions.get(id);
+                ast_func_call_node.ic_type = func_scope? func_scope.return_type : TYPES.UNKNOW;
+                // ... TODO
             
-            ast_node.type = AST.EXPR_MEMBER_METHOD_CALL;
-            ast_node.ic_type = ast_func_call_node.ic_type;
-            ast_node.members.push(ast_func_call_node);
+                ast_node.type = AST.EXPR_MEMBER_FUNC_CALL;
+                ast_node.ic_type = ast_func_call_node.ic_type;
+                ast_node.members.push(ast_func_call_node);
+            }
+
+            // PROCESS AN OBJECT METHOD
+            else {
+                const func_scope = this.get_scopes_map().get(this._current_module).module_functions.get(id);
+                ast_func_call_node.ic_type = func_scope? func_scope.return_type : TYPES.UNKNOW;
+
+                // TEST IF CALLED FUNCTION/METHOD EXISTS
+                if (ast_node.members.length == 0 && ! this.has_declared_func_symbol(id)){
+                    this.add_error(ctx, AST.EXPR_MEMBER_METHOD_CALL, 'Error:unknow called function [' + id + '] of module [' + object_or_module_name + ']');
+                }
+                if (ast_node.members.length > 0){
+                    const last_member = ast_node.members[ast_node.members.length - 1];
+                    const last_member_type = last_member ? last_member.ic_type : TYPES.UNKNOW;
+                    this.check_method(last_member_type, id, ast_func_call_node.operands_types, cst_func_call_node, AST.EXPR_MEMBER_METHOD_CALL);
+                }
+            
+                ast_node.type = AST.EXPR_MEMBER_METHOD_CALL;
+                ast_node.ic_type = ast_func_call_node.ic_type;
+                ast_node.members.push(ast_func_call_node);
+            }
         }
 
         return ast_node;
@@ -425,11 +443,11 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
         const id = ctx.ID[0].image;
         const cst_args_node = ctx.Arguments[0];
         const ast_args_node = this.visit(cst_args_node);
-        const func_scope = this.get_scopes_map().get(id);
+        // const func_scope = this.get_scopes_map().get(id);
 
         const ast_func_call_node = {
             type:AST.EXPR_MEMBER_METHOD_CALL,
-            ic_type: func_scope? func_scope.return_type : TYPES.UNKNOW,
+            ic_type: TYPES.UNKNOW,
             func_name:id,
             operands_types:ast_args_node.ic_subtypes ? ast_args_node.ic_subtypes : [],
             operands_expressions:ast_args_node.items ? ast_args_node.items : []

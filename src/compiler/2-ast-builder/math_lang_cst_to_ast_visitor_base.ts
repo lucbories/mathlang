@@ -2,8 +2,15 @@
 import IType from '../../core/itype';
 import { math_lang_parser } from '../1-cst-builder/math_lang_parser';
 import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES,  TYPES } from '../math_lang_types';
-import { SymbolDeclarationRecord, FunctionScope } from '../3-ic-builder/math_lang_function_scope';
+// import { SymbolDeclarationRecord, FunctionScope, ModuleScope } from '../3-ic-builder/math_lang_function_scope';
+
+import { SymbolDeclaration, ICompilerFunction } from '../../core/icompiler_function';
+import CompilerFunction from '../0-common/compiler_function';
+import CompilerModule from '../0-common/compiler_module';
 import IMethod from '../../core/imethod';
+
+import CompilerScope from '../0-common/compiler_scope';
+
 
 /**
  * CST visitor base class.
@@ -28,12 +35,12 @@ type AstBuilderErrorArray = Array<AstBuilderErrorRecord>;
 /**
  * Stack of function scopes.
  */
-type ScopesStack = Array<FunctionScope>;
+type ScopesStack = Array<ICompilerFunction>;
 
 /**
  * Map of function scopes.
  */
-type ScopesMap = Map<string,FunctionScope>;
+// type ScopesMap = Map<string,CompilerModule>;
 
 
 
@@ -44,24 +51,19 @@ type ScopesMap = Map<string,FunctionScope>;
  * @license Apache-2.0
  */
 export default class MathLangCstToAstVisitorBase extends BaseVisitor {
-    protected _errors:AstBuilderErrorArray = new Array();
-    protected _unknow_symbols:string[] = new Array();
+    protected _errors:AstBuilderErrorArray       = undefined;
+    protected _unknow_symbols:string[]           = undefined;
 
-    protected _main_scope:FunctionScope = {
-        func_name:'main',
-        return_type:'none',
-        statements:[],
-        symbols_consts_table:new Map(),
-        symbols_vars_table:new Map(),
-        symbols_opds_table:new Map(),
-        symbols_opds_ordered_list:[],
-        used_by_functions:[]
-    };
+    protected _compiler_scope:CompilerScope      = undefined;
+    protected _default_module:CompilerModule     = undefined;
+    protected _default_function:CompilerFunction = undefined;
     
-    protected _current_scope:FunctionScope = this._main_scope;
-    protected _current_scope_path:string   = 'main';
-    protected _scopes_stack:ScopesStack    = new Array();
-    protected _scopes_map:ScopesMap        = new Map();
+    protected _current_module:CompilerModule     = undefined;
+    protected _current_function:CompilerFunction = undefined;
+    
+    // protected _current_scope_path:string   = 'default:main';
+
+    protected _scopes_stack:ScopesStack          = undefined;
 
 
     /**
@@ -69,10 +71,11 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * 
      * @param _types_map private property, map of types.
      */
-    constructor(private _types_map:Map<string,IType>) {
+    constructor(compiler_scope:CompilerScope) {
         super();
-        this._scopes_stack.push(this._main_scope);
-        this._scopes_map.set(this._main_scope.func_name, this._main_scope);
+        this._compiler_scope   = compiler_scope;
+
+        this.reset();
     }
 
 
@@ -86,11 +89,11 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns true for success, else false.
      */
     check_type(type_name:string, cst_context:string, ast_node_type:any){
-        const has_type = this._types_map.has(type_name);
+        const has_type = this._compiler_scope.has_available_lang_type(type_name);
         if (! has_type){
             this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
         }
-        return has_type;
+        return true;
     }
 
 
@@ -106,6 +109,8 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns true for success, else false.
      */
     check_method(type_name:string, method_name:string, operands_types:string[], cst_context:string, ast_node_type:any){
+        return this._compiler_scope.has_available_lang_type_method(type_name, method_name, operands_types);
+/*
         let has_error = false;
 
         // CHECK VALUE TYPE
@@ -139,7 +144,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
             }
         }
 
-        return ! has_error;
+        return ! has_error;*/
     }
 
 
@@ -155,14 +160,14 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns true for success, else false.
      */
     check_attribute(type_name:string, attribute_name:string, attribute_type:string, cst_context:string, ast_node_type:any){
-        let has_error = false;
+        // let has_error = false;
 
         // CHECK VALUE TYPE
-        const value_type:IType = this._types_map.get(type_name);
-        if (! value_type){
-            this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
-            has_error = true;
-        }
+        // const value_type:IType = this._types_map.get(type_name);
+        // if (! value_type){
+        //     this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
+        //     has_error = true;
+        // }
 
         return false;
     }
@@ -179,16 +184,17 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns type name.
      */
     get_attribute_type(type_name:string, attribute_name:string, cst_context:string, ast_node_type:any){
-        let has_error = false;
+        // let has_error = false;
 
         // CHECK VALUE TYPE
-        const value_type:IType = this._types_map.get(type_name);
-        if (! value_type){
-            this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
-           return TYPES.UNKNOW;
-        }
+        // const value_type:IType = this._types_map.get(type_name);
+        // if (! value_type){
+        //     this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
+        //    return TYPES.UNKNOW;
+        // }
 
-        return value_type.get_name();
+        // return value_type.get_name();
+        return TYPES.UNKNOW;
     }
 
 
@@ -251,8 +257,8 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * Get scopes map.
      * @return Map 
      */
-    get_scopes_map() {
-        return this._scopes_map;
+    get_compiler_scope() {
+        return this._compiler_scope;
     }
 
 
@@ -266,21 +272,6 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
         const json = JSON.stringify(ctx);
         console.log(label, json)
     }
-
-
-    /**
-     * 
-     * 
-     * @param node AST node
-     * 
-     * @returns Program type
-     */
-	// find_type(node:any):string {
-    //     if (node && node.program_type) {
-    //         return node.program_type;
-    //     }
-    //     return undefined;
-    // }
 
 
     /**
@@ -352,14 +343,14 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
 	get_symbol_type(name:string):string {
         let loop_scope;
         for(loop_scope of this._scopes_stack) {
-            if (loop_scope.symbols_consts_table.has(name)) {
-                return loop_scope.symbols_consts_table.get(name).ic_type;
+            if (loop_scope.has_symbol_const(name)) {
+                return loop_scope.get_symbol_const(name).type;
             }
-            if (loop_scope.symbols_vars_table.has(name)) {
-                return loop_scope.symbols_vars_table.get(name).ic_type;
+            if (loop_scope.has_symbol_var(name)) {
+                return loop_scope.get_symbol_var(name).type;
             }
-            if (loop_scope.symbols_opds_table.has(name)) {
-                return loop_scope.symbols_opds_table.get(name).ic_type;
+            if (loop_scope.has_symbol_operand(name)) {
+                return loop_scope.get_symbol_operand(name).type;
             }
         }
         return TYPES.UNKNOW;
@@ -368,12 +359,21 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
 
     /**
      * Get function return type.
+     * @param module_name module name
      * @param func_name   function name
      * @returns return type
      */
-	get_function_type(func_name:string):string {
-        const func_scope = this._scopes_map.get(func_name);
-        return func_scope ? func_scope.return_type : TYPES.UNKNOW;
+	get_function_type(module_name:string, func_name:string):string {
+        const module_scope = this._compiler_scope.get_module(module_name);
+        if (! module_scope) {
+            return TYPES.UNKNOW;
+        }
+
+        const func_scope = module_scope.get_module_function(func_name);
+        if (! func_scope) {
+            return TYPES.UNKNOW;
+        }
+        return func_scope.get_returned_type();
     }
 
     
@@ -388,20 +388,13 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns true for success or false for failure
      */
     register_symbol_declaration(name:string, ic_type:string, is_constant:boolean, init_value:string, cst_context:any, ast_node_type:string) {
-        const current_scope = this.get_current_scope();
-        const table = is_constant ? current_scope.symbols_consts_table : current_scope.symbols_vars_table;
-
         this.check_type(ic_type, cst_context, ast_node_type);
 
-        if (table && table.has(name)) {
-            return false;
+        if (is_constant) {
+            this._current_function.add_symbol_const(name, ic_type, init_value);
+        } else {
+            this._current_function.add_symbol_var(name, ic_type, init_value);
         }
-
-        const path = this._current_scope_path;
-        const current_scope_name = this._scopes_stack.length > 0 ? this._scopes_stack[this._scopes_stack.length - 1].func_name : 'NO SCOPE';
-        const record:SymbolDeclarationRecord = { name:name, path:path, ic_type:ic_type, is_constant:is_constant, init_value:init_value, uses_count:0, uses_scopes:[current_scope_name] };
-
-        table.set(name, record);
     }
 
     /**
@@ -414,28 +407,18 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param ast_node_type         AST node type for error log.
      */
     register_function_declaration(func_name:string, return_type:string, operands_declarations:any[], instructions:any[], cst_context:any, ast_node_type:string) {
-        const func_scope:FunctionScope = {
-            func_name:func_name,
-            return_type:return_type,
-            statements:instructions,
-            symbols_consts_table:new Map(),
-            symbols_vars_table:new Map(),
-            symbols_opds_table:new Map(),
-            symbols_opds_ordered_list:[],
-            used_by_functions:[]
-        };
-        this._scopes_map.set(func_name, func_scope);
-
         this.check_type(return_type, cst_context, ast_node_type);
+
+        const func = new CompilerFunction(this._current_module, func_name, return_type);
+        func.set_ast_statements(instructions);
+        this._current_module.add_exported_function(func);
 
         // PROCESS OPERANDS
         let opd_decl:any;
         for(opd_decl of operands_declarations){
-            const opd_record:SymbolDeclarationRecord = { name:opd_decl.opd_name, path:func_name, ic_type:opd_decl.opd_type, is_constant:true, init_value:undefined, uses_count:0, uses_scopes:[func_name] };
-            func_scope.symbols_opds_table.set(opd_decl.opd_name, opd_record);
-            func_scope.symbols_opds_ordered_list.push(opd_decl.opd_name);
+            this.check_type(opd_decl.opd_type, cst_context, ast_node_type);
 
-            this.check_type(opd_record.ic_type, cst_context, ast_node_type);
+            func.add_symbol_operand(opd_decl.opd_name, opd_decl.opd_type, undefined);
         }
     }
 
@@ -444,21 +427,21 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param func_name             function name.
      */
     unregister_function_declaration(func_name:string) {
-        this._scopes_map.delete(func_name);
+        this._current_module.del_exported_function(func_name);
     }
 
     set_function_declaration_statements(func_name:string, instructions:any[]){
-        const func_scope = this._scopes_map.get(func_name);
-        func_scope.statements = instructions;
+        const func = this._current_module.get_module_function(func_name);
+        func.set_ast_statements(instructions);
     }
 
     set_function_declaration_type(func_name:string, return_type:string){
-        const func_scope = this._scopes_map.get(func_name);
-        func_scope.return_type = return_type;
+        const func = this._current_module.get_module_function(func_name);
+        func.set_returned_type(return_type);
     }
 
     enter_function_declaration(func_name:string){
-        const func_scope = this._scopes_map.get(func_name);
+        const func_scope = this._current_module.get_module_function(func_name);
         this._scopes_stack.push(func_scope);
     }
 
@@ -471,8 +454,8 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param name symbol name
      * @returns true:symbol is a declared, false: symbol is not a declared
      */
-    has_declared_func_symbol(name:string):boolean {
-        return this._scopes_map.has(name);
+    has_declared_func_symbol(func_name:string):boolean {
+        return this._compiler_scope.has_exported_function(func_name) || this._current_module.has_module_function(func_name);
     }
 
     /**
@@ -483,13 +466,13 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     has_declared_var_symbol(name:string):boolean {
         let loop_scope;
         for(loop_scope of this._scopes_stack) {
-            if (loop_scope.symbols_consts_table.has(name)) {
+            if (loop_scope.has_symbol_const(name)) {
                 return true;
             }
-            if (loop_scope.symbols_vars_table.has(name)) {
+            if (loop_scope.has_symbol_var(name)) {
                 return true;
             }
-            if (loop_scope.symbols_opds_table.has(name)) {
+            if (loop_scope.has_symbol_operand(name)) {
                 return true;
             }
         }
@@ -504,7 +487,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     has_declared_consts_symbol(name:string):boolean {
         let loop_scope;
         for(loop_scope of this._scopes_stack) {
-            if (loop_scope.symbols_consts_table.has(name)) {
+            if (loop_scope.has_symbol_const(name)) {
                 return true;
             }
         }
@@ -519,7 +502,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     has_declared_vars_symbol(name:string):boolean {
         let loop_scope;
         for(loop_scope of this._scopes_stack) {
-            if (loop_scope.symbols_vars_table.has(name)) {
+            if (loop_scope.has_symbol_var(name)) {
                 return true;
             }
         }
@@ -535,7 +518,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     has_declared_opds_symbol(name:string):boolean {
         let loop_scope;
         for(loop_scope of this._scopes_stack) {
-            if (loop_scope.symbols_opds_table.has(name)) {
+            if (loop_scope.has_symbol_operand(name)) {
                 return true;
             }
         }
@@ -547,8 +530,8 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * Get current function scope.
      * @returns current scope
      */
-    get_current_scope():FunctionScope {
-        return this._current_scope;
+    get_current_scope():ICompilerFunction {
+        return this._current_function;
     }
 
 
@@ -620,26 +603,15 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * Reset state.
      */
     reset(){
-        this._errors = [];
-        this._unknow_symbols = [];
+        this._errors           = new Array();
+        this._unknow_symbols   = new Array();
 
-        this._main_scope = {
-            func_name:'main',
-            return_type:'none',
-            statements:[],
-            symbols_consts_table:new Map(),
-            symbols_vars_table:new Map(),
-            symbols_opds_table:new Map(),
-            symbols_opds_ordered_list:[],
-            used_by_functions:[]
-        };
-        
-        this._current_scope        = this._main_scope;
-        this._current_scope_path   = 'main';
-        this._scopes_stack         = new Array();
-        this._scopes_map           = new Map();
-        
-        this._scopes_stack.push(this._main_scope);
-        this._scopes_map.set(this._main_scope.func_name, this._main_scope);
+        this._scopes_stack     = new Array();
+        this._default_module   = new CompilerModule(this._compiler_scope, 'default');
+        this._default_function = new CompilerFunction(this._default_module, 'main', 'none');
+
+        this._current_module   = this._default_module;
+        this._current_function = this._default_function;
+        this._scopes_stack.push(this._default_function);
     }
 }

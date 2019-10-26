@@ -28,7 +28,7 @@ export enum IIcNodeKindOf {
     // TEST_NEGATIVE_ZERO          = 'test-negative-zero'
 }
 
-export default interface ICompilerIcNode {
+export interface ICompilerIcNode {
 	get_node_kindof():IIcNodeKindOf
 	get_node_type():string
 }

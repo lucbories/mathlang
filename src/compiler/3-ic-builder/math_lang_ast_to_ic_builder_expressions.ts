@@ -2,7 +2,7 @@ import IType from '../../core/itype';
 
 import AST from '../2-ast-builder/math_lang_ast';
 
-import { FunctionScope } from './math_lang_function_scope';
+import { FunctionScope, ModuleScope } from './math_lang_function_scope';
 import TYPES from '../math_lang_types';
 import IC from './math_lang_ic';
 import { ICError, ICFunction, ICIdAccessor, ICInstruction, ICOperand, ICOperandSource} from './math_lang_ast_to_ic_builder_base';
@@ -23,8 +23,8 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
      * 
      * @param _ast_functions AST functions scopes
      */
-    constructor(ast_functions:Map<string,FunctionScope>, types_map:Map<string,IType>) {
-        super(ast_functions, types_map);
+    constructor(ast_modules:Map<string,ModuleScope>, types_map:Map<string,IType>) {
+        super(ast_modules, types_map);
     }
 
 
@@ -307,7 +307,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
      * @returns ICOperand
      */
     visit_value_id(ast_expression:any, ast_func_scope:FunctionScope, ic_function:ICFunction):ICOperand|ICError{
-        const id_value_type = ast_expression.ic_type ? ast_expression.ic_type : this.get_symbol_type(ast_expression.name);
+        const id_value_type = ast_expression.ic_type ? ast_expression.ic_type : this.get_symbol_type(ast_func_scope.module_name, ast_expression.name);
 
         // CHECK TYPE
         if (! this.has_type(id_value_type) ){

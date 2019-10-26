@@ -138,6 +138,7 @@ describe('MathLang assign parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.PROGRAM,
+            modules:EMPTY_ARRAY,
             block:[
                 {
                     type:AST.STAT_ASSIGN_VARIABLE,

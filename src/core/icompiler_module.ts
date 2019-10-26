@@ -1,47 +1,34 @@
-import IValue from './ivalue';
-import IInstruction from './iinstruction';
 
-TODO
-export default interface IProgram {
-    has_error():boolean;
-    get_error_message():string;
-    get_error_cursor():number;
-
-    // Context
-    push_context():void;
-    pop_context():void;
-
-    // Stack
-    push_value(value:IValue):void;
-    pop_value(): IValue;
-    pop_value_available():boolean;
-    pop_values(count:number):IValue[];
+import { SymbolDeclaration, ICompilerFunction } from './icompiler_function';
 
 
-    // Registers
-    unregister_value(index:number):void;
-    register_value(index:number, value:IValue):void;
-    push_register_value(index:number):void;
-    get_register_value(index:number):IValue;
+export interface ICompilerModule {
+    get_module_name():string;
 
+    add_used_module(module:ICompilerModule):void;
+    get_used_modules():Map<string,ICompilerModule>;
 
-    // Values
-    free_value(value:IValue):void;
+    add_module_function(func:ICompilerFunction):void;
+    del_module_function(func_name:string):void;
+    has_module_function(func_name:string):boolean;
+    get_module_function(func_name:string):ICompilerFunction;
+    get_module_functions():Map<string,ICompilerFunction>;
 
+    add_exported_function(func:ICompilerFunction):void;
+    del_exported_function(func_name:string):void;
+    has_exported_function(func_name:string):boolean;
+    get_exported_function(func_name:string):ICompilerFunction;
+    get_exported_functions():Map<string,ICompilerFunction>;
 
-    // Instructions
-    set_instruction(index:number, instruction:IInstruction, label?:string):void;
-    add_instruction(instruction:IInstruction, label?:string):void;
-    free_instruction(instruction:IInstruction):void;
-    get_entry_point() : number;
-    set_cursor(index:number):void;
-    get_cursor():number;
-    move_cursor(index:number):void;
-    get_cursor_instruction(): IInstruction;
+    add_module_constant(smb:SymbolDeclaration):void;
+    del_module_constant(const_name:string):void;
+    has_module_constant(const_name:string):boolean;
+    get_module_constant(const_name:string):SymbolDeclaration;
+    get_module_constants():Map<string,SymbolDeclaration>;
 
-
-    // Run
-    start():void;
-    stop():void;
-    is_running():boolean;
+    add_exported_constant(smb:SymbolDeclaration):void;
+    del_exported_constant(const_name:string):void;
+    has_exported_constant(const_name:string):boolean;
+    get_exported_constant(const_name:string):SymbolDeclaration;
+    get_exported_constants():Map<string,SymbolDeclaration>;
 }

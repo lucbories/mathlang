@@ -2,7 +2,7 @@
 import IType from '../../core/itype';
 import MathLangCstToAstVisitorBase from './math_lang_cst_to_ast_visitor_base'
 import AST from '../2-ast-builder/math_lang_ast';
-import { SymbolDeclarationRecord, FunctionScope } from '../3-ic-builder/math_lang_function_scope';
+import { ModuleScope } from '../3-ic-builder/math_lang_function_scope';
 import TYPES from '../math_lang_types';
 
 
@@ -90,11 +90,24 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
     moduleStatement(ctx:any) {
         // console.log('moduleStatement', ctx)
         
+        const module_name:string = ctx.ID[0].image;
+
         let cst_statement;
         let ast_statement;
         let functions:any[] = [];
         let variables:any[] = [];
         let uses:any[] = [];
+
+        this._current_module = module_name;
+        
+        const module_scope:ModuleScope = {
+            module_name:module_name,
+            used_modules:new Map(),
+            module_functions:new Map(),
+            exported_constants:new Map(),
+            exported_functions:new Map()
+        };
+        this._scopes_map.set(this._current_module, module_scope);
 
         // LOOP ON USE MODULE STATEMENTS
         if (ctx.useStatement){
@@ -127,7 +140,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
         return {
             type: AST.STAT_MODULE,
-            module_name: ctx.ID[0].image,
+            module_name: module_name,
             uses:uses,
             functions:functions,
             variables:variables
@@ -145,9 +158,23 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
     useStatement(ctx:any) {
         // console.log('useStatement', ctx)
 
+        const used_module_name = ctx.ID[0].image;
+        const used_module_scope = this._scopes_map.get(used_module_name);
+        if (! used_module_scope) {
+            return {
+                type: AST.STAT_USE,
+                module_name: used_module_name,
+                module_alias: 'USED MODULE NOT FOUND',
+                modules_imports: ctx.importedModuleItem ? ctx.importedModuleItem.map((x:any)=>x.image) : []
+            } 
+        }
+
+        const current_module_scope = this._scopes_map.get(this._current_module);
+        current_module_scope.used_modules.set(used_module_name, used_module_scope);
+
         return {
             type: AST.STAT_USE,
-            module_name: ctx.ID[0].image,
+            module_name: used_module_name,
             module_alias: ctx.alias ? ctx.alias[0].image : ctx.ID[0].image,
             modules_imports: ctx.importedModuleItem ? ctx.importedModuleItem.map((x:any)=>x.image) : []
         }

@@ -92,6 +92,7 @@ describe('MathLang if parser', () => {
         // TEST AST
         const expected_ast = {
             "type":AST.PROGRAM,
+            modules:EMPTY_ARRAY,
             "block": [
                 {
                     "type": AST.STAT_IF,

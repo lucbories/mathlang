@@ -1,18 +1,27 @@
 import IType from '../../core/itype';
 
-import AST from '../2-ast-builder/math_lang_ast';
+// import AST from '../2-ast-builder/math_lang_ast';
 
-import { FunctionScope } from './math_lang_function_scope';
+import { ModuleScope } from './math_lang_function_scope';
 import TYPES from '../math_lang_types';
 import IC from './math_lang_ic';
 
 
 
 
+export type ICModule = {
+    module_name:string,
+    used_modules:Map<string,string>,
+    module_functions:Map<string,ICFunction>,
+    exported_functions:string[],
+    exported_constants:string[]
+}
+
 export type ICFunction = {
     func_name:string,
     return_type:string,
-    statements:any[]
+    statements:any[],
+    labels:Map<string,ICLabel[]> 
 };
 
 export enum ICOperandSource {
@@ -74,9 +83,10 @@ export type ICLabel = {
  * @license Apache-2.0
  */
 export default class MathLangAstToIcVisitorBase {
-    protected _ic_functions:Map<string,ICFunction> = new Map();
+    protected _ic_modules:Map<string,ICModule> = new Map();
+    // protected _ic_functions:Map<string,ICFunction> = new Map();
     private _errors:ICError[] = [];
-    private _functions_labels:Map<string,ICLabel[]> = new Map();
+    // private _functions_labels:Map<string,ICLabel[]> = new Map();
 
 
     /**
@@ -84,8 +94,28 @@ export default class MathLangAstToIcVisitorBase {
      * 
      * @param _ast_functions AST functions scopes
      */
-    constructor(protected _ast_functions:Map<string,FunctionScope>, private _types_map:Map<string,IType>) {
+    constructor(protected _ast_modules:Map<string,ModuleScope>, private _types_map:Map<string,IType>) {
     }
+
+
+    /**
+     * Get IC build modules.
+     * 
+     * @returns Map<string,ICModule>.
+     */
+    get_ic_modules_map(){
+        return this._ic_modules;
+    }
+
+
+    /**
+     * Get IC build functions.
+     * 
+     * @returns Map<string,ICFunction>.
+     */
+    // get_ic_functions_map(){
+    //     return this._ic_functions;
+    // }
 
 
     /**
@@ -107,16 +137,6 @@ export default class MathLangAstToIcVisitorBase {
      */
     has_type(type_name:string){
         return this._types_map.has(type_name);
-    }
-
-
-    /**
-     * Get IC build functions.
-     * 
-     * @returns Map<string,ICFunction>.
-     */
-    get_ic_functions_map(){
-        return this._ic_functions;
     }
 
 
@@ -184,11 +204,12 @@ export default class MathLangAstToIcVisitorBase {
     }
 
 
-    declare_function(func_name:string, return_type:string, opds_records:ICOperand[], opds_records_str:string, ic_statements:ICInstruction[]){
+    declare_function(module_name:string, func_name:string, return_type:string, opds_records:ICOperand[], opds_records_str:string, ic_statements:ICInstruction[]){
         const ic_function = {
             func_name:func_name,
             return_type:return_type,
-            statements:ic_statements
+            statements:ic_statements,
+            labels:new Map()
         };
 
         // ADD FUNCTION IC DECLARATION
@@ -199,16 +220,16 @@ export default class MathLangAstToIcVisitorBase {
             text:return_type + ':' + IC.FUNCTION_DECLARE_ENTER + ' ' + opds_records_str
         });
 
-        this._ic_functions.set(ic_function.func_name, ic_function);
+        this._ic_modules.get(module_name).module_functions.set(ic_function.func_name, ic_function);
     }
 
-    set_function_declaration_statements(func_name:string, instructions:any[]){
-        const func_scope = this._ic_functions.get(func_name);
+    set_function_declaration_statements(module_name:string, func_name:string, instructions:any[]){
+        const func_scope = this._ic_modules.get(module_name).module_functions.get(func_name);
         func_scope.statements = instructions;
     }
 
-    leave_function_declaration(func_name:string){
-        const ic_function = this._ic_functions.get(func_name);
+    leave_function_declaration(module_name:string, func_name:string){
+        const ic_function = this._ic_modules.get(module_name).module_functions.get(func_name);
 
         // LEAVE FUNCTON
         ic_function.statements.push({
@@ -226,9 +247,11 @@ export default class MathLangAstToIcVisitorBase {
      * @param name   symbol name
      * @returns result type
      */
-	get_symbol_type(name:string):string {
+	get_symbol_type(module_name:string, name:string):string {
         let symbol_type = TYPES.UNKNOW;
-        this._ast_functions.forEach(loop_scope => { // TODO OPTIMIZE SEARCH IN LOOP
+
+        // SEARCH IN MODULE FUNCTIONS
+        this._ast_modules.get(module_name).module_functions.forEach(loop_scope => { // TODO OPTIMIZE SEARCH IN LOOP
             if (symbol_type != TYPES.UNKNOW){
                 return;
             }
@@ -305,10 +328,10 @@ export default class MathLangAstToIcVisitorBase {
      * @returns label name.
      */
     add_function_label(ic_function:ICFunction, target_index?:number):string{
-        if (! this._functions_labels.has(ic_function.func_name) ){
-            this._functions_labels.set(ic_function.func_name, []);
+        if (! ic_function.labels.has(ic_function.func_name) ){
+            ic_function.labels.set(ic_function.func_name, []);
         }
-        const labels = this._functions_labels.get(ic_function.func_name);
+        const labels = ic_function.labels.get(ic_function.func_name);
         const label_name = ic_function.func_name + '_label_' + labels.length;
         const label_index = target_index ? target_index : ic_function.statements.length;
         const label = { label_name:label_name, label_index:label_index };
@@ -325,10 +348,10 @@ export default class MathLangAstToIcVisitorBase {
      * @returns nothing.
      */
     update_function_label_index(label_name:string, ic_function:ICFunction, target_index?:number){
-        if (! this._functions_labels.has(ic_function.func_name) ){
+        if (! ic_function.labels.has(ic_function.func_name) ){
             return;
         }
-        const labels = this._functions_labels.get(ic_function.func_name);
+        const labels = ic_function.labels.get(ic_function.func_name);
         if (labels.length == 0){
             return;
         }
@@ -348,15 +371,6 @@ export default class MathLangAstToIcVisitorBase {
         if (labels_index == -99){
             label.label_index = label_index;
         }
-    }
-
-
-    /**
-     * Get IC functions labels Map.
-     * @returns functions labels Map.
-     */
-    get_ic_functions_labels_map(){
-        return this._functions_labels;
     }
 }
 

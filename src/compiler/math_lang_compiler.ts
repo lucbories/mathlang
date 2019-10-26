@@ -7,8 +7,8 @@ import { math_lang_lexer, math_lang_parser } from './1-cst-builder/math_lang_par
 
 import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visitor';
 
-import {FunctionScope} from './3-ic-builder/math_lang_function_scope';
-import { ICFunction } from './3-ic-builder/math_lang_ast_to_ic_builder_base';
+import { ModuleScope, FunctionScope } from './3-ic-builder/math_lang_function_scope';
+import { ICModule } from './3-ic-builder/math_lang_ast_to_ic_builder_base';
 import MathLangAstToIcVisitor from './3-ic-builder/math_lang_ast_to_ic_builder';
 import {ICLabel} from './3-ic-builder/math_lang_ast_to_ic_builder_base';
 
@@ -92,8 +92,8 @@ export default class MathLangCompiler {
     private _lexemes:IToken[];
     private _cst:any;
     private _ast:any;
-    private _ic_functions:Map<string,ICFunction>;
-    private _ic_functions_labels:Map<string,ICLabel[]>;
+    private _ic_modules:Map<string,ICModule>;
+    // private _ic_functions_labels:Map<string,ICLabel[]>;
     private _mc_program:IProgram;
 
     private _ast_builder:MathLangCstToAstVisitor;
@@ -131,8 +131,7 @@ export default class MathLangCompiler {
         this._lexemes = undefined;
         this._cst = undefined;
         this._ast = undefined;
-        this._ic_functions = undefined;
-        this._ic_functions_labels = undefined;
+        this._ic_modules = undefined;
         this._mc_program = undefined;
     }
 
@@ -190,15 +189,7 @@ export default class MathLangCompiler {
      * 
      * @return Map<string,ICFunction>.
      */
-    get_ic_functions_map() { return this._ic_functions; }
-
-
-    /**
-     * Get compiled IC functions labels.
-     * 
-     * @return Map<string,ICLabel>.
-     */
-    get_ic_functions_labels_map() { return this._ic_functions_labels; }
+    get_ic_modules_map() { return this._ic_modules; }
 
 
     /**
@@ -434,12 +425,11 @@ export default class MathLangCompiler {
      * @returns boolean (true:success, false:error occures).
      */
     build_ic():boolean{
-        const functions_map = this._ast_builder.get_scopes_map();
+        const modules_map:Map<string, ModuleScope> = this._ast_builder.get_scopes_map();
 
-        const ic_builder = new MathLangAstToIcVisitor(functions_map, this._types_map);
+        const ic_builder = new MathLangAstToIcVisitor(modules_map, this._types_map);
         ic_builder.visit();
-        this._ic_functions = ic_builder.get_ic_functions_map();
-        this._ic_functions_labels = ic_builder.get_ic_functions_labels_map();
+        this._ic_modules = ic_builder.get_ic_modules_map();
 
         if (ic_builder.has_error()){
             const errors = ic_builder.get_errors();
@@ -480,14 +470,14 @@ export default class MathLangCompiler {
      * @returns boolean (true:success, false:error occures).
      */
     build_mc():boolean{
-        const mc_program_options = {
+/*        const mc_program_options = {
             registers:20, // registers count
             stack:50, // stack max size
             instructions:100, // instructions max size
             entry_label:'main' // program entry point label
         };
 
-        const mc_builder = new MathLangIcToMcVisitor(this._types_map, '', mc_program_options, this._ic_functions, this._ic_functions_labels);
+        const mc_builder = new MathLangIcToMcVisitor(this._types_map, '', mc_program_options, this._ic_modules);
 
         mc_builder.visit();
 
@@ -510,7 +500,7 @@ export default class MathLangCompiler {
             // }
             return false;
         }
-
+*/
         return true;
     }
 
@@ -568,24 +558,24 @@ export default class MathLangCompiler {
      * 
      * @returns dumped string.
      */
-    dump_ic_functions_labels(dump_functions:boolean):string{
-        let labels_str:string='';
-        this._ic_functions_labels.forEach(
-            (function_labels:ICLabel[], func_name)=>{
-                labels_str += '\nICFunction:' + func_name + ' labels:\n';
+    // dump_ic_functions_labels(dump_functions:boolean):string{
+    //     let labels_str:string='';
+    //     this._ic_functions_labels.forEach(
+    //         (function_labels:ICLabel[], func_name)=>{
+    //             labels_str += '\nICFunction:' + func_name + ' labels:\n';
 
-                function_labels.forEach(
-                    (label_record:ICLabel, index:number)=>{
-                        labels_str += index + ':' + label_record.label_name + '=' + label_record.label_index + '\n';
-                    }
-                );
-            }
-        );
+    //             function_labels.forEach(
+    //                 (label_record:ICLabel, index:number)=>{
+    //                     labels_str += index + ':' + label_record.label_name + '=' + label_record.label_index + '\n';
+    //                 }
+    //             );
+    //         }
+    //     );
 
-        if (dump_functions){
-            console.log(labels_str);
-        }
+    //     if (dump_functions){
+    //         console.log(labels_str);
+    //     }
 
-        return labels_str;
-    }
+    //     return labels_str;
+    // }
 }

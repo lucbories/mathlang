@@ -31,7 +31,7 @@
     "test-ast-number": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/2-ast-builder/math_lang_parser_1_number.test.ts",
     "test-ast-id-left": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/2-ast-builder/math_lang_parser_1_id_left.test.ts",
     "test-ast-id-right": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/2-ast-builder/math_lang_parser_1_id_right.test.ts",
-    "test-ast-module": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/2-ast-builder/math_lang_parser_1_module.test.ts",
+    "test-ast-module": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/2-ast-builder/math_lang_parser_4_module.test.ts",
     "test-ast-call": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/2-ast-builder/math_lang_parser_2_call.test.ts",
     "test-ast-mathexpr": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/2-ast-builder/math_lang_parser_2_math_expr.test.ts",
     "test-ast-if": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/2-ast-builder/math_lang_parser_3_if.test.ts",
