@@ -2,6 +2,7 @@
 import { SymbolDeclaration, ICompilerFunction } from './icompiler_function';
 
 
+export default ICompilerModule;
 export interface ICompilerModule {
     get_module_name():string;
 

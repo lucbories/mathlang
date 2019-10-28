@@ -1,18 +1,18 @@
 
+import ICompilerType from './icompiler_type';
 import { SymbolDeclaration, ICompilerFunction } from './icompiler_function';
 import { ICompilerModule } from './icompiler_module';
 
 
+export default ICompilerScope;
 export interface ICompilerScope {
-    add_available_lang_type(type_name:string):void;
+    add_available_lang_type(type_name:string, type_instance:ICompilerType):void;
     has_available_lang_type(type_name:string):boolean;
-    get_available_lang_type(type_name:string):string;
-    get_available_lang_types():Map<string,string>;
+    get_available_lang_type(type_name:string):ICompilerType;
+    get_available_lang_types():Map<string,ICompilerType>;
 
-    add_available_lang_type_method(type_name:string, method_name:string, operands_types:string[]):void;
     has_available_lang_type_method(type_name:string, method_name:string, operands_types:string[]):boolean;
-    get_available_lang_type_method(type_name:string, method_name:string, operands_types:string[]):string;
-    get_available_lang_type_methods():Map<string,string>;
+    get_available_lang_type_method(type_name:string, method_name:string, operands_types:string[]):ICompilerFunction;
 
     has_module(module_name:string):boolean;
     get_module(module_name:string):ICompilerModule

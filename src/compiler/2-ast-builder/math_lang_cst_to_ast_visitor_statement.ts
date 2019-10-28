@@ -4,13 +4,14 @@ import MathLangCstToAstVisitorBase from './math_lang_cst_to_ast_visitor_base'
 import AST from '../2-ast-builder/math_lang_ast';
 import { ModuleScope } from '../3-ic-builder/math_lang_function_scope';
 import TYPES from '../math_lang_types';
-
+import CompilerScope from '../0-common/compiler_scope';
+import CompilerModule from '../0-common/compiler_module';
 
 
 
 export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVisitorBase {
-    constructor(types_map:Map<string,IType>) {
-        super(types_map);
+    constructor(compiler_scope:CompilerScope) {
+        super(compiler_scope);
     }
 
 
@@ -55,7 +56,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             for(cst_statement of ctx.blockStatement){
                 ast_statement = this.visit(cst_statement);
                 statements.push(ast_statement);
-                this._main_scope.statements.push(ast_statement);
+                this._current_function.set_ic_statements(ast_statement);
             }
         }
 
@@ -98,16 +99,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         let variables:any[] = [];
         let uses:any[] = [];
 
-        this._current_module = module_name;
-        
-        const module_scope:ModuleScope = {
-            module_name:module_name,
-            used_modules:new Map(),
-            module_functions:new Map(),
-            exported_constants:new Map(),
-            exported_functions:new Map()
-        };
-        this._scopes_map.set(this._current_module, module_scope);
+        this._current_module = new CompilerModule(this._compiler_scope, module_name);
 
         // LOOP ON USE MODULE STATEMENTS
         if (ctx.useStatement){
@@ -159,7 +151,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         // console.log('useStatement', ctx)
 
         const used_module_name = ctx.ID[0].image;
-        const used_module_scope = this._scopes_map.get(used_module_name);
+        const used_module_scope = this._compiler_scope.get_module(used_module_name);
         if (! used_module_scope) {
             return {
                 type: AST.STAT_USE,
@@ -169,8 +161,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             } 
         }
 
-        const current_module_scope = this._scopes_map.get(this._current_module);
-        current_module_scope.used_modules.set(used_module_name, used_module_scope);
+        this._current_module.add_used_module(used_module_scope);
 
         return {
             type: AST.STAT_USE,
@@ -565,19 +556,19 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             const cst_expr_node = ctx.AssignExpr;
             const ast_expr_node = this.visit(cst_expr_node);
 
-            if (ast_id_left_node.ic_type == TYPES.UNKNOW){
-                ast_id_left_node.ic_type = ast_expr_node.ic_type;
+            if (ast_id_left_node.members[0].ic_type == TYPES.UNKNOW){
+                ast_id_left_node.members[0].ic_type = ast_expr_node.ic_type;
                 
                 // LOOP ON LEFT MEMBERS
-                let loop_index;
-                let loop_member;
-                const last_index = ast_id_left_node.members.length - 1;
-                for(loop_index=last_index; loop_index >= 0; loop_index--){
-                    loop_member = ast_id_left_node.members[loop_index];
-                    if (loop_member.ic_type == TYPES.UNKNOW){
-                        loop_member.ic_type = ast_expr_node.ic_type;
-                    }
-                }
+                // let loop_index;
+                // let loop_member;
+                // const last_index = ast_id_left_node.members.length - 1;
+                // for(loop_index=last_index; loop_index >= 0; loop_index--){
+                //     loop_member = ast_id_left_node.members[loop_index];
+                //     if (loop_member.ic_type == TYPES.UNKNOW){
+                //         loop_member.ic_type = ast_expr_node.ic_type;
+                //     }
+                // }
             }
 
             const assign_ast = {

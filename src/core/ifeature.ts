@@ -9,4 +9,5 @@ export default interface IFeature {
     get_method(method_name:string, operands:IType[]):IMethod;
 
     get_converters():Map<string,IMethod>;
+    get_methods():Map<string,IMethod>;
 }

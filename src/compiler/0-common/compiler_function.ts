@@ -16,12 +16,27 @@ export default class CompilerFunction implements ICompilerFunction {
     private _symbols_opds_ordered_list:string[] = [];
     private _used_by_functions:string[] = [];
 
-    constructor(private _module:ICompilerModule, private _func_name:string, private _type:string){}
+    constructor(/*private _module:ICompilerModule, */private _func_name:string, private _type:string, opds_names:string[] = [], opds_types:string[] = [], opds_values:string[] = []){
+        if ( Array.isArray(opds_names) && Array.isArray(opds_types) ) {
+            if (opds_names.length == opds_types.length) {
+                let i:number;
+                if ( Array.isArray(opds_values) && opds_names.length == opds_values.length) {
+                    for(i=0 ; i < opds_types.length ; i++) {
+                        this.add_symbol_operand(opds_names[i], opds_types[i], opds_values[i]);
+                    }
+                } else {
+                    for(i=0 ; i < opds_types.length ; i++) {
+                        this.add_symbol_operand(opds_names[i], opds_types[i], '');
+                    }
+                }
+            }
+        }
+    }
 
 	// COMMON
-	get_func_module():string {
-        return this._module.get_module_name();
-    }
+	// get_func_module():string {
+    //     return this._module.get_module_name();
+    // }
 
 	get_func_name():string {
         return this._func_name;
@@ -31,7 +46,7 @@ export default class CompilerFunction implements ICompilerFunction {
     set_returned_type(returned_type:string):void {
         this._type = returned_type;
     }
-    
+
 	get_returned_type():string {
         return this._type;
     }
@@ -147,6 +162,18 @@ export default class CompilerFunction implements ICompilerFunction {
 
     get_symbols_opds_table():SymbolsTable {
         return this._symbols_opds_table;
+    }
+
+    has_symbols_opds_ordered_list(opds:string[]):boolean {
+        let match = true;
+        this._symbols_opds_ordered_list.map(
+            (value, index)=>{
+                if (index >= opds.length || value != opds[index]) {
+                    match = false;
+                }
+            }
+        );
+        return match;
     }
 
     get_symbols_opds_ordered_list():string[] {

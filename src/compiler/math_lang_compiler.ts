@@ -14,6 +14,14 @@ import {ICLabel} from './3-ic-builder/math_lang_ast_to_ic_builder_base';
 
 import MathLangIcToMcVisitor from './4-mc-builder/math_lang_ic_to_mc_builder';
 
+import CompilerScope from './0-common/compiler_scope';
+import CompilerFunction from './0-common/compiler_function';
+import ICompilerModule from '../core/icompiler_module';
+import ICompilerType from '../core/icompiler_type';
+
+import AVAILABLE_TYPES from './0-types/index';
+import AVAILABLE_RUNTIMES from './0-runtimes/index';
+import AVAILABLE_MODULES from './0-modules/index';
 
 
 /**
@@ -82,8 +90,9 @@ type CompilerError = {
 export default class MathLangCompiler {
     private _max_errors:number = 10; // TODO
 
-    private _types_map:Map<string,IType>;
+    private _compiler_scope:CompilerScope = undefined;
 
+    private _types_map:Map<string,IType>;
     private _symbols:Map<string,FunctionScope>;
 
     private _errors:CompilerError[];
@@ -104,20 +113,13 @@ export default class MathLangCompiler {
      * 
      * @param features Language features.
      */
-    constructor(private _types:IType[]=[]) {
-        // INIT TYPES MAP
-        this._types_map = new Map<string,IType>();
+    constructor() {
+        this._compiler_scope = new CompilerScope(AVAILABLE_MODULES, AVAILABLE_TYPES, AVAILABLE_RUNTIMES);
+        this._ast_builder = new MathLangCstToAstVisitor(this._compiler_scope);
+    }
 
-        this._types.forEach(
-            (loop_type)=>this._types_map.set(loop_type.get_name(), loop_type)
-        );
-
-        if (this._types_map.has('BIGNUMBER')){
-            this._types_map.set('BIGINTEGER', this._types_map.get('BIGNUMBER'));
-            this._types_map.set('BIGFLOAT', this._types_map.get('BIGNUMBER'));
-        }
-
-        this._ast_builder = new MathLangCstToAstVisitor(this._types_map);
+    get_scope() {
+        return this._compiler_scope;
     }
 
 
@@ -425,29 +427,29 @@ export default class MathLangCompiler {
      * @returns boolean (true:success, false:error occures).
      */
     build_ic():boolean{
-        const modules_map:Map<string, ModuleScope> = this._ast_builder.get_scopes_map();
+        // const modules_map:Map<string, ModuleScope> = this._ast_builder.get_compiler_scope().get_available_modules();
 
-        const ic_builder = new MathLangAstToIcVisitor(modules_map, this._types_map);
-        ic_builder.visit();
-        this._ic_modules = ic_builder.get_ic_modules_map();
+        // const ic_builder = new MathLangAstToIcVisitor(modules_map, this._types_map);
+        // ic_builder.visit();
+        // this._ic_modules = ic_builder.get_ic_modules_map();
 
-        if (ic_builder.has_error()){
-            const errors = ic_builder.get_errors();
-            let ic_build_error;
-            for(ic_build_error of errors){                
-                const error:CompilerError = {
-                    source:this._text,
-                    step:CompilerStep.IC,
-                    line:0,
-                    column:0,
-                    src_extract:'',
-                    message:ic_build_error.message + ' with [ic_type=' + ic_build_error.ic_type + ', ic_source=' + ic_build_error.ic_source + ', ic_name=' + ic_build_error.ic_name + ', ic_index=' + ic_build_error.ic_index + ']',
-                    solution:'IC build error [' + ic_build_error.message + ']'
-                };
-                this._errors.push(error);
-            }
-            return false;
-        }
+        // if (ic_builder.has_error()){
+        //     const errors = ic_builder.get_errors();
+        //     let ic_build_error;
+        //     for(ic_build_error of errors){                
+        //         const error:CompilerError = {
+        //             source:this._text,
+        //             step:CompilerStep.IC,
+        //             line:0,
+        //             column:0,
+        //             src_extract:'',
+        //             message:ic_build_error.message + ' with [ic_type=' + ic_build_error.ic_type + ', ic_source=' + ic_build_error.ic_source + ', ic_name=' + ic_build_error.ic_name + ', ic_index=' + ic_build_error.ic_index + ']',
+        //             solution:'IC build error [' + ic_build_error.message + ']'
+        //         };
+        //         this._errors.push(error);
+        //     }
+        //     return false;
+        // }
 
 
         return true;

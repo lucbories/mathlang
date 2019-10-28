@@ -15,9 +15,10 @@ export class SymbolDeclaration {
 
 export type SymbolsTable = Map<string, SymbolDeclaration>;
 
+export default ICompilerFunction;
 export interface ICompilerFunction {
 	// COMMON
-	get_func_module():string;
+	// get_func_module():string;
     get_func_name():string;
     
     set_returned_type(returned_type:string):void;
@@ -52,6 +53,7 @@ export interface ICompilerFunction {
     get_symbol_operand(symbol_name:string):SymbolDeclaration;
     add_symbol_operand(symbol_name:string, symbol_type:string, symbol_value:string):void;
     get_symbols_opds_table():SymbolsTable;
+    has_symbols_opds_ordered_list(opds:string[]):boolean;
     get_symbols_opds_ordered_list():string[];
 
     add_used_by_function(func_name:string):void;

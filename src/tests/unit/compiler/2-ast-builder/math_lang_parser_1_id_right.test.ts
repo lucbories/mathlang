@@ -5,7 +5,7 @@ const expect = chai.expect;
 import TYPES from '../../../../compiler/math_lang_types';
 import AST from '../../../../compiler/2-ast-builder/math_lang_ast';
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
-import DEFAULT_TYPES from '../../../../features/default_types';
+// import DEFAULT_TYPES from '../../../../features/default_types';
 
 
 function dump_tree(label:string, tree:any) {
@@ -16,7 +16,7 @@ function dump_tree(label:string, tree:any) {
 
 
 describe('MathLang id expression for right part parser', () => {
-    const compiler = new MathLangCompiler(DEFAULT_TYPES);
+    const compiler = new MathLangCompiler();
 
     it('Parse [a]' , () => {
         compiler.reset();
@@ -336,7 +336,7 @@ describe('MathLang id expression for right part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_METHOD_CALL,
+            type:AST.EXPR_MEMBER_UNKNOW,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -375,7 +375,7 @@ describe('MathLang id expression for right part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_METHOD_CALL,
+            type:AST.EXPR_MEMBER_UNKNOW,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -420,7 +420,7 @@ describe('MathLang id expression for right part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_METHOD_CALL,
+            type:AST.EXPR_MEMBER_UNKNOW,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[
@@ -471,7 +471,7 @@ describe('MathLang id expression for right part parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_METHOD_CALL,
+            type:AST.EXPR_MEMBER_UNKNOW,
             ic_type: TYPES.UNKNOW,
             name:'a',
             members:[

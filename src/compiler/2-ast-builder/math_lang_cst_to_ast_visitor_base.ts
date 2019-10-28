@@ -1,5 +1,5 @@
 
-import IType from '../../core/itype';
+import ICompilerType from '../../core/icompiler_type';
 import { math_lang_parser } from '../1-cst-builder/math_lang_parser';
 import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES,  TYPES } from '../math_lang_types';
 // import { SymbolDeclarationRecord, FunctionScope, ModuleScope } from '../3-ic-builder/math_lang_function_scope';
@@ -109,7 +109,8 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns true for success, else false.
      */
     check_method(type_name:string, method_name:string, operands_types:string[], cst_context:string, ast_node_type:any){
-        return this._compiler_scope.has_available_lang_type_method(type_name, method_name, operands_types);
+        const obj_type = this._compiler_scope.get_available_lang_type(type_name);
+        return obj_type ? obj_type.has_method_with_types_names(method_name, operands_types) : false;
 /*
         let has_error = false;
 
@@ -159,17 +160,18 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * 
      * @returns true for success, else false.
      */
-    check_attribute(type_name:string, attribute_name:string, attribute_type:string, cst_context:string, ast_node_type:any){
-        // let has_error = false;
+    check_attribute(type_name:string, attribute_name:string, attribute_type_name:string, cst_context:string, ast_node_type:any){
+        let has_error = false;
 
         // CHECK VALUE TYPE
-        // const value_type:IType = this._types_map.get(type_name);
-        // if (! value_type){
-        //     this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
-        //     has_error = true;
-        // }
+        const value_type:ICompilerType = this._compiler_scope.get_available_lang_type(type_name);
+        if (! value_type){
+            this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
+            return false;
+        }
 
-        return false;
+        const attribute_type = value_type.get_attribute(attribute_name);
+        return attribute_type ? attribute_type.get_type_name() == attribute_type_name : false;
     }
 
 
@@ -184,17 +186,18 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns type name.
      */
     get_attribute_type(type_name:string, attribute_name:string, cst_context:string, ast_node_type:any){
-        // let has_error = false;
+        let has_error = false;
 
         // CHECK VALUE TYPE
-        // const value_type:IType = this._types_map.get(type_name);
-        // if (! value_type){
-        //     this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
-        //    return TYPES.UNKNOW;
-        // }
+        const value_type:ICompilerType = this._compiler_scope.get_available_lang_type(type_name);
+        if (! value_type){
+            this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
+           return TYPES.UNKNOW;
+        }
 
-        // return value_type.get_name();
-        return TYPES.UNKNOW;
+        const attribute_type = value_type.get_attribute(attribute_name);
+
+        return attribute_type ? attribute_type.get_type_name() : TYPES.UNKNOW;
     }
 
 
@@ -210,7 +213,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      */
     check_type_indexes(type_name:string, indexes_count:number, cst_context:string, ast_node_type:any):boolean{
         // CHECK VALUE TYPE
-        const value_type:IType = this._types_map.get(type_name);
+        const value_type:ICompilerType = this._compiler_scope.get_available_lang_type(type_name);
         if (! value_type){
             this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
             return false;
@@ -221,6 +224,8 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
             this.add_error(cst_context, ast_node_type, 'Error:type [' + type_name + '] has not indexes [' + indexes_count + ']');
             return false;
         }
+
+        // TODO: to rework check_type_indexes
 
         return true;
     }
@@ -237,7 +242,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      */
     get_indexed_type(type_name:string, cst_context:any, ast_node_type:any):string{
         // CHECK VALUE TYPE
-        const value_type:IType = this._types_map.get(type_name);
+        const value_type:ICompilerType = this._compiler_scope.get_available_lang_type(type_name);
         if (! value_type){
             this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
             return TYPES.UNKNOW;
@@ -249,7 +254,9 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
             return TYPES.UNKNOW;
         }
 
-        return type_instance.get_name();
+        return type_instance.get_type_name();
+        
+        // TODO rework get_indexed_type
     }
 
 
@@ -363,13 +370,8 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param func_name   function name
      * @returns return type
      */
-	get_function_type(module_name:string, func_name:string):string {
-        const module_scope = this._compiler_scope.get_module(module_name);
-        if (! module_scope) {
-            return TYPES.UNKNOW;
-        }
-
-        const func_scope = module_scope.get_module_function(func_name);
+	get_function_type(module_instance:CompilerModule, func_name:string):string {
+        const func_scope = module_instance.get_module_function(func_name);
         if (! func_scope) {
             return TYPES.UNKNOW;
         }
@@ -409,7 +411,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     register_function_declaration(func_name:string, return_type:string, operands_declarations:any[], instructions:any[], cst_context:any, ast_node_type:string) {
         this.check_type(return_type, cst_context, ast_node_type);
 
-        const func = new CompilerFunction(this._current_module, func_name, return_type);
+        const func = new CompilerFunction(func_name, return_type);
         func.set_ast_statements(instructions);
         this._current_module.add_exported_function(func);
 
@@ -432,16 +434,28 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
 
     set_function_declaration_statements(func_name:string, instructions:any[]){
         const func = this._current_module.get_module_function(func_name);
+        if (! func) {
+            this.add_error({}, 'set_function_declaration_statements', 'function [' + func_name + '] not found');
+            return;
+        }
         func.set_ast_statements(instructions);
     }
 
     set_function_declaration_type(func_name:string, return_type:string){
         const func = this._current_module.get_module_function(func_name);
+        if (! func) {
+            this.add_error({}, 'set_function_declaration_type', 'function [' + func_name + '] not found');
+            return;
+        }
         func.set_returned_type(return_type);
     }
 
     enter_function_declaration(func_name:string){
         const func_scope = this._current_module.get_module_function(func_name);
+        if (! func_scope) {
+            this.add_error({}, 'enter_function_declaration', 'function [' + func_name + '] not found');
+            return;
+        }
         this._scopes_stack.push(func_scope);
     }
 
@@ -523,6 +537,27 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
             }
         }
         return false;
+    }
+
+    /**
+     * Test if a symbol is already declared for a variable.
+     * @param name symbol name
+     * @returns declared variable or undefined if not found
+     */
+    get_declared_var_symbol(name:string):SymbolDeclaration {
+        let loop_scope;
+        for(loop_scope of this._scopes_stack) {
+            if (loop_scope.has_symbol_const(name)) {
+                return loop_scope.get_symbol_const(name);
+            }
+            if (loop_scope.has_symbol_var(name)) {
+                return loop_scope.get_symbol_var(name);
+            }
+            if (loop_scope.has_symbol_operand(name)) {
+                return loop_scope.get_symbol_operand(name);
+            }
+        }
+        return undefined;
     }
 
 
@@ -608,7 +643,8 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
 
         this._scopes_stack     = new Array();
         this._default_module   = new CompilerModule(this._compiler_scope, 'default');
-        this._default_function = new CompilerFunction(this._default_module, 'main', 'none');
+        this._default_function = new CompilerFunction('main', 'none');
+        this._default_module.add_module_function(this._default_function);
 
         this._current_module   = this._default_module;
         this._current_function = this._default_function;

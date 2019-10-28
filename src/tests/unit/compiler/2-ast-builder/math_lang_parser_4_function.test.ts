@@ -5,14 +5,13 @@ const expect = chai.expect;
 import TYPES from '../../../../compiler/math_lang_types';
 import AST from '../../../../compiler/2-ast-builder/math_lang_ast';
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
-import DEFAULT_TYPES from '../../../../features/default_types';
 
 
 
 const EMPTY_ARRAY = <any>[];
 
 describe('MathLang function declaration parser', () => {
-    const compiler = new MathLangCompiler(DEFAULT_TYPES);
+    const compiler = new MathLangCompiler();
 
     it('Parse [function f() return boolean return true end function] statement' , () => {
         compiler.reset();

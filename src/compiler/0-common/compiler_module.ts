@@ -59,6 +59,7 @@ export default class CompilerModule implements ICompilerModule {
     
     // EXPORTED FUNCTIONS
     add_exported_function(func:ICompilerFunction):void {
+        this._module_functions.set(func.get_func_name(), func);
         this._exported_functions.set(func.get_func_name(), func);
     }
 

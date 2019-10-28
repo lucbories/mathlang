@@ -3,12 +3,13 @@ import IType from '../../core/itype';
 import AST from '../2-ast-builder/math_lang_ast';
 import TYPES from '../math_lang_types';
 import MathLangCstToAstVisitorExpression from './math_lang_cst_to_ast_visitor_expressions';
+import CompilerScope from '../0-common/compiler_scope';
 
 
 
 export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpression {
-    constructor(types_map:Map<string,IType>) {
-        super(types_map);
+    constructor(compiler_scope:CompilerScope) {
+        super(compiler_scope);
 
         // The "validateVisitor" method is a helper utility which performs static analysis
         // to detect missing or redundant visitor methods

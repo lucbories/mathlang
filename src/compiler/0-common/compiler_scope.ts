@@ -1,52 +1,47 @@
 
+import ICompilerType from '../../core/icompiler_type';
+import ICompilerRuntime from '../../core/icompiler_runtime';
 import { SymbolDeclaration, ICompilerFunction } from '../../core/icompiler_function'
 import { ICompilerModule } from '../../core/icompiler_module'
 import { ICompilerScope } from '../../core/icompiler_scope'
 
 
 export default class CompilerScope implements ICompilerScope {
-    private _available_lang_types:Map<string,string> = new Map();
-    private _available_lang_types_methods:Map<string,string> = new Map();
-    private _available_modules:Map<string,ICompilerModule>;
     private _new_modules:Map<string,ICompilerModule> = new Map();
 
-    constructor(available_modules:Map<string,ICompilerModule>) {
-        this._available_modules = available_modules;
+    constructor(
+        private _available_modules:Map<string,ICompilerModule>,
+        private _available_lang_types:Map<string,ICompilerType>,
+        private _available_runtimes:Map<string,ICompilerRuntime>) {
     }
 
     // AVAILABLE LANGUAGE TYPES
-    add_available_lang_type(type_name:string):void {
-        this._available_lang_types.set(type_name, type_name);
+    add_available_lang_type(type_name:string, type_instance:ICompilerType):void {
+        this._available_lang_types.set(type_name, type_instance);
     }
 
     has_available_lang_type(type_name:string):boolean {
         return this._available_lang_types.has(type_name);
     }
 
-    get_available_lang_type(type_name:string):string {
+    get_available_lang_type(type_name:string):ICompilerType {
         return this._available_lang_types.get(type_name);
     }
 
-    get_available_lang_types():Map<string,string> {
+    get_available_lang_types():Map<string,ICompilerType> {
         return this._available_lang_types;
     }
 
 
     // AVAILABLE TYPES METHODS
-    add_available_lang_type_method(type_name:string, method_name:string, operands_types:string[]):void {
-        this._available_lang_types_methods.set(type_name + '.' + method_name + '(' +  operands_types.join(',') + ')', method_name);
-    }
-
     has_available_lang_type_method(type_name:string, method_name:string, operands_types:string[]):boolean {
-        return this._available_lang_types_methods.has(type_name + '.' + method_name + '(' +  operands_types.join(',') + ')');
+        const obj_type = this._available_lang_types.get(type_name);
+        return obj_type ? obj_type.has_method_with_types_names(method_name, operands_types) : false;
     }
 
-    get_available_lang_type_method(type_name:string, method_name:string, operands_types:string[]):string {
-        return this._available_lang_types_methods.get(type_name + '.' + method_name + '(' +  operands_types.join(',') + ')');
-    }
-
-    get_available_lang_type_methods():Map<string,string> {
-        return this._available_lang_types_methods;
+    get_available_lang_type_method(type_name:string, method_name:string, operands_types:string[]):ICompilerFunction {
+        const obj_type = this._available_lang_types.get(type_name);
+        return obj_type ? obj_type.get_method_with_types_names(method_name, operands_types) : undefined;
     }
 
 

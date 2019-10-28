@@ -28,4 +28,8 @@ export default class VMFeature implements IFeature {
     get_converters():Map<string,IMethod> {
         return this._converters;
     }
+
+    get_methods():Map<string,IMethod> {
+        return this._methods;
+    }
 }

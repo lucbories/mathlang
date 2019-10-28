@@ -5,9 +5,6 @@ const expect = chai.expect;
 import TYPES from '../../../../compiler/math_lang_types';
 import AST from '../../../../compiler/2-ast-builder/math_lang_ast';
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
-import DEFAULT_TYPES from '../../../../features/default_types';
-
-// import parse from '../../../../compiler/math_lang_processor';
 
 
 function dump_ast(label:string, ast:any) {
@@ -19,7 +16,7 @@ function dump_ast(label:string, ast:any) {
 const EMPTY_ARRAY = <any>[];
 
 describe('MathLang define module parser', () => {
-    const compiler = new MathLangCompiler(DEFAULT_TYPES);
+    const compiler = new MathLangCompiler();
 
     it('Parse define module ModuleA' , () => {
         const text = 'module ModuleA function funcA() return INTEGER return 12 end function';

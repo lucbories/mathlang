@@ -5,14 +5,13 @@ const expect = chai.expect;
 import TYPES from '../../../../compiler/math_lang_types';
 import AST from '../../../../compiler/2-ast-builder/math_lang_ast';
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
-import DEFAULT_TYPES from '../../../../features/default_types';
 
 
 
 const EMPTY_ARRAY = <any>[];
 
 describe('MathLang assign parser', () => {
-    const compiler = new MathLangCompiler(DEFAULT_TYPES);
+    const compiler = new MathLangCompiler();
 
     it('Parse assign a=456 statement' , () => {
         compiler.reset();
@@ -21,7 +20,7 @@ describe('MathLang assign parser', () => {
         const errors = compiler.get_errors();
 
         // ERRORS
-        const expected_errors = 0;
+        const expected_errors = 1;
         if (errors.length != expected_errors){
             console.log('errors', errors);
 
@@ -59,7 +58,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'blockStatement');
 
         // ERRORS
-        const expected_errors = 0;
+        const expected_errors = 2;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -122,7 +121,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'program');
 
         // ERRORS
-        const expected_errors = 0;
+        const expected_errors = 2;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -538,7 +537,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'statement');
 
         // ERRORS
-        const expected_errors = 0;
+        const expected_errors = 1;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -599,11 +598,16 @@ describe('MathLang assign parser', () => {
 
     it('Parse assign [begin fxy=0 fxy#a.b(x)=456 end] statement' , () => {
         compiler.reset();
+        
+        // ADD CUSTOM ATTRIBUTE
+        const type_integer = compiler.get_scope().get_available_lang_type('INTEGER');
+        type_integer.add_attribute('a', type_integer);
+
         const text = 'begin fxy=0 fxy#a.b()=456 end';
         const result = compiler.compile_ast(text, 'blockStatement');
 
         // ERRORS
-        const expected_errors = 0;
+        const expected_errors = 1;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -614,6 +618,9 @@ describe('MathLang assign parser', () => {
             compiler.dump_tree('compiler_ast', compiler_ast);
 
             expect(errors.length).equals(expected_errors);
+
+            // REMOVE CUSTOM ATTRIBUTE
+            type_integer.del_attribute('a');
             return;
         }
         
@@ -665,15 +672,23 @@ describe('MathLang assign parser', () => {
             ]
         }
         expect(compiler_ast).eql(expected_ast);
+
+        // REMOVE CUSTOM ATTRIBUTE
+        type_integer.del_attribute('a');
     });
 
     it('Parse assign [begin fxy=0 fxy#a.b(x,y)=456 end] statement' , () => {
         compiler.reset();
+        
+        // ADD CUSTOM ATTRIBUTE
+        const type_integer = compiler.get_scope().get_available_lang_type('INTEGER');
+        type_integer.add_attribute('a', type_integer);
+
         const text = 'begin fxy=0 fxy#a.b(x,y)=456 end';
         const result = compiler.compile_ast(text, 'blockStatement');
 
         // ERRORS
-        const expected_errors = 0;
+        const expected_errors = 1;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -684,6 +699,10 @@ describe('MathLang assign parser', () => {
             compiler.dump_tree('compiler_ast', compiler_ast);
 
             expect(errors.length).equals(expected_errors);
+
+            // REMOVE CUSTOM ATTRIBUTE
+            type_integer.del_attribute('a');
+
             return;
         }
         
@@ -736,6 +755,9 @@ describe('MathLang assign parser', () => {
             ]
         }
         expect(compiler_ast).eql(expected_ast);
+
+        // REMOVE CUSTOM ATTRIBUTE
+        type_integer.del_attribute('a');
     });
 
     it('Parse assign error [begin fxy=0 fxy.a(x,y)#b=456 end] statement' , () => {
@@ -832,7 +854,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'blockStatement');
 
         // ERRORS
-        const expected_errors = 2;
+        const expected_errors = 3;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();

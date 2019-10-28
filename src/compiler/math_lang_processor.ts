@@ -4,9 +4,19 @@ import DEFAULT_TYPES from '../features/default_types';
 import { math_lang_lexer, math_lang_parser } from './1-cst-builder/math_lang_parser';
 import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visitor';
 
+import CompilerScope from './0-common/compiler_scope';
+import ICompilerModule from '../core/icompiler_module';
+import ICompilerType from '../core/icompiler_type';
+
+import AVAILABLE_TYPES from './0-types/index';
+import AVAILABLE_RUNTIMES from './0-runtimes/index';
+import AVAILABLE_MODULES from './0-modules/index';
+
 
 
 export default function(text:string, throw_errors:boolean=true, rule_name:string='program') {
+    const compiler_scope = new CompilerScope(AVAILABLE_MODULES, AVAILABLE_TYPES, AVAILABLE_RUNTIMES);
+
     const lexResult = math_lang_lexer.tokenize(text)
 
     // setting a new input will RESET the parser instance's state.
@@ -43,7 +53,7 @@ export default function(text:string, throw_errors:boolean=true, rule_name:string
             types_map.set('BIGFLOAT', types_map.get('BIGNUMBER'));
         }
         
-        math_lang_cst_to_ast_visitor = new MathLangCstToAstVisitor(types_map);
+        math_lang_cst_to_ast_visitor = new MathLangCstToAstVisitor(compiler_scope);
         ast = math_lang_cst_to_ast_visitor.visit(cst);
 //        const t=1;
     }
@@ -51,7 +61,7 @@ export default function(text:string, throw_errors:boolean=true, rule_name:string
     return {
         cst:cst,
         ast:ast,
-        ast_scopes_map:math_lang_cst_to_ast_visitor ? math_lang_cst_to_ast_visitor.get_scopes_map() : undefined,
+        ast_scopes_map:math_lang_cst_to_ast_visitor ? math_lang_cst_to_ast_visitor.get_compiler_scope() : undefined,
         // ir_text:'',
         // ir_code:<any>[],
         lexErrors: lexResult.errors,

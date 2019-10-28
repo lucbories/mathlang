@@ -1,15 +1,16 @@
 
-import IType from '../../core/itype';
+import ICompilerType from '../../core/icompiler_type';
 import AST from './math_lang_ast';
 import TYPES from '../math_lang_types';
 import MathLangCstToAstVisitorStatement from './math_lang_cst_to_ast_visitor_statement';
 import { MathLangParserExpressions } from '../1-cst-builder/math_lang_parser_expressions';
+import CompilerScope from '../0-common/compiler_scope';
 
 
 
 export default abstract class MathLangCstToAstVisitorExpression extends MathLangCstToAstVisitorStatement {
-    constructor(types_map:Map<string,IType>) {
-        super(types_map);
+    constructor(compiler_scope:CompilerScope) {
+        super(compiler_scope);
     }
 
     abstract get_prefix_operator_function(node_op:any):string;
@@ -315,6 +316,11 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             ast_node.members.push(ast_func_decl_node);
         }
 
+        // ERROR
+        else {
+            this.add_error(ctx, AST.EXPR_MEMBER_UNKNOW, 'Error:unknow left part.');
+        }
+
         return ast_node;
     }
 
@@ -365,9 +371,10 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             const id = ast_func_call_node.func_name;
 
             // PROCESS A MODULE.FUNCTION
-            if (this._scopes_map.has(object_or_module_name)) {
-                const func_scope = this.get_scopes_map().get(object_or_module_name).module_functions.get(id);
-                ast_func_call_node.ic_type = func_scope? func_scope.return_type : TYPES.UNKNOW;
+            if (this._compiler_scope.has_module(object_or_module_name)) {
+                const module_function = this._compiler_scope.get_module(object_or_module_name).get_module_function(id);
+               
+                ast_func_call_node.ic_type = module_function ? module_function.get_returned_type() : TYPES.UNKNOW;
                 // ... TODO
             
                 ast_node.type = AST.EXPR_MEMBER_FUNC_CALL;
@@ -375,22 +382,32 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
                 ast_node.members.push(ast_func_call_node);
             }
 
-            // PROCESS AN OBJECT METHOD
-            else {
-                const func_scope = this.get_scopes_map().get(this._current_module).module_functions.get(id);
-                ast_func_call_node.ic_type = func_scope? func_scope.return_type : TYPES.UNKNOW;
+            // PROCESS AN VAR METHOD
+            else if ( this.has_declared_var_symbol(object_or_module_name) ) {
+                const obj = this.get_declared_var_symbol(object_or_module_name);
+                const obj_type = obj ? obj.type : TYPES.UNKNOW;
 
-                // TEST IF CALLED FUNCTION/METHOD EXISTS
-                if (ast_node.members.length == 0 && ! this.has_declared_func_symbol(id)){
-                    this.add_error(ctx, AST.EXPR_MEMBER_METHOD_CALL, 'Error:unknow called function [' + id + '] of module [' + object_or_module_name + ']');
-                }
-                if (ast_node.members.length > 0){
+                // VAR METHOD EXISTS?
+                if ( ast_node.members.length == 0 && this._compiler_scope.has_available_lang_type_method(obj.type, id, ast_func_call_node.operands_types) ) {
+                    const method = this._compiler_scope.get_available_lang_type_method(obj.type, id, ast_func_call_node.operands_types);
+                    ast_func_call_node.ic_type = method.get_returned_type();
+                } else if (ast_node.members.length > 0){
                     const last_member = ast_node.members[ast_node.members.length - 1];
                     const last_member_type = last_member ? last_member.ic_type : TYPES.UNKNOW;
                     this.check_method(last_member_type, id, ast_func_call_node.operands_types, cst_func_call_node, AST.EXPR_MEMBER_METHOD_CALL);
+                } else {
+                    this.add_error(ctx, AST.EXPR_MEMBER_METHOD_CALL, 'Error:unknow called function [' + id + '] of module [' + object_or_module_name + ']');
                 }
             
                 ast_node.type = AST.EXPR_MEMBER_METHOD_CALL;
+                ast_node.ic_type = ast_func_call_node.ic_type;
+                ast_node.members.push(ast_func_call_node);
+            }
+
+            else {
+                this.add_error(ctx, AST.EXPR_MEMBER_UNKNOW, 'Error:unknow module or var [' + object_or_module_name + '] for called function/method [' + id + ']');
+
+                ast_node.type = AST.EXPR_MEMBER_UNKNOW;
                 ast_node.ic_type = ast_func_call_node.ic_type;
                 ast_node.members.push(ast_func_call_node);
             }
