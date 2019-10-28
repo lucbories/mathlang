@@ -8,6 +8,7 @@ import { ICompilerScope } from '../../core/icompiler_scope'
 
 export default class CompilerScope implements ICompilerScope {
     private _new_modules:Map<string,ICompilerModule> = new Map();
+    private _modules_aliases:Map<string,ICompilerModule> = new Map();
 
     constructor(
         private _available_modules:Map<string,ICompilerModule>,
@@ -47,8 +48,23 @@ export default class CompilerScope implements ICompilerScope {
 
 
     // AVAILABLE OR NEW MODULES
+	add_module_alias(module_alias:string, module_name:string):void {
+		let module = this._new_modules.get(module_name);
+		if (module) {
+			this._modules_aliases.set(module_alias, module);
+			return;
+		}
+		module = this._available_modules.get(module_name);
+		if (module) {
+			this._modules_aliases.set(module_alias, module);
+			return;
+		}
+    }
+	
     has_module(module_name:string):boolean {
-        return this._available_modules.has(module_name) || this._new_modules.has(module_name);
+        return this._available_modules.has(module_name)
+			|| this._new_modules.has(module_name)
+			|| this._modules_aliases.has(module_name);
     }
 
     get_module(module_name:string):ICompilerModule {
@@ -57,6 +73,9 @@ export default class CompilerScope implements ICompilerScope {
         }
         if ( this._new_modules.has(module_name) ) {
             return this._new_modules.get(module_name);
+        }
+        if ( this._modules_aliases.has(module_name) ) {
+            return this._modules_aliases.get(module_name);
         }
         return undefined;
     }

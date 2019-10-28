@@ -86,7 +86,7 @@ describe('MathLang define module parser', () => {
 	
 
 describe('MathLang use module parser', () => {
-    const compiler = new MathLangCompiler(DEFAULT_TYPES);
+    const compiler = new MathLangCompiler();
 	
     it('Parse define modules ModuleA and ModuleB which use ModuleA' , () => {
         const text = `module ModuleA
@@ -183,7 +183,7 @@ describe('MathLang use module parser', () => {
 												}
 											],
 											name: 'ModuleA',
-											type: AST.EXPR_MEMBER_METHOD_CALL
+											type: AST.EXPR_MEMBER_FUNC_CALL
 										},
 										operator: {
 											ic_function: 'mul',
@@ -209,7 +209,7 @@ describe('MathLang use module parser', () => {
         expect(compiler_ast).eql(expected_ast);
     });
 	
-	
+	/*
 	it('Parse define modules ModuleA and ModuleB which use ModuleA as MA' , () => {
         const text = `module ModuleA
 			function funcA() return INTEGER
@@ -892,7 +892,7 @@ describe('MathLang use module parser', () => {
         }
         expect(compiler_ast).eql(expected_ast);
     });
-	
+	*/
 	
 // 	it('Parse define modules ModuleA, ModuleB and ModuleC which use ModuleA and ModuleB' , () => {
 //         const text = `module ModuleA

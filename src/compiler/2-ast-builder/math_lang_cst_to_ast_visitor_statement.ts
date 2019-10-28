@@ -161,12 +161,17 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             } 
         }
 
-        this._current_module.add_used_module(used_module_scope);
+		// TODO PROCESS MODULES IMPORTS
+		
+		const module_alias = ctx.alias ? ctx.alias[0].image : ctx.ID[0].image;
+		this._compiler_scope.add_module_alias(module_alias, used_module_name);
+        
+		this._current_module.add_used_module(used_module_scope);
 
         return {
             type: AST.STAT_USE,
             module_name: used_module_name,
-            module_alias: ctx.alias ? ctx.alias[0].image : ctx.ID[0].image,
+            module_alias: module_alias,
             modules_imports: ctx.importedModuleItem ? ctx.importedModuleItem.map((x:any)=>x.image) : []
         }
     }

@@ -190,7 +190,7 @@ describe('MathLang function declaration parser', () => {
         const result = compiler.compile_ast(text, 'program');
 
         // ERRORS
-        const expected_errors = 2;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -272,7 +272,7 @@ describe('MathLang function declaration parser', () => {
         const result = compiler.compile_ast(text, 'program');
 
         // ERRORS
-        const expected_errors = 9;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();

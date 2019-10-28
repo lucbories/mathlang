@@ -316,10 +316,15 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             ast_node.members.push(ast_func_decl_node);
         }
 
-        // ERROR
+        // VAR ASSIGN (begin b = 12 + x end)
         else {
-            this.add_error(ctx, AST.EXPR_MEMBER_UNKNOW, 'Error:unknow left part.');
+			// NOTHING TO DO, NO ERROR
         }
+
+        // ERROR
+        // else {
+            // this.add_error(ctx, AST.EXPR_MEMBER_UNKNOW, 'Error:unknow left part.');
+        // }
 
         return ast_node;
     }
