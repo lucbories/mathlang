@@ -1,9 +1,8 @@
 
-import ICompilerType from '../../core/icompiler_type';
-import AST from './math_lang_ast';
-import TYPES from '../math_lang_types';
 import MathLangCstToAstVisitorStatement from './math_lang_cst_to_ast_visitor_statement';
-import { MathLangParserExpressions } from '../1-cst-builder/math_lang_parser_expressions';
+import TYPES from '../math_lang_types';
+
+import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
 import CompilerScope from '../0-common/compiler_scope';
 
 
@@ -375,19 +374,35 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             const ast_func_call_node:any = this.visit(cst_func_call_node);
             const id = ast_func_call_node.func_name;
 
-            // PROCESS A MODULE.FUNCTION
+            // PROCESS A MODULE.FUNCTION OR MODULE.CONST
             if (this._compiler_scope.has_module(object_or_module_name)) {
-                const module_function = this._compiler_scope.get_module(object_or_module_name).get_module_function(id);
+                const module_function = this._compiler_scope.get_module(object_or_module_name).get_exported_function(id);
+                const module_const = this._compiler_scope.get_module(object_or_module_name).get_exported_constant(id);
                
-                ast_func_call_node.ic_type = module_function ? module_function.get_returned_type() : TYPES.UNKNOW;
-                // ... TODO
+                if (module_function) {
+                    ast_func_call_node.ic_type = module_function.get_returned_type();
             
-                ast_node.type = AST.EXPR_MEMBER_FUNC_CALL;
-                ast_node.ic_type = ast_func_call_node.ic_type;
-                ast_node.members.push(ast_func_call_node);
+                    ast_node.type = AST.EXPR_MEMBER_FUNC_CALL;
+                    ast_node.ic_type = ast_func_call_node.ic_type;
+                    ast_node.members.push(ast_func_call_node);
+                } else if (module_const) {
+                    ast_func_call_node.ic_type = module_function.get_returned_type();
+            
+                    ast_node.type = AST.EXPR_MEMBER_ATTRIBUTE;
+                    ast_node.ic_type = ast_func_call_node.ic_type;
+                    ast_node.members.push(ast_func_call_node);
+                } else {
+                    this.add_error(ctx, AST.EXPR_MEMBER_FUNC_CALL, 'Error:unknow exported function or constant [' + id + '] of module [' + object_or_module_name + ']');
+                    
+                    ast_func_call_node.ic_type = TYPES.UNKNOW;
+                    
+                    ast_node.type = AST.EXPR_MEMBER_UNKNOW;
+                    ast_node.ic_type = ast_func_call_node.ic_type;
+                    ast_node.members.push(ast_func_call_node);
+                }
             }
 
-            // PROCESS AN VAR METHOD
+            // PROCESS A VAR METHOD
             else if ( this.has_declared_var_symbol(object_or_module_name) ) {
                 const obj = this.get_declared_var_symbol(object_or_module_name);
                 const obj_type = obj ? obj.type : TYPES.UNKNOW;

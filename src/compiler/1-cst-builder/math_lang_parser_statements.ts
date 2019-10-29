@@ -28,9 +28,13 @@ export class MathLangParserStatements extends Parser {
     private moduleStatement = this.RULE("moduleStatement", () => {
         this.CONSUME(t.Module);
         this.CONSUME(t.ID);
+
+        this.MANY(() => {
+            this.SUBRULE(this.useStatement, { LABEL:"useStatement" })
+        });
+
         this.AT_LEAST_ONE(() => {
             this.OR( [
-                { ALT: () => this.SUBRULE(this.useStatement, { LABEL:"useStatement" }) },
                 { ALT: () => this.SUBRULE(this.functionStatement, { LABEL:'functionStatement' } ) },
                 { ALT: () => this.SUBRULE(this.exportableAssignStatement, { LABEL:'exportableAssignStatement' } ) }
             ]);

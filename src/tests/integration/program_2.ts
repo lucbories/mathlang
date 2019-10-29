@@ -1,5 +1,5 @@
 
-import AST from '../../compiler/2-ast-builder/math_lang_ast';
+import AST from '../../compiler/2-ast-builder/old_math_lang_ast';
 
 
 export const program_2_source = `

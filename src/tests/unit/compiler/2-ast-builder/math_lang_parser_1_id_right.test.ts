@@ -3,9 +3,10 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import TYPES from '../../../../compiler/math_lang_types';
-import AST from '../../../../compiler/2-ast-builder/math_lang_ast';
+
+import { IAstNodeKindOf as AST } from '../../../../core/icompiler_ast_node';
+
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
-// import DEFAULT_TYPES from '../../../../features/default_types';
 
 
 function dump_tree(label:string, tree:any) {

@@ -18,7 +18,7 @@ describe('MathLang switch parser', () => {
         const result = compiler.compile_ast(text, 'blockStatement');
 
         // ERRORS
-        const expected_errors = 4;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();

@@ -1,28 +1,31 @@
-import IType from '../../core/itype';
 
-// import AST from '../2-ast-builder/math_lang_ast';
+import ICompilerType from '../../core/icompiler_type';
+import ICompilerScope from '../../core/icompiler_scope';
 
-import { ModuleScope } from './math_lang_function_scope';
 import TYPES from '../math_lang_types';
+
+// import IType from '../../core/itype';
+
+// import { ModuleScope } from './math_lang_function_scope';
 import IC from './math_lang_ic';
 
 
 
 
-export type ICModule = {
-    module_name:string,
-    used_modules:Map<string,string>,
-    module_functions:Map<string,ICFunction>,
-    exported_functions:string[],
-    exported_constants:string[]
-}
+// export type ICModule = {
+//     module_name:string,
+//     used_modules:Map<string,string>,
+//     module_functions:Map<string,ICFunction>,
+//     exported_functions:string[],
+//     exported_constants:string[]
+// }
 
-export type ICFunction = {
-    func_name:string,
-    return_type:string,
-    statements:any[],
-    labels:Map<string,ICLabel[]> 
-};
+// export type ICFunction = {
+//     func_name:string,
+//     return_type:string,
+//     statements:any[],
+//     labels:Map<string,ICLabel[]> 
+// };
 
 export enum ICOperandSource {
     FROM_STACK       = 'FROM_STACK',
@@ -69,10 +72,10 @@ export type ICInstruction = {
     text:string
 };
 
-export type ICLabel = {
-    label_name:string,
-    label_index:number
-};
+// export type ICLabel = {
+//     label_name:string,
+//     label_index:number
+// };
 
 
 
@@ -83,10 +86,7 @@ export type ICLabel = {
  * @license Apache-2.0
  */
 export default class MathLangAstToIcVisitorBase {
-    protected _ic_modules:Map<string,ICModule> = new Map();
-    // protected _ic_functions:Map<string,ICFunction> = new Map();
     private _errors:ICError[] = [];
-    // private _functions_labels:Map<string,ICLabel[]> = new Map();
 
 
     /**
@@ -94,28 +94,19 @@ export default class MathLangAstToIcVisitorBase {
      * 
      * @param _ast_functions AST functions scopes
      */
-    constructor(protected _ast_modules:Map<string,ModuleScope>, private _types_map:Map<string,IType>) {
+    constructor(private _compiler_scope:ICompilerScope ) { //protected _ast_modules:Map<string,ModuleScope>, private _types_map:Map<string,IType>) {
     }
 
 
     /**
-     * Get IC build modules.
+     * Get Compiler scope.
      * 
-     * @returns Map<string,ICModule>.
+     * @returns CompilerScope.
      */
-    get_ic_modules_map(){
-        return this._ic_modules;
+    get_compiler_scope(){
+        return this._compiler_scope;
     }
 
-
-    /**
-     * Get IC build functions.
-     * 
-     * @returns Map<string,ICFunction>.
-     */
-    // get_ic_functions_map(){
-    //     return this._ic_functions;
-    // }
 
 
     /**
@@ -136,7 +127,7 @@ export default class MathLangAstToIcVisitorBase {
      * @returns boolean, true if type exists.
      */
     has_type(type_name:string){
-        return this._types_map.has(type_name);
+        return this._compiler_scope.has_available_lang_type(type_name);
     }
 
 
@@ -152,18 +143,6 @@ export default class MathLangAstToIcVisitorBase {
 
         return ic_str;
     }
-
-
-    /**
-     * Get IC function name for given operator.
-     * 
-     * @param ast_operator AST operator name.
-     * 
-     * @returns IC function name.
-     */
-    // get_op_function_name(ast_operator:string):string{
-    //     return ast_operator.ic_function;
-    // }
 
 
     /**

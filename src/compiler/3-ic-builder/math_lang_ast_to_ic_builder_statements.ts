@@ -1,9 +1,11 @@
+
+import TYPES from '../math_lang_types';
+
 import IType from '../../core/itype';
 
-import AST from '../2-ast-builder/math_lang_ast';
+import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
 
 import { FunctionScope, ModuleScope } from './math_lang_function_scope';
-import TYPES from '../math_lang_types';
 import IC from './math_lang_ic';
 import MathLangAstToIcVisitorBase from './math_lang_ast_to_ic_builder_base';
 import { ICError, ICFunction, ICIdAccessor, ICInstruction, ICOperand, ICOperandSource} from './math_lang_ast_to_ic_builder_base';

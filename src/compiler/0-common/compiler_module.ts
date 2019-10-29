@@ -104,6 +104,7 @@ export default class CompilerModule implements ICompilerModule {
     
     // EXPORTED CONSTANTS
     add_exported_constant(smb:SymbolDeclaration) {
+        this._module_constants.set(smb.name, smb);
         this._exported_constants.set(smb.name, smb);
     }
     

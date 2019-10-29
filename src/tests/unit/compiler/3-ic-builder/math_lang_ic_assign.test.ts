@@ -3,12 +3,11 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
-import DEFAULT_TYPES from '../../../../features/default_types';
 
 
 
 describe('MathLang assign IC builder', () => {
-    const compiler = new MathLangCompiler(DEFAULT_TYPES);
+    const compiler = new MathLangCompiler();
 
     it('Parse assign a=456 statement' , () => {
         compiler.reset();

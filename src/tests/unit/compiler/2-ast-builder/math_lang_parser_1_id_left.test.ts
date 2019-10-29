@@ -3,9 +3,10 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import TYPES from '../../../../compiler/math_lang_types';
-import AST from '../../../../compiler/2-ast-builder/math_lang_ast';
+
+import { IAstNodeKindOf as AST } from '../../../../core/icompiler_ast_node';
+
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
-// import DEFAULT_TYPES from '../../../../features/default_types';
 
 
 
@@ -20,7 +21,7 @@ describe('MathLang id expression for left part parser', () => {
         const result = compiler.compile_ast(text, 'idLeft');
 
         // ERRORS
-        const expected_errors = 1;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -55,7 +56,7 @@ describe('MathLang id expression for left part parser', () => {
         const result = compiler.compile_ast(text, 'idLeft');
 
         // ERRORS
-        const expected_errors = 3;
+        const expected_errors = 2;
         const errors = compiler.get_errors();
         // console.log('errors', errors);
         expect(result).equals(false);
@@ -93,7 +94,7 @@ describe('MathLang id expression for left part parser', () => {
         const result = compiler.compile_ast(text, 'idLeft');
 
         // ERRORS
-        const expected_errors = 5;
+        const expected_errors = 4;
         const errors = compiler.get_errors();
         // console.log('errors', errors);
         expect(result).equals(false);
@@ -136,7 +137,7 @@ describe('MathLang id expression for left part parser', () => {
         const result = compiler.compile_ast(text, 'idLeft');
 
         // ERRORS
-        const expected_errors = 6;
+        const expected_errors = 5;
         const errors = compiler.get_errors();
         expect(result).equals(false);
         if (errors.length != expected_errors){
@@ -190,7 +191,7 @@ describe('MathLang id expression for left part parser', () => {
         const result = compiler.compile_ast(text, 'idLeft');
 
         // ERRORS
-        const expected_errors = 8;
+        const expected_errors = 7;
         const errors = compiler.get_errors();
         expect(result).equals(false);
         if (errors.length != expected_errors){

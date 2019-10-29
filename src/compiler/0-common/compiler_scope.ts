@@ -9,6 +9,7 @@ import { ICompilerScope } from '../../core/icompiler_scope'
 export default class CompilerScope implements ICompilerScope {
     private _new_modules:Map<string,ICompilerModule> = new Map();
     private _modules_aliases:Map<string,ICompilerModule> = new Map();
+    private _modules_imports:Map<string,Map<string,string>> = new Map();
 
     constructor(
         private _available_modules:Map<string,ICompilerModule>,
@@ -48,7 +49,7 @@ export default class CompilerScope implements ICompilerScope {
 
 
     // AVAILABLE OR NEW MODULES
-	add_module_alias(module_alias:string, module_name:string):void {
+	add_module_alias(module_name:string, module_alias:string):void {
 		let module = this._new_modules.get(module_name);
 		if (module) {
 			this._modules_aliases.set(module_alias, module);
@@ -61,6 +62,19 @@ export default class CompilerScope implements ICompilerScope {
 		}
     }
 	
+	add_module_imports(module_name:string, module_imports:Map<string,string>):void {
+		let module = this._new_modules.get(module_name);
+		if (module) {
+			this._modules_imports.set(module_name, module_imports);
+			return;
+		}
+		module = this._available_modules.get(module_name);
+		if (module) {
+			this._modules_imports.set(module_name, module_imports);
+			return;
+		}
+    }
+
     has_module(module_name:string):boolean {
         return this._available_modules.has(module_name)
 			|| this._new_modules.has(module_name)
@@ -121,8 +135,17 @@ export default class CompilerScope implements ICompilerScope {
     has_exported_function(func_name:string) {
         let found:boolean = false;
         this._new_modules.forEach(
-            (value:ICompilerModule)=>{
-                if (found || value.has_exported_function(func_name) ) {
+            (module:ICompilerModule)=>{
+                if (found) {
+                    return;
+                }
+                const module_name = module.get_module_name();
+                if (this._modules_imports.has(module_name)) {
+                    const module_imports = this._modules_imports.get(module_name);
+                    found = module_imports.has(func_name);
+                    return;
+                }
+                if (module.has_exported_function(func_name) ) {
                     return;
                 }
             }
@@ -131,8 +154,17 @@ export default class CompilerScope implements ICompilerScope {
             return true;
         }
         this._available_modules.forEach(
-            (value:ICompilerModule)=>{
-                if (found || value.has_exported_function(func_name) ) {
+            (module:ICompilerModule)=>{
+                if (found) {
+                    return;
+                }
+                const module_name = module.get_module_name();
+                if (this._modules_imports.has(module_name)) {
+                    const module_imports = this._modules_imports.get(module_name);
+                    found = module_imports.has(func_name);
+                    return;
+                }
+                if (module.has_exported_function(func_name) ) {
                     return;
                 }
             }
@@ -143,18 +175,34 @@ export default class CompilerScope implements ICompilerScope {
     get_exported_function(func_name:string):ICompilerFunction {
         let found:ICompilerFunction = undefined;
         this._new_modules.forEach(
-            (value:ICompilerModule)=>{
+            (module:ICompilerModule)=>{
                 if (found) return;
-                found = value.get_exported_function(func_name);
+                const module_name = module.get_module_name();
+                if (this._modules_imports.has(module_name)) {
+                    const module_imports = this._modules_imports.get(module_name);
+                    if (module_imports.has(func_name)) {
+                        found = module.get_exported_function(func_name);
+                    }
+                    return;
+                }
+                found = module.get_exported_function(func_name);
             }
         );
         if (found) {
             return found;
         }
         this._available_modules.forEach(
-            (value:ICompilerModule)=>{
+            (module:ICompilerModule)=>{
                 if (found) return;
-                found = value.get_exported_function(func_name);
+                const module_name = module.get_module_name();
+                if (this._modules_imports.has(module_name)) {
+                    const module_imports = this._modules_imports.get(module_name);
+                    if (module_imports.has(func_name)) {
+                        found = module.get_exported_function(func_name);
+                    }
+                    return;
+                }
+                found = module.get_exported_function(func_name);
             }
         );
         return found;

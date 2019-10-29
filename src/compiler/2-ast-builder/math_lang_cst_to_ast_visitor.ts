@@ -1,8 +1,8 @@
 
-import IType from '../../core/itype';
-import AST from '../2-ast-builder/math_lang_ast';
-import TYPES from '../math_lang_types';
 import MathLangCstToAstVisitorExpression from './math_lang_cst_to_ast_visitor_expressions';
+import TYPES from '../math_lang_types';
+
+import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
 import CompilerScope from '../0-common/compiler_scope';
 
 

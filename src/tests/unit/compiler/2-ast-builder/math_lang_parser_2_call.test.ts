@@ -4,7 +4,8 @@ const expect = chai.expect;
 
 import parse from '../../../../compiler/math_lang_processor';
 import TYPES from '../../../../compiler/math_lang_types';
-import AST from '../../../../compiler/2-ast-builder/math_lang_ast';
+
+import { IAstNodeKindOf as AST } from '../../../../core/icompiler_ast_node';
 
 
 function dump_ast(label:string, ast:any) {

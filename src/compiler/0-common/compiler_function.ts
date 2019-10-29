@@ -9,6 +9,7 @@ export default class CompilerFunction implements ICompilerFunction {
 
     private _ic_node:ICompilerIcNode;
     private _ic_statements:ICompilerIcNode[];
+    private _ic_labels_index:Map<string,number>= new Map();
 
     private _symbols_consts_table:SymbolsTable = new Map();
     private _symbols_vars_table:SymbolsTable = new Map();
@@ -87,6 +88,17 @@ export default class CompilerFunction implements ICompilerFunction {
         return this._ic_statements;
     }
 
+    add_ic_label(label_name:string, label_index:number):void {
+        this._ic_labels_index.set(label_name, label_index);
+    }
+
+    has_ic_label(label_name:string):boolean {
+        return this._ic_labels_index.has(label_name);
+    }
+
+    get_ic_label_index(label_name:string):number {
+        return this._ic_labels_index.get(label_name);
+    }
     
 	// SYMBOLS
     has_symbol_const(symbol_name:string):boolean {

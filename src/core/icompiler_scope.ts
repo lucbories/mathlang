@@ -14,7 +14,8 @@ export interface ICompilerScope {
     has_available_lang_type_method(type_name:string, method_name:string, operands_types:string[]):boolean;
     get_available_lang_type_method(type_name:string, method_name:string, operands_types:string[]):ICompilerFunction;
 
-	add_module_alias(module_alias:string, module_name:string):void;
+	add_module_alias(module_name:string, module_alias:string):void;
+	add_module_imports(module_name:string, module_imports:Map<string,string>):void;
     has_module(module_name:string):boolean;
     get_module(module_name:string):ICompilerModule
 

@@ -3,7 +3,9 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import TYPES from '../../../../compiler/math_lang_types';
-import AST from '../../../../compiler/2-ast-builder/math_lang_ast';
+
+import { IAstNodeKindOf as AST } from '../../../../core/icompiler_ast_node';
+
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
 
 
@@ -20,7 +22,7 @@ describe('MathLang assign parser', () => {
         const errors = compiler.get_errors();
 
         // ERRORS
-        const expected_errors = 1;
+        const expected_errors = 0;
         if (errors.length != expected_errors){
             console.log('errors', errors);
 
@@ -58,7 +60,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'blockStatement');
 
         // ERRORS
-        const expected_errors = 2;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -121,7 +123,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'program');
 
         // ERRORS
-        const expected_errors = 2;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -537,7 +539,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'statement');
 
         // ERRORS
-        const expected_errors = 1;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -607,7 +609,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'blockStatement');
 
         // ERRORS
-        const expected_errors = 1;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -688,7 +690,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'blockStatement');
 
         // ERRORS
-        const expected_errors = 1;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -854,7 +856,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'blockStatement');
 
         // ERRORS
-        const expected_errors = 3;
+        const expected_errors = 2;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();

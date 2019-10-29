@@ -3,12 +3,11 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
-import DEFAULT_TYPES from '../../../../features/default_types';
 
 
 
 describe('MathLang Switch IC builder', () => {
-    const compiler = new MathLangCompiler(DEFAULT_TYPES);
+    const compiler = new MathLangCompiler();
 
     const src_code_1 = `
     begin
@@ -39,7 +38,9 @@ describe('MathLang Switch IC builder', () => {
 
         // GET IC CODE
         const DEBUG_IC = false;
-        const ic_functions_map = compiler.get_ic_functions_map();
+        const ic_modules_map = compiler.get_ic_modules_map();
+        
+        const ic_functions_map = compiler.get_ic_modules_map();
         // console.log('ic_functions_map', ic_functions_map);
         const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, DEBUG_IC);
         const labels_str = compiler.dump_ic_functions_labels(DEBUG_IC);

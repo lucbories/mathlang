@@ -1,15 +1,14 @@
 
 import ICompilerType from '../../core/icompiler_type';
+import ICompilerScope from '../../core/icompiler_scope';
+import { SymbolDeclaration, ICompilerFunction } from '../../core/icompiler_function';
+import CompilerFunction from '../0-common/compiler_function'; // TODO replace by interface
+import CompilerModule from '../0-common/compiler_module'; // TODO replace by interface
+
 import { math_lang_parser } from '../1-cst-builder/math_lang_parser';
 import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES,  TYPES } from '../math_lang_types';
-// import { SymbolDeclarationRecord, FunctionScope, ModuleScope } from '../3-ic-builder/math_lang_function_scope';
 
-import { SymbolDeclaration, ICompilerFunction } from '../../core/icompiler_function';
-import CompilerFunction from '../0-common/compiler_function';
-import CompilerModule from '../0-common/compiler_module';
-import IMethod from '../../core/imethod';
 
-import CompilerScope from '../0-common/compiler_scope';
 
 
 /**
@@ -54,7 +53,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     protected _errors:AstBuilderErrorArray       = undefined;
     protected _unknow_symbols:string[]           = undefined;
 
-    protected _compiler_scope:CompilerScope      = undefined;
+    protected _compiler_scope:ICompilerScope     = undefined;
     protected _default_module:CompilerModule     = undefined;
     protected _default_function:CompilerFunction = undefined;
     
@@ -69,9 +68,9 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     /**
      * Constructor, nothing to do.
      * 
-     * @param _types_map private property, map of types.
+     * @param compiler_scope compiler scope.
      */
-    constructor(compiler_scope:CompilerScope) {
+    constructor(compiler_scope:ICompilerScope) {
         super();
         this._compiler_scope   = compiler_scope;
 
@@ -225,8 +224,6 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
             return false;
         }
 
-        // TODO: to rework check_type_indexes
-
         return true;
     }
 
@@ -255,8 +252,6 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
         }
 
         return type_instance.get_type_name();
-        
-        // TODO rework get_indexed_type
     }
 
 
@@ -403,17 +398,23 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * Register a function declaration.
      * @param func_name             function name.
      * @param return_type           returned value type.
+     * @param is_exported           function is exported?
      * @param operands_declarations function operands declaration.
      * @param instructions          function instruction block.
      * @param cst_context           CST context for error log.
      * @param ast_node_type         AST node type for error log.
      */
-    register_function_declaration(func_name:string, return_type:string, operands_declarations:any[], instructions:any[], cst_context:any, ast_node_type:string) {
+    register_function_declaration(func_name:string, return_type:string, is_exported:boolean, operands_declarations:any[], instructions:any[], cst_context:any, ast_node_type:string) {
         this.check_type(return_type, cst_context, ast_node_type);
 
         const func = new CompilerFunction(func_name, return_type);
         func.set_ast_statements(instructions);
-        this._current_module.add_exported_function(func);
+
+        if (is_exported) {
+            this._current_module.add_exported_function(func);
+        } else {
+            this._current_module.add_module_function(func);
+        }
 
         // PROCESS OPERANDS
         let opd_decl:any;

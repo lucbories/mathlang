@@ -1,9 +1,9 @@
 
-import IType from '../../core/itype';
 import MathLangCstToAstVisitorBase from './math_lang_cst_to_ast_visitor_base'
-import AST from '../2-ast-builder/math_lang_ast';
-import { ModuleScope } from '../3-ic-builder/math_lang_function_scope';
 import TYPES from '../math_lang_types';
+
+import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
+
 import CompilerScope from '../0-common/compiler_scope';
 import CompilerModule from '../0-common/compiler_module';
 
@@ -160,19 +160,27 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
                 modules_imports: ctx.importedModuleItem ? ctx.importedModuleItem.map((x:any)=>x.image) : []
             } 
         }
-
-		// TODO PROCESS MODULES IMPORTS
-		
-		const module_alias = ctx.alias ? ctx.alias[0].image : ctx.ID[0].image;
-		this._compiler_scope.add_module_alias(module_alias, used_module_name);
         
+        // MODULE ALIAS
+		const module_alias = ctx.alias ? ctx.alias[0].image : ctx.ID[0].image;
+        this._compiler_scope.add_module_alias(used_module_name, module_alias);
+        
+        // MODULE IMPORTS
+        const modules_imports_array:string[] = ctx.importedModuleItem ? ctx.importedModuleItem.map((x:any)=>x.image) : [];
+        const modules_imports_map = new Map<string,string>();
+        modules_imports_array.map(
+            (func_or_var_name:string)=>modules_imports_map.set(func_or_var_name, func_or_var_name)
+        )
+		this._compiler_scope.add_module_imports(used_module_name, modules_imports_map);
+        
+        // USED MODULES
 		this._current_module.add_used_module(used_module_scope);
 
         return {
             type: AST.STAT_USE,
             module_name: used_module_name,
             module_alias: module_alias,
-            modules_imports: ctx.importedModuleItem ? ctx.importedModuleItem.map((x:any)=>x.image) : []
+            modules_imports: modules_imports_array
         }
     }
 
@@ -456,10 +464,11 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
     exportableAssignStatement(ctx:any) {
         // console.log('exportableAssignStatement', ctx)
 
+        const is_exported:boolean = ctx.Export && ctx.Export[0].image
+        
+        ctx.assignStatement.is_exported = is_exported;
         let ast_assign = this.visit(ctx.assignStatement);
-        if (ctx.Export && ctx.Export[0].image){
-            ast_assign.is_exported = true;
-        }
+        ast_assign.is_exported = is_exported;
 
         return ast_assign
     }
@@ -530,7 +539,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
                 operands.push( { opd_name:loop_name, opd_type:loop_type } )
             }
             
-            this.register_function_declaration(assign_name, TYPES.UNKNOW, operands, [], ctx, AST.STAT_ASSIGN_FUNCTION);
+            this.register_function_declaration(assign_name, TYPES.UNKNOW, ctx.is_exported, operands, [], ctx, AST.STAT_ASSIGN_FUNCTION);
             
             // EVALUATE RIGHT EXPRESSION
             this.enter_function_declaration(assign_name);
@@ -618,7 +627,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
     
             }
             
-            this.register_function_declaration(method_name, TYPES.INTEGER, operands, [], ctx, AST.STAT_ASSIGN_METHOD);
+            this.register_function_declaration(method_name, TYPES.INTEGER, ctx.is_exported, operands, [], ctx, AST.STAT_ASSIGN_METHOD);
             
             // EVALUATE RIGHT EXPRESSION
             this.enter_function_declaration(method_name);
@@ -674,6 +683,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
         const function_name = ctx.functionName[0].image ? ctx.functionName[0].image : TYPES.UNKNOW;
         const returned_type = this.visit(ctx.returnedType[0]);
+        const function_is_exported:boolean = ctx.Export && ctx.Export[0] ? true : false;
 
         let operands_decl;
         if (ctx.visit_header){
@@ -686,7 +696,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
                 }
             }
 
-            this.register_function_declaration(function_name, returned_type, operands, [], ctx, AST.STAT_FUNCTION);
+            this.register_function_declaration(function_name, returned_type, function_is_exported, operands, [], ctx, AST.STAT_FUNCTION);
         }
 
         const statements = [];
@@ -708,7 +718,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             type: AST.STAT_FUNCTION,
             ic_type:returned_type,
             name:function_name,
-            is_exported: ctx.Export && ctx.Export[0] ? true : false,
+            is_exported: function_is_exported,
             operands_types:operands_decl && operands_decl.ic_subtypes ? operands_decl.ic_subtypes : [],
             operands_names:operands_decl && operands_decl.items ? operands_decl.items : [],
             block:statements

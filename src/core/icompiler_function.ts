@@ -37,6 +37,10 @@ export interface ICompilerFunction {
     
     set_ic_statements(nodes:ICompilerIcNode[]):void;
     get_ic_statements():ICompilerIcNode[];
+
+    add_ic_label(label_name:string, label_index:number):void;
+    has_ic_label(label_name:string):boolean;
+    get_ic_label_index(label_name:string):number;
     
     // SYMBOLS
     has_symbol_const(symbol_name:string):boolean;
