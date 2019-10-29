@@ -29,6 +29,9 @@ export enum IIcNodeKindOf {
 }
 
 export interface ICompilerIcNode {
-	get_node_kindof():IIcNodeKindOf
-	get_node_type():string
+	// get_node_kindof():IIcNodeKindOf
+	// get_node_type():string
+	
+	ic_code:IIcNodeKindOf;
+	ic_type:string;
 }

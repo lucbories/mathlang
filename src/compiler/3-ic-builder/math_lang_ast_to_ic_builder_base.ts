@@ -7,7 +7,7 @@ import TYPES from '../math_lang_types';
 // import IType from '../../core/itype';
 
 // import { ModuleScope } from './math_lang_function_scope';
-import IC from './math_lang_ic';
+// import IC from './math_lang_ic';
 
 
 
@@ -94,7 +94,8 @@ export default class MathLangAstToIcVisitorBase {
      * 
      * @param _ast_functions AST functions scopes
      */
-    constructor(private _compiler_scope:ICompilerScope ) { //protected _ast_modules:Map<string,ModuleScope>, private _types_map:Map<string,IType>) {
+    constructor(private _compiler_scope:ICompilerScope ) {
+		//protected _ast_modules:Map<string,ModuleScope>, private _types_map:Map<string,IType>) {
     }
 
 
@@ -199,7 +200,9 @@ export default class MathLangAstToIcVisitorBase {
             text:return_type + ':' + IC.FUNCTION_DECLARE_ENTER + ' ' + opds_records_str
         });
 
-        this._ic_modules.get(module_name).module_functions.set(ic_function.func_name, ic_function);
+        const scope_module = this._compiler_scope.get_new_module(module_name);
+		const scope_function = scope_module.get_module_function(ic_function.func_name);
+		scope_function.set(ic_function.func_name, ic_function);
     }
 
     set_function_declaration_statements(module_name:string, func_name:string, instructions:any[]){
