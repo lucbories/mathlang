@@ -71,7 +71,7 @@ export default class CompilerFunction implements ICompilerFunction {
     }
 
 	
-	// IC
+	// IC STATEMENTS
     set_ic_node(node:ICompilerIcNode) {
         this._ic_node = node;
     }
@@ -88,8 +88,15 @@ export default class CompilerFunction implements ICompilerFunction {
         return this._ic_statements;
     }
 
-    add_ic_label(label_name:string, label_index:number):void {
+
+	// IC LABELS
+    add_ic_label(label_index:number=undefined):string {
+        const label_name = this.func_name + '_label_' + this._ic_labels_index.length;
+        label_index = label_index ? label_index : this._ic_statements.length;
+		
         this._ic_labels_index.set(label_name, label_index);
+		
+		return label_name;
     }
 
     has_ic_label(label_name:string):boolean {
@@ -99,6 +106,12 @@ export default class CompilerFunction implements ICompilerFunction {
     get_ic_label_index(label_name:string):number {
         return this._ic_labels_index.get(label_name);
     }
+
+    set_ic_label_index(label_name:string, label_index:number):void {
+        label_index = label_index ? label_index : this._ic_statements.length;
+        this._ic_labels_index.set(label_name, label_index);
+    }
+	
     
 	// SYMBOLS
     has_symbol_const(symbol_name:string):boolean {

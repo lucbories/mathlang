@@ -2,81 +2,6 @@
 import ICompilerType from '../../core/icompiler_type';
 import ICompilerScope from '../../core/icompiler_scope';
 
-import TYPES from '../math_lang_types';
-
-// import IType from '../../core/itype';
-
-// import { ModuleScope } from './math_lang_function_scope';
-// import IC from './math_lang_ic';
-
-
-
-
-// export type ICModule = {
-//     module_name:string,
-//     used_modules:Map<string,string>,
-//     module_functions:Map<string,ICFunction>,
-//     exported_functions:string[],
-//     exported_constants:string[]
-// }
-
-// export type ICFunction = {
-//     func_name:string,
-//     return_type:string,
-//     statements:any[],
-//     labels:Map<string,ICLabel[]> 
-// };
-
-export enum ICOperandSource {
-    FROM_STACK       = 'FROM_STACK',
-    FROM_REGISTER    = 'FROM_REGISTER',
-    FROM_ID          = 'FROM_ID',
-    FROM_INLINE      = 'FROM_INLINE'
-}
-
-export type ICIdAccessor = {
-    id:string,
-    ic_type:string,
-    operands_types:[],
-    operands_names:[],
-    operands_expressions:[],
-    is_attribute:boolean,
-    is_method_call:boolean,
-    is_method_decl:boolean,
-    is_indexed:boolean,
-    indexed_args_count:number
-};
-
-export interface ICOperand {
-    ic_type:string,
-    ic_source:ICOperandSource,
-    ic_name:string,
-    ic_id_accessors:ICIdAccessor[],
-    ic_id_accessors_str:string
-};
-
-
-export interface ICError {
-    ic_type:string,
-    ic_source:ICOperandSource,
-    ic_name:string,
-    ic_index:number,
-    ast_node:any,
-    message:string
-};
-
-export type ICInstruction = {
-    ic_type:string,
-    ic_code:string,
-    operands:ICOperand[],
-    text:string
-};
-
-// export type ICLabel = {
-//     label_name:string,
-//     label_index:number
-// };
-
 
 
 /**
@@ -87,7 +12,7 @@ export type ICInstruction = {
  */
 export default class MathLangAstToIcVisitorBase {
     private _errors:ICError[] = [];
-
+	private _current_function:ICompilerFunction = undefined;
 
     /**
      * Constructor, nothing to do.
@@ -95,7 +20,6 @@ export default class MathLangAstToIcVisitorBase {
      * @param _ast_functions AST functions scopes
      */
     constructor(private _compiler_scope:ICompilerScope ) {
-		//protected _ast_modules:Map<string,ModuleScope>, private _types_map:Map<string,IType>) {
     }
 
 
@@ -171,55 +95,36 @@ export default class MathLangAstToIcVisitorBase {
      * @returns Error ICOperand node.
      */
     add_error(ast_expression:any, message?:string):ICError{
-        const error:ICError = {
-            ic_type:TYPES.ERROR,
-            ic_source:undefined,
-            ic_name:undefined,
-            ic_index:undefined,
-            ast_node:ast_expression,
-            message:message
-        }
+		const error = CompilerIcNode.create_error(ast_expression, message);
         this._errors.push(error);
         return error;
     }
 
 
     declare_function(module_name:string, func_name:string, return_type:string, opds_records:ICOperand[], opds_records_str:string, ic_statements:ICInstruction[]){
-        const ic_function = {
-            func_name:func_name,
-            return_type:return_type,
-            statements:ic_statements,
-            labels:new Map()
-        };
-
+        const ic_function = CompilerIcNode.create_function(module_name, func_name, return_type, opds_records, ic_statements);
+		
+		// LOOKUP CURRENT FUNCTION
+		const scope_module = this._compiler_scope.get_new_module(module_name);
+		this._current_function = scope_module.get_module_function(func_name);
+		
         // ADD FUNCTION IC DECLARATION
-        ic_function.statements.push({
-            ic_type:return_type,
-            ic_code:IC.FUNCTION_DECLARE_ENTER,
-            operands:opds_records,
-            text:return_type + ':' + IC.FUNCTION_DECLARE_ENTER + ' ' + opds_records_str
-        });
-
-        const scope_module = this._compiler_scope.get_new_module(module_name);
-		const scope_function = scope_module.get_module_function(ic_function.func_name);
-		scope_function.set(ic_function.func_name, ic_function);
+		const ic_function_enter = CompilerIcNode.create_function_enter(module_name, func_name, return_type);
+        this._current_function.add_ic_statement(ic_function_enter);
     }
+	
 
-    set_function_declaration_statements(module_name:string, func_name:string, instructions:any[]){
-        const func_scope = this._ic_modules.get(module_name).module_functions.get(func_name);
-        func_scope.statements = instructions;
-    }
+    // set_function_declaration_statements(module_name:string, func_name:string, instructions:any[]){
+        // const func_scope = this._ic_modules.get(module_name).module_functions.get(func_name);
+        // func_scope.statements = instructions;
+    // }
 
     leave_function_declaration(module_name:string, func_name:string){
-        const ic_function = this._ic_modules.get(module_name).module_functions.get(func_name);
-
-        // LEAVE FUNCTON
-        ic_function.statements.push({
-            ic_type:ic_function.return_type,
-            ic_code:IC.FUNCTION_DECLARE_LEAVE,
-            operands:[],
-            text:ic_function.return_type + ':' + IC.FUNCTION_DECLARE_LEAVE + ' ' + func_name
-        });
+        // ADD FUNCTION IC DECLARATION
+        const ic_function_leave = CompilerIcNode.create_function_leave(module_name, func_name, return_type);
+        this._current_function.add_ic_statement(ic_function_leave);
+		
+		this._current_function = undefined;
     }
 
 
@@ -259,101 +164,40 @@ export default class MathLangAstToIcVisitorBase {
 
 
     /**
-     * Get True operand.
-     * @returns true operand
-     */
-    get_true_operand():ICOperand{
-        return {
-            ic_type:TYPES.BOOLEAN,
-            ic_source:ICOperandSource.FROM_INLINE,
-            ic_name:'###TRUE',
-            ic_id_accessors:[],
-            ic_id_accessors_str:''
-        };
-    }
-
-
-    /**
-     * Get False operand.
-     * @returns false operand
-     */
-    get_false_operand():ICOperand{
-        return {
-            ic_type:TYPES.UNKNOW,
-            ic_source:ICOperandSource.FROM_INLINE,
-            ic_name:'###FALSE',
-            ic_id_accessors:[],
-            ic_id_accessors_str:''
-        };
-    }
-
-
-    /**
-     * Get Null operand.
-     * @returns null operand
-     */
-    get_null_operand():ICOperand{
-        return {
-            ic_type:TYPES.UNKNOW,
-            ic_source:ICOperandSource.FROM_INLINE,
-            ic_name:'###NULL',
-            ic_id_accessors:[],
-            ic_id_accessors_str:''
-        };
-    }
-
-
-    /**
-     * Add IC function label. By default, label index is at future statement position.
-     * @param ic_function   function object.
-     * @param target_index  label index.
-     * @returns label name.
-     */
-    add_function_label(ic_function:ICFunction, target_index?:number):string{
-        if (! ic_function.labels.has(ic_function.func_name) ){
-            ic_function.labels.set(ic_function.func_name, []);
-        }
-        const labels = ic_function.labels.get(ic_function.func_name);
-        const label_name = ic_function.func_name + '_label_' + labels.length;
-        const label_index = target_index ? target_index : ic_function.statements.length;
-        const label = { label_name:label_name, label_index:label_index };
-        labels.push(label);
-        return label_name;
-    }
-
-
-    /**
      * Update IC function label index.
      * @param label_name    label name.
      * @param ic_function   function object.
      * @param target_index  label index.
      * @returns nothing.
      */
-    update_function_label_index(label_name:string, ic_function:ICFunction, target_index?:number){
-        if (! ic_function.labels.has(ic_function.func_name) ){
-            return;
-        }
-        const labels = ic_function.labels.get(ic_function.func_name);
-        if (labels.length == 0){
-            return;
-        }
+    // update_function_label_index(label_name:string, ic_function:ICFunction, target_index?:number){
+		
+		// this._current_function.set_ic_label
+		
+        // if (! ic_function.labels.has(ic_function.func_name) ){
+            // return;
+        // }
+        // const labels = ic_function.labels.get(ic_function.func_name);
+        // if (labels.length == 0){
+            // return;
+        // }
 
         // SEARCH LABEL RECORD WITH GIVEN NAME FROM THE END
-        const label_index = target_index ? target_index : ic_function.statements.length;
-        let labels_index = labels.length;
-        let label:ICLabel;
-        do{
-            --labels_index;
-            label = labels[labels_index];
-            if (label.label_name == label_name){
-                labels_index = -99;
-            }
-        } while(labels_index >= 0);
+        // const label_index = target_index ? target_index : ic_function.statements.length;
+        // let labels_index = labels.length;
+        // let label:ICLabel;
+        // do{
+            // --labels_index;
+            // label = labels[labels_index];
+            // if (label.label_name == label_name){
+                // labels_index = -99;
+            // }
+        // } while(labels_index >= 0);
 
-        if (labels_index == -99){
-            label.label_index = label_index;
-        }
-    }
+        // if (labels_index == -99){
+            // label.label_index = label_index;
+        // }
+    // }
 }
 
 /*
