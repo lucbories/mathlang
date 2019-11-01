@@ -13,6 +13,8 @@ import ICompilerScope from '../../core/icompiler_scope';
 export default class MathLangAstToIcVisitorBase {
     private _errors:ICError[] = [];
 	private _current_function:ICompilerFunction = undefined;
+	private _current_functions_stack:ICompilerFunction[] = new Array();
+	
 
     /**
      * Constructor, nothing to do.
@@ -106,23 +108,21 @@ export default class MathLangAstToIcVisitorBase {
 		
 		// LOOKUP CURRENT FUNCTION
 		const scope_module = this._compiler_scope.get_new_module(module_name);
+	}
+	
+	
+    enter_function_declaration(module_name:string, func_name:string){
 		this._current_function = scope_module.get_module_function(func_name);
-		
-        // ADD FUNCTION IC DECLARATION
 		const ic_function_enter = CompilerIcNode.create_function_enter(module_name, func_name, return_type);
         this._current_function.add_ic_statement(ic_function_enter);
+		this._current_functions_stack.push(this._current_function);
     }
 	
 
-    // set_function_declaration_statements(module_name:string, func_name:string, instructions:any[]){
-        // const func_scope = this._ic_modules.get(module_name).module_functions.get(func_name);
-        // func_scope.statements = instructions;
-    // }
-
     leave_function_declaration(module_name:string, func_name:string){
-        // ADD FUNCTION IC DECLARATION
         const ic_function_leave = CompilerIcNode.create_function_leave(module_name, func_name, return_type);
         this._current_function.add_ic_statement(ic_function_leave);
+		this._current_functions_stack.pop();
 		
 		this._current_function = undefined;
     }
@@ -134,10 +134,51 @@ export default class MathLangAstToIcVisitorBase {
      * @param name   symbol name
      * @returns result type
      */
-	get_symbol_type(module_name:string, name:string):string {
-        let symbol_type = TYPES.UNKNOW;
-
+	get_functions_stack_symbol_type(symbol_name:string):ICompilerType {
+        let symbol_type = undefined;
+		
+		const size = this._current_functions_stack.length;
+		let stack_index = size - 1;
+		let stack_function:ICompilerFunction = undefined;
+		let smb: = undefined;
+		
+		while(symbol_type == undefined && stack_index >= 0){
+			stack_function = this._current_functions_stack[stack_index];
+			smb = stack_function.get_symbol(symbol_name);
+			if (smb) {
+				symbol_type = smb.get_type();
+			}
+			stack_index--;
+		}
+		
+		return symbol_type;
+	}
+		
+	/**
+     * Get symbol (identifier) type.
+     * @param name   symbol name
+     * @returns result type
+     */
+	get_module_symbol_type(module_name:string, symbol_name:string):ICompilerType {
+		// GET MODULE
+		const module = this._compiler_scope.get_module(module_name);
+		if (! module) {
+			return undefined;
+		}
+		
+		// SYMBOL IS A FUNCTION
+		if ( module.has_module_function(symbol_name) ){
+			return module.get_module_function(symbol_name).get_return_type();
+		}
+		if ( module.has_exported_function(symbol_name) ){
+			return module.get_exported_function(symbol_name).get_return_type();
+		}
+		
         // SEARCH IN MODULE FUNCTIONS
+		const module_functions = module.get_exported_functions();
+		const exported_functions = module.get_module_functions();
+		let smb: = undefined;
+		
         this._ast_modules.get(module_name).module_functions.forEach(loop_scope => { // TODO OPTIMIZE SEARCH IN LOOP
             if (symbol_type != TYPES.UNKNOW){
                 return;
@@ -161,66 +202,4 @@ export default class MathLangAstToIcVisitorBase {
         });
         return symbol_type;
     }
-
-
-    /**
-     * Update IC function label index.
-     * @param label_name    label name.
-     * @param ic_function   function object.
-     * @param target_index  label index.
-     * @returns nothing.
-     */
-    // update_function_label_index(label_name:string, ic_function:ICFunction, target_index?:number){
-		
-		// this._current_function.set_ic_label
-		
-        // if (! ic_function.labels.has(ic_function.func_name) ){
-            // return;
-        // }
-        // const labels = ic_function.labels.get(ic_function.func_name);
-        // if (labels.length == 0){
-            // return;
-        // }
-
-        // SEARCH LABEL RECORD WITH GIVEN NAME FROM THE END
-        // const label_index = target_index ? target_index : ic_function.statements.length;
-        // let labels_index = labels.length;
-        // let label:ICLabel;
-        // do{
-            // --labels_index;
-            // label = labels[labels_index];
-            // if (label.label_name == label_name){
-                // labels_index = -99;
-            // }
-        // } while(labels_index >= 0);
-
-        // if (labels_index == -99){
-            // label.label_index = label_index;
-        // }
-    // }
 }
-
-/*
-
-IC Commands:
-	type_name:function-declare-enter	id_func_name [type_name:opd_name]*
-	type_name:function-declare-leave	id_func_name
-	type_name:function-call				id_func_name [type_name:value|id_value_name|from_stack|from_registre(n)]*
-	type_name:function-return			id_func_name type_name:value|id_value_name|from_stack|from_registre(n)
-	
-	type_name:register-get				id_value_name
-	type_name:register-set				id_value_name type_name:value|id_value_name|from_stack|from_registre(n)
-	
-	none:stack-push						type_name:value
-	none:stack-push-from-register		type_name:id_value_name
-	type_name:stack-pop														// get and remove top stack value
-	type_name:stack-pop-to-register		id_value_name
-	
-	type_name:id_op_name				[type_name:value|id_value_name|from_stack|from_registre(n)]x2	// Result pushed on stack
-
-	none:message-send					id_sender id_subject [type_name:value|id_value_name|from_stack|from_registre(n)]*
-	message-receive				id_sender id_subject id_func_name
-
-avec id_op_name=add,sub,mul,div,concat,length....
-
-*/

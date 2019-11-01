@@ -44,6 +44,8 @@ export interface ICompilerFunction {
     get_ic_label_index(label_name:string):number;
     
     // SYMBOLS
+    get_symbol(symbol_name:string):SymbolDeclaration;
+	
     has_symbol_const(symbol_name:string):boolean;
     get_symbol_const(symbol_name:string):SymbolDeclaration;
     add_symbol_const(symbol_name:string, symbol_type:string, symbol_value:string):void;

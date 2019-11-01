@@ -114,6 +114,20 @@ export default class CompilerFunction implements ICompilerFunction {
 	
     
 	// SYMBOLS
+	get_symbol(symbol_name:string):SymbolDeclaration {
+		let smb = this.get_symbol_const(symbol_name);
+		if (smb) return smb;
+		
+		smb = this.get_symbol_var(symbol_name);
+		if (smb) return smb;
+		
+		smb = this.get_symbol_operand(symbol_name);
+		if (smb) return smb;
+		
+		return undefined;
+	}
+	
+	
     has_symbol_const(symbol_name:string):boolean {
         return this._symbols_consts_table.has(symbol_name);
     }
