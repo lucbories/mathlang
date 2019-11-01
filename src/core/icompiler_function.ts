@@ -35,14 +35,17 @@ export interface ICompilerFunction {
     set_ic_node(node:ICompilerIcNode):void;
     get_ic_node():ICompilerIcNode;
     
+    add_ic_statement(ic_node:ICompilerIcNode):void;
     set_ic_statements(nodes:ICompilerIcNode[]):void;
     get_ic_statements():ICompilerIcNode[];
 
-    add_ic_label(label_name:string, label_index:number):void;
+    add_ic_label(label_index:number):string;
     has_ic_label(label_name:string):boolean;
     get_ic_label_index(label_name:string):number;
     
     // SYMBOLS
+    get_symbol(symbol_name:string):SymbolDeclaration;
+	
     has_symbol_const(symbol_name:string):boolean;
     get_symbol_const(symbol_name:string):SymbolDeclaration;
     add_symbol_const(symbol_name:string, symbol_type:string, symbol_value:string):void;

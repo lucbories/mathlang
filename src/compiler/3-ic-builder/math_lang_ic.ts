@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 /*
 enum IC {
+=======
+/*enum IC {
+>>>>>>> e81553978c51260eb3ac4e0a3818af4de5bf8831
     FUNCTION_DECLARE_ENTER      ='function-declare-enter',
     FUNCTION_DECLARE_LEAVE      ='function-declare-leave',
     FUNCTION_CALL               ='function-call',
@@ -29,5 +33,4 @@ enum IC {
     // TEST_NEGATIVE_ZERO          = 'test-negative-zero'
 }
 
-export default IC;
-*/
+export default IC;*/

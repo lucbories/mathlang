@@ -3,6 +3,7 @@ export const TYPES = {
     FLOAT:'FLOAT',
     BIGINTEGER:'BIGINTEGER',
     BIGFLOAT:'BIGFLOAT',
+    FUNCTION:'FUNCTION',
     
     RECORD:'RECORD',
     BOOLEAN:'BOOLEAN',
@@ -23,6 +24,8 @@ export const TYPES = {
 }
 export default TYPES;
 
+// export const get_type = function() {
+// }
 
 export const BINOP_TYPES = new Map<string,string>();
 
