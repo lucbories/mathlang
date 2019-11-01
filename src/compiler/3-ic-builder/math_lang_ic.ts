@@ -1,3 +1,4 @@
+/*
 enum IC {
     FUNCTION_DECLARE_ENTER      ='function-declare-enter',
     FUNCTION_DECLARE_LEAVE      ='function-declare-leave',
@@ -29,3 +30,4 @@ enum IC {
 }
 
 export default IC;
+*/
