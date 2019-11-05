@@ -1,14 +1,26 @@
 
-import TYPES from '../math_lang_types';
+// import TYPES from '../math_lang_types';
 
-import IType from '../../core/itype';
+// import IType from '../../core/itype';
 
 import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
 
-import { FunctionScope, ModuleScope } from './math_lang_function_scope';
-import IC from './math_lang_ic';
-import { ICError, ICFunction, ICIdAccessor, ICInstruction, ICOperand, ICOperandSource} from './math_lang_ast_to_ic_builder_base';
+import ICompilerError from '../../core/icompiler_error';
+import ICompilerType from '../../core/icompiler_type';
+import ICompilerScope from '../../core/icompiler_scope';
+import ICompilerSymbol from '../../core/icompiler_symbol';
+import ICompilerFunction from '../../core/icompiler_function';
+import { IIcNodeKindOf, ICompilerIcOperand, ICompilerIcOperandSource, ICompilerIcFunction, ICompilerIcInstruction,
+    ICompilerIcFunctionEnter, ICompilerIcFunctionLeave, ICompilerIcConstant } from '../../core/icompiler_ic_node';
+import ICompilerIcNode from '../../core/icompiler_ic_node';
+
+// import { FunctionScope, ModuleScope } from './math_lang_function_scope';
+// import IC from './math_lang_ic';
+// import { ICompilerError, ICFunction, ICIdAccessor, ICInstruction, ICompilerIcOperand, ICompilerIcOperandSource} from './math_lang_ast_to_ic_builder_base';
 import MathLangAstToIcVisitorStatements from './math_lang_ast_to_ic_builder_statements';
+
+import CompilerIcNode from '../0-common/compiler_ic_node';
+import CompilerType from '../0-common/compiler_type';
 
 
 
@@ -25,8 +37,8 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
      * 
      * @param _ast_functions AST functions scopes
      */
-    constructor(ast_modules:Map<string,ModuleScope>, types_map:Map<string,IType>) {
-        super(ast_modules, types_map);
+    constructor(compiler_scope:ICompilerScope) {
+        super(compiler_scope);
     }
 
 
@@ -34,12 +46,10 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
      * Visit AST expression.
      * 
      * @param ast_expression AST expression
-     * @param ast_func_scope AST functions scopes
-     * @param ic_function Intermediate Code function
      * 
      * @returns IC Operand object
      */
-    visit_expression(ast_expression:any, ast_func_scope:FunctionScope, ic_function:ICFunction):ICOperand|ICError{
+    visit_expression(ast_expression:any):ICompilerIcOperand|ICompilerError{
         
         switch(ast_expression.type){
             // ID EXPRESSION
@@ -47,83 +57,29 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
             case AST.EXPR_MEMBER_METHOD_CALL:
             case AST.EXPR_MEMBER_FUNC_DECL:
             case AST.EXPR_MEMBER_FUNC_CALL:
-            case AST.EXPR_MEMBER_ID:{
-                return this.visit_value_id(ast_expression, ast_func_scope, ic_function);
-            }
-
+            case AST.EXPR_MEMBER_ID:            return this.visit_value_id(ast_expression);
 
             // PARENTHESIS EXPRESSION
-            case AST.EXPR_PARENTHESIS:{
-                return this.visit_expression(ast_expression.expression, ast_func_scope, ic_function);
-            }
-
+            case AST.EXPR_PARENTHESIS:          return this.visit_expression(ast_expression.expression);
 
             // PRIMARY VALUE
-            case AST.EXPR_PRIMARY_INTEGER: return {
-                ic_type:TYPES.INTEGER,
-                ic_source:ICOperandSource.FROM_INLINE,
-                ic_name:ast_expression.value,
-                ic_id_accessors:[],
-                ic_id_accessors_str:''
-            }
-            case AST.EXPR_PRIMARY_BIGINTEGER: return {
-                ic_type:TYPES.BIGINTEGER,
-                ic_source:ICOperandSource.FROM_INLINE,
-                ic_name:ast_expression.value,
-                ic_id_accessors:[],
-                ic_id_accessors_str:''
-            }
-            case AST.EXPR_PRIMARY_FLOAT: return {
-                ic_type:TYPES.FLOAT,
-                ic_source:ICOperandSource.FROM_INLINE,
-                ic_name:ast_expression.value,
-                ic_id_accessors:[],
-                ic_id_accessors_str:''
-            }
-            case AST.EXPR_PRIMARY_BIGFLOAT: return {
-                ic_type:TYPES.BIGFLOAT,
-                ic_source:ICOperandSource.FROM_INLINE,
-                ic_name:ast_expression.value,
-                ic_id_accessors:[],
-                ic_id_accessors_str:''
-            }
-            case AST.EXPR_PRIMARY_STRING: return {
-                ic_type:TYPES.STRING,
-                ic_source:ICOperandSource.FROM_INLINE,
-                ic_name:ast_expression.value,
-                ic_id_accessors:[],
-                ic_id_accessors_str:''
-            }
-
+            case AST.EXPR_PRIMARY_INTEGER:      return CompilerIcNode.create_const_integer(this.get_compiler_scope(), ast_expression.value);
+            case AST.EXPR_PRIMARY_BIGINTEGER:   return CompilerIcNode.create_const_biginteger(this.get_compiler_scope(), ast_expression.value);
+            case AST.EXPR_PRIMARY_FLOAT:        return CompilerIcNode.create_const_float(this.get_compiler_scope(), ast_expression.value);
+            case AST.EXPR_PRIMARY_BIGFLOAT:     return CompilerIcNode.create_const_bigfloat(this.get_compiler_scope(), ast_expression.value);
+            case AST.EXPR_PRIMARY_STRING:       return CompilerIcNode.create_const_string(this.get_compiler_scope(), ast_expression.value);
 
             // BINARY OPERATOR EXPRESSION
-            case AST.EXPR_BINOP_ADDSUB:{
-                return this.visit_binop_expression(ast_expression, ast_func_scope, ic_function);
-            }
-            case AST.EXPR_BINOP_COMPARE:{
-                return this.visit_binop_expression(ast_expression, ast_func_scope, ic_function);
-            }
-            case AST.EXPR_BINOP_MULTDIV:{
-                return this.visit_binop_expression(ast_expression, ast_func_scope, ic_function);
-            }
-
+            case AST.EXPR_BINOP_ADDSUB:         return this.visit_binop_expression(ast_expression);
+            case AST.EXPR_BINOP_COMPARE:        return this.visit_binop_expression(ast_expression);
+            case AST.EXPR_BINOP_MULTDIV:        return this.visit_binop_expression(ast_expression);
 
             // UNARY OPERATOR EXPRESSION
-            case AST.EXPR_UNOP_PRE_FALSE:{
-                return this.get_false_operand();
-            }
-            case AST.EXPR_UNOP_PRE_NULL:{
-                return this.get_null_operand();
-            }
-            case AST.EXPR_UNOP_PRE_TRUE:{
-                return this.get_true_operand();
-            }
-            case AST.EXPR_UNOP_POST:{
-                return this.visit_postunop_expression(ast_expression, ast_func_scope, ic_function);
-            }
-            case AST.EXPR_UNOP_PREUNOP:{
-                return this.visit_preunop_expression(ast_expression, ast_func_scope, ic_function);
-            }
+            case AST.EXPR_UNOP_PRE_FALSE:       return CompilerIcNode.create_const_false(this.get_compiler_scope());
+            case AST.EXPR_UNOP_PRE_NULL:        return CompilerIcNode.create_const_null(this.get_compiler_scope());
+            case AST.EXPR_UNOP_PRE_TRUE:        return CompilerIcNode.create_const_true(this.get_compiler_scope());
+            case AST.EXPR_UNOP_POST:            return this.visit_postunop_expression(ast_expression);
+            case AST.EXPR_UNOP_PREUNOP:         return this.visit_preunop_expression(ast_expression);
         }
 
         return this.add_error(ast_expression, 'Unknow AST expression type [' + (ast_expression? ast_expression.type : 'null expression') + ']' );
@@ -134,18 +90,13 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
      * Visit AST Binop expression.
      * 
      * @param ast_expression AST expression
-     * @param ast_func_scope AST functions scopes
-     * @param ic_function Intermediate Code function
      * 
      * @returns IC Operand object
      */
-    visit_binop_expression(ast_expression:any, ast_func_scope:FunctionScope, ic_function:ICFunction):ICOperand|ICError{
+    visit_binop_expression(ast_expression:any):ICompilerIcOperand|ICompilerError{
         const ast_lhs = ast_expression.lhs;
-        // const ast_op  = ast_expression.operator.value;
         const ast_rhs = ast_expression.rhs;
 
-        const ic_code   = IC.FUNCTION_CALL;
-        const ic_source = ICOperandSource.FROM_STACK
         const ic_type   = ast_expression.ic_type;
         const ic_op     = ast_expression.operator.ic_function;
 
@@ -154,11 +105,11 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
             return this.add_error(ast_expression, 'Type [' + ast_expression.ic_type + '] not found.')
         }
 
-        const ic_left =this.visit_expression(ast_lhs, ast_func_scope, ic_function);
-        const ic_right=this.visit_expression(ast_rhs, ast_func_scope, ic_function);
+        const ic_left =this.visit_expression(ast_lhs);
+        const ic_right=this.visit_expression(ast_rhs);
 
         // CHECK LEFT
-        if (! this.has_type(ic_left.ic_type) ){
+        if (! ic_left.ic_type){
             return this.add_error(ic_left, 'Type [' + ic_left.ic_type + '] not found.')
         }
         if (this.test_if_error(ic_left)){
@@ -166,34 +117,18 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
         }
 
         // CHECK RIGHT
-        if (! this.has_type(ic_right.ic_type) ){
+        if (! ic_right.ic_type){
             return this.add_error(ic_right, 'Type [' + ic_right.ic_type + '] not found.')
         }
         if (this.test_if_error(ic_right)){
             return this.add_error(ast_rhs, 'Error in binop expression:right side is not a valid expression');
         }
 
-        let ic_left_str:string = this.get_operand_source_str(ic_left);
-        let ic_right_str:string = this.get_operand_source_str(ic_right);
-
-        // ADD IC OPERANDS STATEMENTS
-
         // ADD IC FUNCTION CALL STATEMENT
-        ic_function.statements.push({
-            ic_type:ic_type,
-            ic_code:ic_code,
-            ic_function:ic_op,
-            ic_operands:[ic_left, ic_right],
-            text:ic_type + ':' + ic_code + ' ' + ic_op + ' ' + ic_left.ic_type + ':' + ic_left_str  + ' ' + ic_right.ic_type + ':' + ic_right_str
-        });
+        const instr = CompilerIcNode.create_function_call(ic_op, ic_type, [ic_left, ic_right]);
+        this.get_current_function().add_ic_statement(instr);
 
-        return {
-            ic_type:ic_type,
-            ic_source:ic_source,
-            ic_name:undefined,
-            ic_id_accessors:[],
-            ic_id_accessors_str:''
-        }
+        return CompilerIcNode.create_operand_from_stack(this.get_compiler_scope(), ic_type);
     }
 
 
@@ -201,19 +136,15 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
      * Visit AST Preunop expression.
      * 
      * @param ast_expression AST expression
-     * @param ast_func_scope AST functions scopes
-     * @param ic_function Intermediate Code function
      * 
      * @returns IC Operand object
      */
-    visit_preunop_expression(ast_expression:any, ast_func_scope:FunctionScope, ic_function:ICFunction):ICOperand|ICError{
+    visit_preunop_expression(ast_expression:any):ICompilerIcOperand|ICompilerError{
         const ast_rhs = ast_expression.rhs;
 
-        const ic_code   =  IC.FUNCTION_CALL;
-        const ic_source = ICOperandSource.FROM_STACK;
         const ic_type   = ast_expression.ic_type;
         const ic_op     = ast_expression.ic_function;
-        const ic_right  = this.visit_expression(ast_rhs, ast_func_scope, ic_function);
+        const ic_right  = this.visit_expression(ast_rhs);
 
         // CHECK
         if (! this.has_type(ast_expression.ic_type) ){
@@ -221,31 +152,18 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
         }
 
         // CHECK RIGHT
-        if (! this.has_type(ic_right.ic_type) ){
+        if (! ic_right.ic_type){
             return this.add_error(ic_right, 'Type [' + ic_right.ic_type + '] not found.')
         }
         if (this.test_if_error(ic_right)){
             return this.add_error(ast_rhs, 'Error in preunop expression:right side is not a valid expression');
         }
 
-        let ic_right_str:string = this.get_operand_source_str(ic_right);
-
         // ADD IC STATEMENT
-        ic_function.statements.push({
-            ic_type:ic_type,
-            ic_code:ic_code,
-            ic_function:ic_op,
-            ic_operands:[ic_right],
-            text:ic_type + ':' + ic_code + ' ' + ic_op + ' ' + ic_right.ic_type + ':' + ic_right_str
-        });
+        const instr = CompilerIcNode.create_function_call(ic_op, ic_type, [ic_right]);
+        this.get_current_function().add_ic_statement(instr);
 
-        return {
-            ic_type:ic_type,
-            ic_source:ic_source,
-            ic_name:undefined,
-            ic_id_accessors:[],
-            ic_id_accessors_str:''
-        }
+        return CompilerIcNode.create_operand_from_stack(this.get_compiler_scope(), ic_type);
     }
 
 
@@ -253,19 +171,15 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
      * Visit AST Preunop expression.
      * 
      * @param ast_expression AST expression
-     * @param ast_func_scope AST functions scopes
-     * @param ic_function Intermediate Code function
      * 
      * @returns IC Operand object
      */
-    visit_postunop_expression(ast_expression:any, ast_func_scope:FunctionScope, ic_function:ICFunction):ICOperand|ICError{
+    visit_postunop_expression(ast_expression:any):ICompilerIcOperand|ICompilerError{
         const ast_lhs = ast_expression.lhs;
 
-        const ic_code   =  IC.FUNCTION_CALL;
-        const ic_source = ICOperandSource.FROM_STACK
         const ic_type   = ast_expression.ic_type;
         const ic_op     = ast_expression.ic_function;
-        const ic_left   = this.visit_expression(ast_lhs, ast_func_scope, ic_function);
+        const ic_left   = this.visit_expression(ast_lhs);
 
         // CHECK TYPE
         if (! this.has_type(ast_expression.ic_type) ){
@@ -273,46 +187,40 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
         }
 
         // CHECK LEFT
-        if (! this.has_type(ic_left.ic_type) ){
+        if (! ic_left.ic_type){
             return this.add_error(ic_left, 'Type [' + ic_left.ic_type + '] not found.')
         }
         if (this.test_if_error(ic_left)){
             return this.add_error(ast_lhs, 'Error in postunop expression:left side is not a valid expression');
         }
-        
-        let ic_left_str:string = this.get_operand_source_str(ic_left);
 
         // ADD IC STATEMENT
-        ic_function.statements.push({
-            ic_type:ic_type,
-            ic_code:ic_code,
-            ic_function:ic_op,
-            ic_operands:[ic_left],
-            text:ic_type + ':' + ic_code + ' ' + ic_op + ' ' + ic_left.ic_type + ':' + ic_left_str
-        });
+        const instr = CompilerIcNode.create_function_call(ic_op, ic_type, [ic_left]);
+        this.get_current_function().add_ic_statement(instr);
 
-        return {
-            ic_type:ic_type,
-            ic_source:ic_source,
-            ic_name:undefined,
-            ic_id_accessors:[],
-            ic_id_accessors_str:''
-        }
+        return CompilerIcNode.create_operand_from_stack(this.get_compiler_scope(), ic_type);
     }
 
 
     /**
      * Visit value ID.
      * 
-     * @param ast_id_expression AST ID expression
+     * @param ast_expression AST ID expression
      * 
-     * @returns ICOperand
+     * @returns ICompilerIcOperand
      */
-    visit_value_id(ast_expression:any, ast_func_scope:FunctionScope, ic_function:ICFunction):ICOperand|ICError{
-        const id_value_type = ast_expression.ic_type ? ast_expression.ic_type : this.get_symbol_type(ast_func_scope.module_name, ast_expression.name);
+    visit_value_id(ast_expression:any):ICompilerIcOperand|ICompilerError{
+        let id_value_type:ICompilerType = ast_expression.ic_type ? ast_expression.ic_type : undefined;
+        if (! id_value_type){
+            id_value_type = this.get_functions_stack_symbol_type(ast_expression.name);
+        } else if ( this.get_compiler_scope().has_exported_constant(ast_expression.name) ){
+            id_value_type = this.get_compiler_scope().get_exported_constant(ast_expression.name).type;
+        } else if ( this.get_compiler_scope().has_exported_function(ast_expression.name) ){
+            id_value_type = this.get_compiler_scope().get_exported_function(ast_expression.name).get_returned_type();
+        }
 
         // CHECK TYPE
-        if (! this.has_type(id_value_type) ){
+        if (! id_value_type){
             return this.add_error(ast_expression, 'Type [' + id_value_type + '] not found for var [' + ast_expression.name + '].')
         }
         if (! this.has_type(ast_expression.ic_type) ){
@@ -327,7 +235,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
         // VARIABLE
         if (ast_expression.members.length == 0){
-            ic_name_prefix = ic_function.func_name + '/';
+            ic_name_prefix = this.get_current_function().get_func_name() + '/';
 
             if (ast_expression.type == AST.EXPR_MEMBER_FUNC_DECL){
                 ic_name_prefix = '';
@@ -346,7 +254,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
                 return {
                     ic_type:id_value_type,
-                    ic_source:ICOperandSource.FROM_ID,
+                    ic_source:ICompilerIcOperandSource.FROM_ID,
                     ic_name:ic_name_prefix + ast_expression.name,
                     ic_id_accessors:[accessor],
                     ic_id_accessors_str:''
@@ -373,7 +281,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
                 let loop_ast_opd;
                 for(loop_opd_index=0; loop_opd_index < opds_count; loop_opd_index++){
                     loop_ast_opd = ast_expression.operands_expressions[loop_opd_index];
-                    loop_ic_opd = this.visit_expression(loop_ast_opd, ast_func_scope, ic_function);
+                    loop_ic_opd = this.visit_expression(loop_ast_opd);
                     ic_call.ic_operands.push(loop_ic_opd);
                 }
 
@@ -381,7 +289,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
                 return {
                     ic_type:ic_type,
-                    ic_source:ICOperandSource.FROM_STACK,
+                    ic_source:ICompilerIcOperandSource.FROM_STACK,
                     ic_name:undefined,
                     ic_id_accessors:[],
                     ic_id_accessors_str:''
@@ -390,7 +298,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
             return {
                 ic_type:id_value_type,
-                ic_source:ICOperandSource.FROM_ID,
+                ic_source:ICompilerIcOperandSource.FROM_ID,
                 ic_name:ic_name_prefix + ast_expression.name,
                 ic_id_accessors:[],
                 ic_id_accessors_str:''
@@ -494,7 +402,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
         return {
             ic_type:ast_expression.ic_type,
-            ic_source:ICOperandSource.FROM_ID,
+            ic_source:ICompilerIcOperandSource.FROM_ID,
             ic_name:ic_name_prefix + ast_expression.name,
             ic_id_accessors:accessors,
             ic_id_accessors_str:id_str

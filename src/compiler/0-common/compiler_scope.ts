@@ -1,9 +1,10 @@
 
 import ICompilerType from '../../core/icompiler_type';
+import ICompilerSymbol from '../../core/icompiler_symbol';
 import ICompilerRuntime from '../../core/icompiler_runtime';
-import { SymbolDeclaration, ICompilerFunction } from '../../core/icompiler_function'
-import { ICompilerModule } from '../../core/icompiler_module'
-import { ICompilerScope } from '../../core/icompiler_scope'
+import ICompilerFunction from '../../core/icompiler_function'
+import ICompilerModule from '../../core/icompiler_module'
+import ICompilerScope from '../../core/icompiler_scope'
 
 
 export default class CompilerScope implements ICompilerScope {
@@ -230,8 +231,8 @@ export default class CompilerScope implements ICompilerScope {
         return found;
     }
 
-    get_exported_constant(const_name:string):SymbolDeclaration {
-        let found:SymbolDeclaration = undefined;
+    get_exported_constant(const_name:string):ICompilerSymbol {
+        let found:ICompilerSymbol = undefined;
         this._new_modules.forEach(
             (value:ICompilerModule)=>{
                 if (found) return;

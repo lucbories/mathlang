@@ -26,8 +26,8 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * 
      * @param _ast_functions AST functions scopes
      */
-    constructor(ast_modules:Map<string,ModuleScope>, types_map:Map<string,IType>) {
-        super(ast_modules, types_map);
+    constructor(compiler_scope:ICompilerScope) {
+        super(compiler_scope);
     }
 
 

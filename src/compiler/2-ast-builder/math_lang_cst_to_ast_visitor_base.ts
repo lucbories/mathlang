@@ -1,7 +1,9 @@
 
 import ICompilerType from '../../core/icompiler_type';
 import ICompilerScope from '../../core/icompiler_scope';
-import { SymbolDeclaration, ICompilerFunction } from '../../core/icompiler_function';
+import ICompilerSymbol from '../../core/icompiler_symbol';
+import ICompilerFunction from '../../core/icompiler_function';
+
 import CompilerFunction from '../0-common/compiler_function'; // TODO replace by interface
 import CompilerModule from '../0-common/compiler_module'; // TODO replace by interface
 
@@ -342,7 +344,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param name   symbol name
      * @returns result type
      */
-	get_symbol_type(name:string):string {
+	get_symbol_type(name:string):ICompilerType {
         let loop_scope;
         for(loop_scope of this._scopes_stack) {
             if (loop_scope.has_symbol_const(name)) {
@@ -355,7 +357,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
                 return loop_scope.get_symbol_operand(name).type;
             }
         }
-        return TYPES.UNKNOW;
+        return undefined;
     }
 
 
@@ -365,10 +367,10 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param func_name   function name
      * @returns return type
      */
-	get_function_type(module_instance:CompilerModule, func_name:string):string {
+	get_function_type(module_instance:CompilerModule, func_name:string):ICompilerType {
         const func_scope = module_instance.get_module_function(func_name);
         if (! func_scope) {
-            return TYPES.UNKNOW;
+            return undefined;
         }
         return func_scope.get_returned_type();
     }
@@ -384,8 +386,8 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param ast_node_type AST node type for error log.
      * @returns true for success or false for failure
      */
-    register_symbol_declaration(name:string, ic_type:string, is_constant:boolean, init_value:string, cst_context:any, ast_node_type:string) {
-        this.check_type(ic_type, cst_context, ast_node_type);
+    register_symbol_declaration(name:string, ic_type:ICompilerType, is_constant:boolean, init_value:string, cst_context:any, ast_node_type:string) {
+        // this.check_type(ic_type, cst_context, ast_node_type);
 
         if (is_constant) {
             this._current_function.add_symbol_const(name, ic_type, init_value);
@@ -404,8 +406,8 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param cst_context           CST context for error log.
      * @param ast_node_type         AST node type for error log.
      */
-    register_function_declaration(func_name:string, return_type:string, is_exported:boolean, operands_declarations:any[], instructions:any[], cst_context:any, ast_node_type:string) {
-        this.check_type(return_type, cst_context, ast_node_type);
+    register_function_declaration(func_name:string, return_type:ICompilerType, is_exported:boolean, operands_declarations:any[], instructions:any[], cst_context:any, ast_node_type:string) {
+        // this.check_type(return_type, cst_context, ast_node_type);
 
         const func = new CompilerFunction(func_name, return_type);
         func.set_ast_statements(instructions);
@@ -442,7 +444,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
         func.set_ast_statements(instructions);
     }
 
-    set_function_declaration_type(func_name:string, return_type:string){
+    set_function_declaration_type(func_name:string, return_type:ICompilerType){
         const func = this._current_module.get_module_function(func_name);
         if (! func) {
             this.add_error({}, 'set_function_declaration_type', 'function [' + func_name + '] not found');
@@ -545,7 +547,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param name symbol name
      * @returns declared variable or undefined if not found
      */
-    get_declared_var_symbol(name:string):SymbolDeclaration {
+    get_declared_var_symbol(name:string):ICompilerSymbol {
         let loop_scope;
         for(loop_scope of this._scopes_stack) {
             if (loop_scope.has_symbol_const(name)) {
@@ -644,7 +646,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
 
         this._scopes_stack     = new Array();
         this._default_module   = new CompilerModule(this._compiler_scope, 'default');
-        this._default_function = new CompilerFunction('main', 'none');
+        this._default_function = new CompilerFunction('main', undefined); // TODO DEFINE NONE TYPE
         this._default_module.add_module_function(this._default_function);
 
         this._current_module   = this._default_module;

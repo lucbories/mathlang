@@ -61,7 +61,7 @@ export enum IAstNodeKindOf {
     EXPR_BINOP              ='BINOP'
 }
 
-export interface ICompilerAstNode {
+export default interface ICompilerAstNode {
 	get_node_kindof():IAstNodeKindOf
 	get_node_type():string
 }

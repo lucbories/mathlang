@@ -10,19 +10,19 @@ const TYPE_NAME = 'INTEGER';
 const attributes = new Map<string,ICompilerType>();
 const methods = new Map<string, ICompilerFunction>();
 
-const method_add = new CompilerFunction('add', TYPE_NAME, ['lhs', 'rhs'], [TYPE_NAME, TYPE_NAME], ['0', '0']);
-const method_addone = new CompilerFunction('add_one', TYPE_NAME, ['lhs', 'rhs'], [TYPE_NAME, TYPE_NAME], ['0', '0']);
-const method_sub = new CompilerFunction('sub', TYPE_NAME, ['lhs', 'rhs'], [TYPE_NAME, TYPE_NAME], ['0', '0']);
-const method_mul = new CompilerFunction('mul', TYPE_NAME, ['lhs', 'rhs'], [TYPE_NAME, TYPE_NAME], ['0', '0']);
-const method_div = new CompilerFunction('div', TYPE_NAME, ['lhs', 'rhs'], [TYPE_NAME, TYPE_NAME], ['0', '1']);
-methods.set(method_add.get_func_name(), method_add);
-methods.set(method_addone.get_func_name(), method_addone);
-methods.set(method_sub.get_func_name(), method_sub);
-methods.set(method_mul.get_func_name(), method_mul);
-methods.set(method_div.get_func_name(), method_div);
-
 export default class CompilerInteger extends CompilerType {
     constructor(alt_name:string=undefined) {
         super(alt_name ? alt_name : TYPE_NAME, undefined, attributes, methods);
+
+        const method_add = new CompilerFunction('add', this, ['lhs', 'rhs'], [this, this], ['0', '0']);
+        const method_addone = new CompilerFunction('add_one', this, ['lhs', 'rhs'], [this, this], ['0', '0']);
+        const method_sub = new CompilerFunction('sub', this, ['lhs', 'rhs'], [this, this], ['0', '0']);
+        const method_mul = new CompilerFunction('mul', this, ['lhs', 'rhs'], [this, this], ['0', '0']);
+        const method_div = new CompilerFunction('div', this, ['lhs', 'rhs'], [this, this], ['0', '1']);
+        methods.set(method_add.get_func_name(), method_add);
+        methods.set(method_addone.get_func_name(), method_addone);
+        methods.set(method_sub.get_func_name(), method_sub);
+        methods.set(method_mul.get_func_name(), method_mul);
+        methods.set(method_div.get_func_name(), method_div);
     }
 }

@@ -1,7 +1,11 @@
-import { ICompilerAstNode } from '../../core/icompiler_ast_node'
-import { ICompilerIcNode } from '../../core/icompiler_ic_node'
-import { SymbolDeclaration, SymbolsTable, ICompilerFunction } from '../../core/icompiler_function'
-import { ICompilerModule } from '../../core/icompiler_module'
+
+import ICompilerType from '../../core/icompiler_type';
+import ICompilerAstNode from '../../core/icompiler_ast_node';
+import ICompilerIcNode from '../../core/icompiler_ic_node';
+import ICompilerSymbol from '../../core/icompiler_symbol';
+import { SymbolsTable, ICompilerFunction } from '../../core/icompiler_function';
+// import { ICompilerModule } from '../../core/icompiler_module';
+
 
 export default class CompilerFunction implements ICompilerFunction {
     private _ast_node:ICompilerAstNode;
@@ -17,7 +21,7 @@ export default class CompilerFunction implements ICompilerFunction {
     private _symbols_opds_ordered_list:string[] = [];
     private _used_by_functions:string[] = [];
 
-    constructor(/*private _module:ICompilerModule, */private _func_name:string, private _type:string, opds_names:string[] = [], opds_types:string[] = [], opds_values:string[] = []){
+    constructor(/*private _module:ICompilerModule, */private _func_name:string, private _type:ICompilerType, opds_names:string[] = [], opds_types:ICompilerType[] = [], opds_values:string[] = []){
         if ( Array.isArray(opds_names) && Array.isArray(opds_types) ) {
             if (opds_names.length == opds_types.length) {
                 let i:number;
@@ -44,11 +48,11 @@ export default class CompilerFunction implements ICompilerFunction {
     }
 
 
-    set_returned_type(returned_type:string):void {
+    set_returned_type(returned_type:ICompilerType):void {
         this._type = returned_type;
     }
 
-	get_returned_type():string {
+	get_returned_type():ICompilerType {
         return this._type;
     }
 
@@ -80,6 +84,10 @@ export default class CompilerFunction implements ICompilerFunction {
         return this._ic_node;
     }
 
+    add_ic_statement(ic_node:ICompilerIcNode):void {
+        this._ic_statements.push(ic_node);
+    }
+
     set_ic_statements(nodes:ICompilerIcNode[]) {
         this._ic_statements = nodes;
     }
@@ -91,7 +99,7 @@ export default class CompilerFunction implements ICompilerFunction {
 
 	// IC LABELS
     add_ic_label(label_index:number=undefined):string {
-        const label_name = this.func_name + '_label_' + this._ic_labels_index.length;
+        const label_name = this._func_name + '_label_' + this._ic_labels_index.size;
         label_index = label_index ? label_index : this._ic_statements.length;
 		
         this._ic_labels_index.set(label_name, label_index);
@@ -114,7 +122,7 @@ export default class CompilerFunction implements ICompilerFunction {
 	
     
 	// SYMBOLS
-	get_symbol(symbol_name:string):SymbolDeclaration {
+	get_symbol(symbol_name:string):ICompilerSymbol {
 		let smb = this.get_symbol_const(symbol_name);
 		if (smb) return smb;
 		
@@ -132,18 +140,19 @@ export default class CompilerFunction implements ICompilerFunction {
         return this._symbols_consts_table.has(symbol_name);
     }
 
-    get_symbol_const(symbol_name:string):SymbolDeclaration {
+    get_symbol_const(symbol_name:string):ICompilerSymbol {
         return this._symbols_consts_table.get(symbol_name);
     }
 
-	add_symbol_const(symbol_name:string, symbol_type:string, symbol_value:string) {
-        const smb = new SymbolDeclaration();
-        smb.name        = symbol_name;
-        smb.type        = symbol_type;
-        smb.is_constant = true;
-        smb.init_value  = symbol_value;
-        smb.uses_count  = 0;
-        // smb.uses_scopes = [];
+	add_symbol_const(symbol_name:string, symbol_type:ICompilerType, symbol_value:string) {
+        const smb = {
+            name:symbol_name,
+            // path:string,
+            type:symbol_type,
+            is_constant:true,
+            init_value: symbol_value,
+            uses_count:0
+        };
 
         this._symbols_consts_table.set(symbol_name, smb);
     }
@@ -157,18 +166,19 @@ export default class CompilerFunction implements ICompilerFunction {
         return this._symbols_vars_table.has(symbol_name);
     }
 
-    get_symbol_var(symbol_name:string):SymbolDeclaration {
+    get_symbol_var(symbol_name:string):ICompilerSymbol {
         return this._symbols_vars_table.get(symbol_name);
     }
     
-	add_symbol_var(symbol_name:string, symbol_type:string, symbol_value:string) {
-        const smb = new SymbolDeclaration();
-        smb.name        = symbol_name;
-        smb.type        = symbol_type;
-        smb.is_constant = false;
-        smb.init_value  = symbol_value;
-        smb.uses_count  = 0;
-        // smb.uses_scopes = [];
+	add_symbol_var(symbol_name:string, symbol_type:ICompilerType, symbol_value:string) {
+        const smb = {
+            name:symbol_name,
+            // path:string,
+            type:symbol_type,
+            is_constant:false,
+            init_value: symbol_value,
+            uses_count:0
+        };
 
         this._symbols_vars_table.set(symbol_name, smb);
     }
@@ -182,18 +192,19 @@ export default class CompilerFunction implements ICompilerFunction {
         return this._symbols_opds_table.has(symbol_name);
     }
 
-    get_symbol_operand(symbol_name:string):SymbolDeclaration {
+    get_symbol_operand(symbol_name:string):ICompilerSymbol {
         return this._symbols_opds_table.get(symbol_name);
     }
     
-	add_symbol_operand(symbol_name:string, symbol_type:string, symbol_value:string) {
-        const smb = new SymbolDeclaration();
-        smb.name        = symbol_name;
-        smb.type        = symbol_type;
-        smb.is_constant = true;
-        smb.init_value  = symbol_value;
-        smb.uses_count  = 0;
-        // smb.uses_scopes = [];
+	add_symbol_operand(symbol_name:string, symbol_type:ICompilerType, symbol_value:string) {
+        const smb = {
+            name:symbol_name,
+            // path:string,
+            type:symbol_type,
+            is_constant:true,
+            init_value: symbol_value,
+            uses_count:0
+        };
 
         this._symbols_opds_table.set(symbol_name, smb);
         this._symbols_opds_ordered_list.push(symbol_name)

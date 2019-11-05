@@ -1,7 +1,14 @@
 
+import ICompilerError from '../../core/icompiler_error';
 import ICompilerType from '../../core/icompiler_type';
+import ICompilerSymbol from '../../core/icompiler_symbol';
+import ICompilerFunction from '../../core/icompiler_function';
+import ICompilerModule from '../../core/icompiler_module';
 import ICompilerScope from '../../core/icompiler_scope';
+import { ICompilerIcOperand, ICompilerIcInstruction } from '../../core/icompiler_ic_node';
 
+import CompilerIcNode from '../0-common/compiler_ic_node';
+import CompilerModule from '../0-common/compiler_module';
 
 
 /**
@@ -11,7 +18,8 @@ import ICompilerScope from '../../core/icompiler_scope';
  * @license Apache-2.0
  */
 export default class MathLangAstToIcVisitorBase {
-    private _errors:ICError[] = [];
+    private _errors:ICompilerError[] = [];
+	private _current_module:ICompilerModule = undefined;
 	private _current_function:ICompilerFunction = undefined;
 	private _current_functions_stack:ICompilerFunction[] = new Array();
 	
@@ -35,13 +43,23 @@ export default class MathLangAstToIcVisitorBase {
     }
 
 
+    /**
+     * Get current function.
+     * 
+     * @returns ICompilerFunction.
+     */
+    get_current_function():ICompilerFunction{
+        return this._current_function;
+    }
+
+
 
     /**
      * Test if a variable type is an ICError.
      * @param toBeDetermined variable to test type
      */
-    test_if_error(var_to_test: ICOperand|ICError): var_to_test is ICError {
-        if((var_to_test as ICError).message){
+    test_if_error(var_to_test: ICompilerIcOperand|ICompilerError): var_to_test is ICompilerError {
+        if((var_to_test as ICompilerError).message){
             return true
         }
         return false
@@ -58,26 +76,12 @@ export default class MathLangAstToIcVisitorBase {
     }
 
 
-    get_operand_source_str(ic_operand:ICOperand){
-        let ic_str:string = 'UNKNOW';
-
-        switch(ic_operand.ic_source){
-            case ICOperandSource.FROM_ID:       ic_str='@' + ic_operand.ic_name;       break;
-            case ICOperandSource.FROM_INLINE:   ic_str='[' + ic_operand.ic_name + ']'; break;
-            case ICOperandSource.FROM_STACK:    ic_str=ICOperandSource.FROM_STACK;     break;
-            case ICOperandSource.FROM_REGISTER: ic_str=ICOperandSource.FROM_REGISTER;  break;
-        }
-
-        return ic_str;
-    }
-
-
     /**
      * Get IC builder errors.
      * 
      * @returns ICOperand array.
      */
-    get_errors():ICError[]{
+    get_errors():ICompilerError[]{
         return this._errors;
     }
 
@@ -96,34 +100,37 @@ export default class MathLangAstToIcVisitorBase {
      * 
      * @returns Error ICOperand node.
      */
-    add_error(ast_expression:any, message?:string):ICError{
+    add_error(ast_expression:any, message?:string):ICompilerError{
 		const error = CompilerIcNode.create_error(ast_expression, message);
         this._errors.push(error);
         return error;
     }
 
 
-    declare_function(module_name:string, func_name:string, return_type:string, opds_records:ICOperand[], opds_records_str:string, ic_statements:ICInstruction[]){
-        const ic_function = CompilerIcNode.create_function(module_name, func_name, return_type, opds_records, ic_statements);
-		
-		// LOOKUP CURRENT FUNCTION
-		const scope_module = this._compiler_scope.get_new_module(module_name);
+    declare_module(module_name:string):void {
+        this._current_module = new CompilerModule(this._compiler_scope, module_name);
+    }
+
+
+    declare_function(func_name:string, return_type:ICompilerType, opds_records:ICompilerIcOperand[], opds_records_str:string, ic_statements:ICompilerIcInstruction[]){
+        const ic_function = CompilerIcNode.create_function(this._compiler_scope, this._current_module.get_module_name(), func_name, return_type, opds_records, ic_statements);
 	}
 	
 	
-    enter_function_declaration(module_name:string, func_name:string){
-		this._current_function = scope_module.get_module_function(func_name);
-		const ic_function_enter = CompilerIcNode.create_function_enter(module_name, func_name, return_type);
-        this._current_function.add_ic_statement(ic_function_enter);
+    enter_function_declaration(func_name:string, return_type:ICompilerType){
+        this._current_function = this._current_module.get_module_function(func_name);
 		this._current_functions_stack.push(this._current_function);
+        
+		const ic_function_enter = CompilerIcNode.create_function_enter(this._compiler_scope, this._current_module.get_module_name(), func_name, return_type);
+        this._current_function.add_ic_statement(ic_function_enter);
     }
 	
 
-    leave_function_declaration(module_name:string, func_name:string){
-        const ic_function_leave = CompilerIcNode.create_function_leave(module_name, func_name, return_type);
+    leave_function_declaration(func_name:string, return_type:ICompilerType){
+        const ic_function_leave = CompilerIcNode.create_function_leave(this._compiler_scope, this._current_module.get_module_name(), func_name, return_type);
         this._current_function.add_ic_statement(ic_function_leave);
+
 		this._current_functions_stack.pop();
-		
 		this._current_function = undefined;
     }
 
@@ -140,13 +147,13 @@ export default class MathLangAstToIcVisitorBase {
 		const size = this._current_functions_stack.length;
 		let stack_index = size - 1;
 		let stack_function:ICompilerFunction = undefined;
-		let smb: = undefined;
+		let smb:ICompilerSymbol = undefined;
 		
 		while(symbol_type == undefined && stack_index >= 0){
 			stack_function = this._current_functions_stack[stack_index];
 			smb = stack_function.get_symbol(symbol_name);
 			if (smb) {
-				symbol_type = smb.get_type();
+				symbol_type = smb.type;
 			}
 			stack_index--;
 		}
@@ -159,7 +166,7 @@ export default class MathLangAstToIcVisitorBase {
      * @param name   symbol name
      * @returns result type
      */
-	get_module_symbol_type(module_name:string, symbol_name:string):ICompilerType {
+	get_function_symbol_type(module_name:string, symbol_name:string):ICompilerType {
 		// GET MODULE
 		const module = this._compiler_scope.get_module(module_name);
 		if (! module) {
@@ -168,38 +175,12 @@ export default class MathLangAstToIcVisitorBase {
 		
 		// SYMBOL IS A FUNCTION
 		if ( module.has_module_function(symbol_name) ){
-			return module.get_module_function(symbol_name).get_return_type();
+			return module.get_module_function(symbol_name).get_returned_type();
 		}
 		if ( module.has_exported_function(symbol_name) ){
-			return module.get_exported_function(symbol_name).get_return_type();
+			return module.get_exported_function(symbol_name).get_returned_type();
 		}
 		
-        // SEARCH IN MODULE FUNCTIONS
-		const module_functions = module.get_exported_functions();
-		const exported_functions = module.get_module_functions();
-		let smb: = undefined;
-		
-        this._ast_modules.get(module_name).module_functions.forEach(loop_scope => { // TODO OPTIMIZE SEARCH IN LOOP
-            if (symbol_type != TYPES.UNKNOW){
-                return;
-            }
-            if (loop_scope.func_name == name){
-                symbol_type = loop_scope.return_type;
-                return;
-            }
-            if (loop_scope.symbols_consts_table.has(name)) {
-                symbol_type = loop_scope.symbols_consts_table.get(name).ic_type;
-                return;
-            }
-            if (loop_scope.symbols_vars_table.has(name)) {
-                symbol_type = loop_scope.symbols_vars_table.get(name).ic_type;
-                return;
-            }
-            if (loop_scope.symbols_opds_table.has(name)) {
-                symbol_type = loop_scope.symbols_opds_table.get(name).ic_type;
-                return;
-            }
-        });
-        return symbol_type;
+        return undefined;
     }
 }

@@ -1,19 +1,11 @@
 
-import {ICompilerAstNode} from './icompiler_ast_node';
-import {ICompilerIcNode}  from './icompiler_ic_node';
+import ICompilerType    from './icompiler_type';
+import ICompilerAstNode from './icompiler_ast_node';
+import ICompilerIcNode  from './icompiler_ic_node';
+import ICompilerSymbol  from './icompiler_symbol';
 
 
-export class SymbolDeclaration {
-    name:string;
-    path:string;
-    type:string;
-    is_constant:boolean;
-    init_value:string;
-    uses_count:number;
-    // uses_scopes:string[];
-}
-
-export type SymbolsTable = Map<string, SymbolDeclaration>;
+export type SymbolsTable = Map<string, ICompilerSymbol>;
 
 export default ICompilerFunction;
 export interface ICompilerFunction {
@@ -21,8 +13,8 @@ export interface ICompilerFunction {
 	// get_func_module():string;
     get_func_name():string;
     
-    set_returned_type(returned_type:string):void;
-	get_returned_type():string;
+    set_returned_type(returned_type:ICompilerType):void;
+	get_returned_type():ICompilerType;
 	
     // AST
     set_ast_node(node:ICompilerAstNode):void;
@@ -44,21 +36,21 @@ export interface ICompilerFunction {
     get_ic_label_index(label_name:string):number;
     
     // SYMBOLS
-    get_symbol(symbol_name:string):SymbolDeclaration;
+    get_symbol(symbol_name:string):ICompilerSymbol;
 	
     has_symbol_const(symbol_name:string):boolean;
-    get_symbol_const(symbol_name:string):SymbolDeclaration;
-    add_symbol_const(symbol_name:string, symbol_type:string, symbol_value:string):void;
+    get_symbol_const(symbol_name:string):ICompilerSymbol;
+    add_symbol_const(symbol_name:string, symbol_type:ICompilerType, symbol_value:string):void;
     get_symbols_consts_table():SymbolsTable;
 
     has_symbol_var(symbol_name:string):boolean;
-    get_symbol_var(symbol_name:string):SymbolDeclaration;
-    add_symbol_var(symbol_name:string, symbol_type:string, symbol_value:string):void;
+    get_symbol_var(symbol_name:string):ICompilerSymbol;
+    add_symbol_var(symbol_name:string, symbol_type:ICompilerType, symbol_value:string):void;
     get_symbols_vars_table():SymbolsTable;
 
     has_symbol_operand(symbol_name:string):boolean;
-    get_symbol_operand(symbol_name:string):SymbolDeclaration;
-    add_symbol_operand(symbol_name:string, symbol_type:string, symbol_value:string):void;
+    get_symbol_operand(symbol_name:string):ICompilerSymbol;
+    add_symbol_operand(symbol_name:string, symbol_type:ICompilerType, symbol_value:string):void;
     get_symbols_opds_table():SymbolsTable;
     has_symbols_opds_ordered_list(opds:string[]):boolean;
     get_symbols_opds_ordered_list():string[];
