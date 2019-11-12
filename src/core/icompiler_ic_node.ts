@@ -10,6 +10,9 @@ export enum IIcNodeKindOf {
     CONSTANT_VALUE           ='constant-value',
     
     OPERAND_FROM_STACK          ='operand-from-stack',
+    OPERAND_FROM_FUNC_LOCAL     ='operand-from-function-local',
+    OPERAND_FROM_MODULE_CONST   ='operand-from-module-const',
+    OPERAND_FROM_MODULE_FUNC    ='operand-from-module-func',
 	
     FUNCTION_DECLARE            ='function-declare',
     FUNCTION_DECLARE_ENTER      ='function-declare-enter',
@@ -109,22 +112,41 @@ export interface ICompilerIcFunctionLeave extends ICompilerIcNode {
 }
 
 
-// CONSTANTS
+// OPERANDS
 export interface ICompilerIcOperand extends ICompilerIcNode {
-    ic_source:ICompilerIcOperandSource
-}
-
-export interface ICompilerIcConstant extends ICompilerIcOperand {
 }
 
 
-export interface ICompilerIcConstantValue extends ICompilerIcConstant {
+// OPERANDS FROM STACK
+export interface ICompilerIcStackOperand extends ICompilerIcOperand {
+}
+
+
+export interface ICompilerIcConstantValue extends ICompilerIcStackOperand {
     ic_value:string
 }
 
 
-export interface ICompilerIcOtherOperand extends ICompilerIcOperand {
+// OPERANDS FROM CURRENT FUNCTION
+export interface ICompilerIcFunctionLocalOperand extends ICompilerIcOperand {
     ic_name:string,
-    ic_id_accessors:ICompilerIcIdAccessor[],
-    ic_id_accessors_str:string
 }
+
+
+// OPERANDS FROM A MODULE
+export interface ICompilerIcModuleConstOperand extends ICompilerIcOperand {
+    ic_module:string,
+    ic_name:string
+}
+
+export interface ICompilerIcModuleFunctionOperand extends ICompilerIcOperand {
+    ic_module:string,
+    ic_name:string
+}
+
+
+// export interface ICompilerIcOtherOperand extends ICompilerIcOperand {
+    // ic_name:string,
+    // ic_id_accessors:ICompilerIcIdAccessor[],
+    // ic_id_accessors_str:string
+// }

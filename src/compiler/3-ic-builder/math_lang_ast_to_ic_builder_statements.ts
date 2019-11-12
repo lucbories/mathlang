@@ -1,15 +1,20 @@
 
-import TYPES from '../math_lang_types';
-
-import IType from '../../core/itype';
-
 import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
+import ICompilerError from '../../core/icompiler_error';
+import ICompilerType from '../../core/icompiler_type';
+import ICompilerScope from '../../core/icompiler_scope';
+import ICompilerSymbol from '../../core/icompiler_symbol';
+import ICompilerFunction from '../../core/icompiler_function';
+import { IIcNodeKindOf, ICompilerIcIdAccessor, ICompilerIcOperand, ICompilerIcOtherOperand, ICompilerIcOperandSource,
+    ICompilerIcFunction, ICompilerIcInstruction,
+    ICompilerIcFunctionEnter, ICompilerIcFunctionLeave, ICompilerIcConstant } from '../../core/icompiler_ic_node';
+import ICompilerIcNode from '../../core/icompiler_ic_node';
+import ICompilerAstNode from '../../core/icompiler_ast_node';
 
-import { FunctionScope, ModuleScope } from './math_lang_function_scope';
-import IC from './math_lang_ic';
+import CompilerIcNode from '../0-common/compiler_ic_node';
+import CompilerType from '../0-common/compiler_type';
+
 import MathLangAstToIcVisitorBase from './math_lang_ast_to_ic_builder_base';
-import { ICError, ICFunction, ICIdAccessor, ICInstruction, ICOperand, ICOperandSource} from './math_lang_ast_to_ic_builder_base';
-
 
 
 
@@ -39,11 +44,11 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * Visit the AST entry point.
      */
     visit() {
-        this._ast_modules.forEach(
-            (loop_module_scope, loop_module_name)=>{
-                loop_module_scope.module_functions.forEach(
-                    (loop_function_scope, loop_function_name)=>{
-                        this.visit_function(loop_function_scope);
+        this.get_compiler_scope().get_new_modules().forEach(
+            (loop_module, loop_module_name)=>{
+                loop_module.get_module_functions().forEach(
+                    (loop_function, loop_function_name)=>{
+                        this.visit_function(loop_function);
                     }
                 )
             }
@@ -54,59 +59,51 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
     /**
      * Visit given function.
      * 
-     * @param ast_func_scope function scope
+     * @param compiler_function Compiler function to visit
      */
-    visit_function(ast_func_scope:FunctionScope) {
-        // CHECK RETURN TYPE
-        if (ast_func_scope.func_name != 'main'){
-            if (! this.has_type(ast_func_scope.return_type) ){
-                return this.add_error(ast_func_scope, 'Type [' + ast_func_scope.return_type + '] not found.')
-            }
-        }
-    
-        // LOOP ON FUNCTION OPERANDS
-        const func_definition:ICOperand = {
-            ic_type:ast_func_scope.return_type,
-            ic_source:ICOperandSource.FROM_ID,
-            ic_name:ast_func_scope.func_name,
-            ic_id_accessors:[],
-            ic_id_accessors_str:''
-        }
-        let opds_records = [func_definition];
-        let opds_records_str = ast_func_scope.func_name;
-    
-        let loop_opd_nane;
-        let loop_opd_record;
-        for(loop_opd_nane of ast_func_scope.symbols_opds_ordered_list){
-            loop_opd_record = ast_func_scope.symbols_opds_table.get(loop_opd_nane);
-    
-            opds_records.push({
-                ic_type:loop_opd_record.ic_type,
-                ic_source:ICOperandSource.FROM_ID,
-                ic_name:loop_opd_record.name,
-                ic_id_accessors:[],
-                ic_id_accessors_str:''
-            });
-            opds_records_str += ' ' + loop_opd_record.ic_type + ':' + loop_opd_record.name;
-        }
+    visit_function(compiler_function:ICompilerFunction) {
+		// GET FUNCTION AST NODE
+		const ast_expression:ICompilerAstNode = compiler_function.get_ast_node();
+		/*
+			{
+				type: AST.STAT_FUNCTION,
+				ic_type:returned_type,
+				name:function_name,
+				is_exported: function_is_exported,
+				operands_types:operands_decl && operands_decl.ic_subtypes ? operands_decl.ic_subtypes : [],
+				operands_names:operands_decl && operands_decl.items ? operands_decl.items : [],
+				block:statements
+			}
+		*/
 
+		// GET FUNCTION DECLARATION OPERANDS
+		let opds_records:ICompilerIcOperand[] = [];
+		let loop_opd_index = 0;
+		let loop_opd_type:string;
+		let loop_opd_name:string;
+		const opds_count = ast_expression.operands_types.length;
+		for(loop_opd_index = 0; loop_opd_index < opds_count; loop_opd_index++){
+			loop_opd_type = ast_expression.operands_types[loop_opd_index];
+			loop_opd_name = ast_expression.operands_names[loop_opd_index];
+			opds_records[loop_opd_index] = CompilerIcNode.create_(this.get_compiler_scope(), loop_opd_name, loop_opd_type);
+		}
+		
         // REGISTER IC FUNCTION
-        const ic_statements:ICInstruction[] = [];
-        this.declare_function(ast_func_scope.module_name, ast_func_scope.func_name, ast_func_scope.return_type, opds_records, opds_records_str, ic_statements);
-        const ic_function = this._ic_modules.get(ast_func_scope.module_name).module_functions.get(ast_func_scope.func_name);
+        const ic_function = this.declare_function(ast_expression.func_name, ast_expression.ic_type, opds_records);
         if (! ic_function){
-            this.add_error(ast_func_scope, 'Error:function registration error [' + ast_func_scope.func_name + ']');
-            return;
+           return;
         }
 
         // LOOP ON FUNCTION STATEMENTS
-        const ast_statements = ast_func_scope.statements;
+        this.enter_function_declaration(ast_expression.func_name, ast_expression.ic_type);
+		
+        const ast_statements = ast_expression.statements;
         let loop_ast_statement;
         for(loop_ast_statement of ast_statements){
-            this.visit_statement(loop_ast_statement, ast_func_scope, ic_function);
+            this.visit_statement(loop_ast_statement, ast_expression, ic_function);
         }
 
-        this.leave_function_declaration(ast_func_scope.module_name, ast_func_scope.func_name);
+        this.leave_function_declaration(ast_expression.func_name, ast_expression.ic_type);
     }
 
 

@@ -44,6 +44,16 @@ export default class MathLangAstToIcVisitorBase {
 
 
     /**
+     * Get current module.
+     * 
+     * @returns ICompilerModule.
+     */
+    get_current_module():ICompilerModule{
+        return this._current_module;
+    }
+
+
+    /**
      * Get current function.
      * 
      * @returns ICompilerFunction.
@@ -107,17 +117,27 @@ export default class MathLangAstToIcVisitorBase {
     }
 
 
+    /**
+     * Register a module.
+     * 
+     * @returns nothing
+     */
     declare_module(module_name:string):void {
         this._current_module = new CompilerModule(this._compiler_scope, module_name);
     }
 
 
-    declare_function(func_name:string, return_type:ICompilerType, opds_records:ICompilerIcOperand[], opds_records_str:string, ic_statements:ICompilerIcInstruction[]){
-        const ic_function = CompilerIcNode.create_function(this._compiler_scope, this._current_module.get_module_name(), func_name, return_type, opds_records, ic_statements);
+    /**
+     * Register a function.
+     * 
+     * @returns nothing
+     */
+    declare_function(func_name:string, return_type:ICompilerType, opds_records:ICompilerIcOperand[], ic_statements:ICompilerIcInstruction[]=[]):ICompilerIcFunction{
+        return CompilerIcNode.create_function(this._compiler_scope, this._current_module.get_module_name(), func_name, return_type, opds_records, ic_statements);
 	}
 	
 	
-    enter_function_declaration(func_name:string, return_type:ICompilerType){
+    enter_function_declaration(func_name:string, return_type:ICompilerType):void{
         this._current_function = this._current_module.get_module_function(func_name);
 		this._current_functions_stack.push(this._current_function);
         
@@ -126,7 +146,7 @@ export default class MathLangAstToIcVisitorBase {
     }
 	
 
-    leave_function_declaration(func_name:string, return_type:ICompilerType){
+    leave_function_declaration(func_name:string, return_type:ICompilerType):void{
         const ic_function_leave = CompilerIcNode.create_function_leave(this._compiler_scope, this._current_module.get_module_name(), func_name, return_type);
         this._current_function.add_ic_statement(ic_function_leave);
 

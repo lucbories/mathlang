@@ -3,11 +3,27 @@ STATEMENTS
 --------------------------------------------------------------------------------------------- 
 program
    : statement+
+   | module+
+   | function_declaration+
+   ;
+
+module_declaration
+   : 'module' + ID
+   | use_declaration
    | function_declaration
+   | exportable_assign_statement
+   ;
+
+use_declaration
+   : 'use' + ID
+   | 'use' + ID + 'as' + ID
+   | 'use' + ID + '(' + ID + (',' + ID)* + ')'
+   | 'use' + ID + '(' + ID + (',' + ID)* + ')' + 'as' + ID
    ;
 
 function_declaration
    : 'function' function_header_declaration 'return' ID statement+ 'end function'
+   | 'exported' 'function' function_header_declaration 'return' ID statement+ 'end function'
    ;
 
 function_header_declaration
@@ -21,6 +37,22 @@ operands_declaration
 operand_declaration
    : ID ('is' ID)?
    ;
+
+primary_id
+   : ID
+   ;
+
+// MODULE EXPORTED FUNCTION OR CONSTANT
+module_id
+   : primary_id '.' ID
+   ;
+
+attribute_id
+   : primary_id '#' ID
+   | module_id '#' ID
+   ;
+
+function
 
 statement
    : 'if' expression 'then' statement+ ('else' statement+)? 'end if'

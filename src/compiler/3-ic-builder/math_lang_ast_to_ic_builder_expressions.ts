@@ -1,28 +1,19 @@
 
-// import TYPES from '../math_lang_types';
-
-// import IType from '../../core/itype';
-
 import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
-
 import ICompilerError from '../../core/icompiler_error';
 import ICompilerType from '../../core/icompiler_type';
 import ICompilerScope from '../../core/icompiler_scope';
 import ICompilerSymbol from '../../core/icompiler_symbol';
 import ICompilerFunction from '../../core/icompiler_function';
-
 import { IIcNodeKindOf, ICompilerIcIdAccessor, ICompilerIcOperand, ICompilerIcOtherOperand, ICompilerIcOperandSource,
     ICompilerIcFunction, ICompilerIcInstruction,
     ICompilerIcFunctionEnter, ICompilerIcFunctionLeave, ICompilerIcConstant } from '../../core/icompiler_ic_node';
 import ICompilerIcNode from '../../core/icompiler_ic_node';
 
-// import { FunctionScope, ModuleScope } from './math_lang_function_scope';
-// import IC from './math_lang_ic';
-// import { ICompilerError, ICFunction,, ICInstruction, ICompilerIcOperand, ICompilerIcOperandSource} from './math_lang_ast_to_ic_builder_base';
-import MathLangAstToIcVisitorStatements from './math_lang_ast_to_ic_builder_statements';
-
 import CompilerIcNode from '../0-common/compiler_ic_node';
 import CompilerType from '../0-common/compiler_type';
+
+import MathLangAstToIcVisitorStatements from './math_lang_ast_to_ic_builder_statements';
 
 
 
@@ -128,7 +119,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
         // ADD IC FUNCTION CALL STATEMENT
         const instr = CompilerIcNode.create_function_call(ic_op, ic_type, [ic_left, ic_right]);
-        this.get_current_function().add_ic_statement(instr);
+        this.get_current_function()().add_ic_statement(instr);
 
         return CompilerIcNode.create_operand_from_stack(this.get_compiler_scope(), ic_type);
     }
@@ -163,7 +154,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
         // ADD IC STATEMENT
         const instr = CompilerIcNode.create_function_call(ic_op, ic_type, [ic_right]);
-        this.get_current_function().add_ic_statement(instr);
+        this.get_current_function()().add_ic_statement(instr);
 
         return CompilerIcNode.create_operand_from_stack(this.get_compiler_scope(), ic_type);
     }
@@ -198,7 +189,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
         // ADD IC STATEMENT
         const instr = CompilerIcNode.create_function_call(ic_op, ic_type, [ic_left]);
-        this.get_current_function().add_ic_statement(instr);
+        this.get_current_function()().add_ic_statement(instr);
 
         return CompilerIcNode.create_operand_from_stack(this.get_compiler_scope(), ic_type);
     }
@@ -237,47 +228,27 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
         // VARIABLE
         if (ast_expression.members.length == 0){
-            ic_name_prefix = this.get_current_function().get_func_name() + '/';
+            ic_name_prefix = this.get_current_function()().get_func_name() + '/';
 
             if (ast_expression.type == AST.EXPR_MEMBER_FUNC_DECL){
-                ic_name_prefix = '';
-                const accessor:ICompilerIcIdAccessor = {
-                    id:ast_expression.name,
-                    ic_type:ast_expression.ic_type,
-                    operands_types:ast_expression.operands_types,
-                    operands_names:ast_expression.operands_names,
-                    operands_expressions:[],
-                    is_attribute:false,
-                    is_method_call:false,
-                    is_method_decl:false,
-                    is_indexed:false,
-                    indexed_args_count:0
-                };
-
-                return {
-                    ic_code:,
-                    ic_type:id_value_type,
-                    ic_source:ICompilerIcOperandSource.FROM_ID,
-                    ic_name:ic_name_prefix + ast_expression.name,
-                    ic_id_accessors:[accessor],
-                    ic_id_accessors_str:''
-                };
+				// GET FUNCTION DECLARATION OPERANDS
+				let opds_records:ICompilerIcOperand[] = [];
+				let loop_opd_index = 0;
+				let loop_opd_type:string;
+				let loop_opd_name:string;
+				const opds_count = ast_expression.operands_types.length;
+				for(loop_opd_index = 0; loop_opd_index < opds_count; loop_opd_index++){
+					loop_opd_type = ast_expression.operands_types[loop_opd_index];
+					loop_opd_name = ast_expression.operands_names[loop_opd_index];
+					opds_records[loop_opd_index] = CompilerIcNode.create_(this.get_compiler_scope(), loop_opd_name, loop_opd_type);
+				}
+				
+				return this.declare_function(ast_expression.name, id_value_type, opds_records);
             }
 
             if (ast_expression.type == AST.EXPR_MEMBER_FUNC_CALL){
-                ic_name_prefix = '';
-
-                // ADD IC FUNCTION CALL STATEMENT
-                const ic_type = ast_expression.ic_type;
-                const ic_call = {
-                    ic_type:ic_type,
-                    ic_code:IIcNodeKindOf.FUNCTION_CALL,
-                    ic_function:ast_expression.name,
-                    ic_operands:<any>[],
-                    text:ic_type + ':' + IIcNodeKindOf.FUNCTION_CALL + ' ' + ast_expression.name + ' ' + 'OPERANDS_COUNT' + '=[' + ast_expression.operands_expressions.length  + ']'
-                };
-
                 // PROCESS OPERANDS
+				let ic_operands:ICompilerIcOperand[] = [];
                 const opds_count = ast_expression.operands_expressions.length;
                 let loop_opd_index;
                 let loop_ic_opd;
@@ -285,11 +256,13 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
                 for(loop_opd_index=0; loop_opd_index < opds_count; loop_opd_index++){
                     loop_ast_opd = ast_expression.operands_expressions[loop_opd_index];
                     loop_ic_opd = this.visit_expression(loop_ast_opd);
-                    ic_call.ic_operands.push(loop_ic_opd);
+                    ic_operands.push(loop_ic_opd);
                 }
 
-                ic_function.statements.push(ic_call);
+				const ic_call = CompilerIcNode.create_function_call(ast_expression.name, ast_expression.ic_type, ic_operands);
+                this.get_current_function().add_ic_statement(ic_call);
 
+				return CompilerIcNode.create_()
                 return {
                     ic_type:ic_type,
                     ic_source:ICompilerIcOperandSource.FROM_STACK,
@@ -323,7 +296,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
             // METHOD DECLARATION
             if (loop_member.type == AST.EXPR_MEMBER_METHOD_DECL){
-                ic_name_prefix = ic_function.func_name + '/';
+                ic_name_prefix = this.get_current_function().func_name + '/';
                 loop_accessor={
                     id:loop_member.func_name,
                     ic_type:loop_member.ic_type,
@@ -343,7 +316,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
             // METHOD CALL
             if (loop_member.type == AST.EXPR_MEMBER_METHOD_CALL){
-                ic_name_prefix = ic_function.func_name + '/';
+                ic_name_prefix = this.get_current_function().func_name + '/';
                 loop_accessor={
                     id:loop_member.func_name,
                     ic_type:loop_member.ic_type,
@@ -362,7 +335,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
             // ATTRIBUTE
             if (loop_member.type == AST.EXPR_MEMBER_ATTRIBUTE){
-                ic_name_prefix = ic_function.func_name + '/';
+                ic_name_prefix = this.get_current_function().get_func_name() + '/';
                 loop_accessor={
                     id:loop_member.attribute_name,
                     ic_type:loop_member.ic_type,
@@ -381,7 +354,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
             // INDEXED
             if (loop_member.type == AST.EXPR_MEMBER_INDEXED){
-                ic_name_prefix = ic_function.func_name + '/';
+                ic_name_prefix = this.get_current_function().get_func_name() + '/';
                 loop_accessor={
                     id:undefined,
                     ic_type:undefined,

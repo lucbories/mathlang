@@ -36,7 +36,19 @@ export default class CompilerIcNode implements ICompilerIcNode {
 	
 	
 	static create_function(compiler_scope:ICompilerScope, module_name:string, func_name:string, return_type:ICompilerType, opds_records:ICompilerIcOperand[], ic_statements:ICompilerIcInstruction[]=[]):ICompilerIcFunction {
-        const ic_function:ICompilerIcFunction = {
+        const scope_module = compiler_scope.get_new_module(module_name);
+		if (! scope_module) {
+			this.add_error(ast_func_scope, 'Error:registration for module [' + module_name + '] function [' + func_name + '] failed:module not found');
+			return undefined;
+		}
+		
+		const scope_function = scope_module.get_module_function(func_name);
+		if (! func_name) {
+			this.add_error(ast_func_scope, 'Error:registration for module [' + module_name + '] function [' + func_name + '] failed:function not found');
+			return undefined;
+		}
+		
+		const ic_function:ICompilerIcFunction = {
 			ic_code:IIcNodeKindOf.FUNCTION_DECLARE,
             ic_type:return_type,
 			
@@ -47,9 +59,6 @@ export default class CompilerIcNode implements ICompilerIcNode {
             ic_statements:ic_statements,
             ic_labels:new Map()
         };
-		
-        const scope_module = compiler_scope.get_new_module(module_name);
-		const scope_function = scope_module.get_module_function(func_name);
 		scope_function.set_ic_node(ic_function);
 		
 		return ic_function;
@@ -155,11 +164,31 @@ export default class CompilerIcNode implements ICompilerIcNode {
         };
     }
     
-    static create_operand_from_stack(compiler_scope:ICompilerScope, operand_type:ICompilerType):ICompilerIcOperand {
+    static create_operand_from_stack(compiler_scope:ICompilerScope, operand_type:ICompilerType):ICompilerIcStackOperand {
         return {
 			ic_code:IIcNodeKindOf.OPERAND_FROM_STACK,
-            ic_type:operand_type,
-            ic_source:ICompilerIcOperandSource.FROM_STACK
+            ic_type:operand_type
+        };
+    }
+    
+    static create_operand_from_local(compiler_scope:ICompilerScope, operand_type:ICompilerType, operand_name:string):ICompilerIcFunctionLocalOperand {
+        return {
+			ic_code:IIcNodeKindOf.OPERAND_FROM_ID,
+            ic_type:operand_type
+        };
+    }
+    
+    static create_operand_from_module_const(compiler_scope:ICompilerScope, operand_type:ICompilerType, operand_name:string):ICompilerIcModuleConstOperand {
+        return {
+			ic_code:IIcNodeKindOf.OPERAND_FROM_ID,
+            ic_type:operand_type
+        };
+    }
+    
+    static create_operand_from_module_func(compiler_scope:ICompilerScope, operand_type:ICompilerType, operand_name:string):ICompilerIcModuleFunctionOperand {
+        return {
+			ic_code:IIcNodeKindOf.OPERAND_FROM_ID,
+            ic_type:operand_type
         };
     }
 }
