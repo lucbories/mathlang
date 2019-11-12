@@ -7,7 +7,6 @@ import AST from '../../compiler/2-ast-builder/old_math_lang_ast';
 import MathLangCompiler from '../../compiler/math_lang_compiler';
 import DEFAULT_TYPES from '../../features/default_types';
 
-// import parse from '../../../../compiler/math_lang_processor';
 
 
 function dump_ast(label:string, ast:any) {

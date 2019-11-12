@@ -1,6 +1,5 @@
 
-import MathLangCstToAstVisitorBase from './math_lang_cst_to_ast_visitor_base'
-import TYPES from '../math_lang_types';
+import MathLangCstToAstVisitorBase from './math_lang_cst_to_ast_visitor_base';
 
 import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
 
@@ -375,7 +374,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         // console.log('loopStatement', ctx)
 
         const node_var = ctx.LoopVar[0].image;
-        const node_type = ctx.LoopType ? ctx.LoopType[0].image : TYPES.INTEGER;
+        const node_type = ctx.LoopType ? ctx.LoopType[0].image : this._type_integer;
         const node_from = this.visit(ctx.LoopFrom);
         const node_to = this.visit(ctx.LoopTo);
         const node_step = this.visit(ctx.LoopStep);
@@ -515,7 +514,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         if (ast_id_left_node.members.length == 0 && ast_id_left_node.type == AST.EXPR_MEMBER_FUNC_DECL){
             let assign_ast = {
                 type: AST.STAT_ASSIGN_FUNCTION,
-                ic_type: TYPES.UNKNOW,
+                ic_type: this._type_unknow,
                 name:assign_name,
                 is_async:ctx.Async ? true : false,
                 members:ast_id_left_node.members,
@@ -539,7 +538,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
                 operands.push( { opd_name:loop_name, opd_type:loop_type } )
             }
             
-            this.register_function_declaration(assign_name, TYPES.UNKNOW, ctx.is_exported, operands, [], ctx, AST.STAT_ASSIGN_FUNCTION);
+            this.register_function_declaration(assign_name, this.get_unknow_type(ctx, ast_id_left_node), ctx.is_exported, operands, [], ctx, AST.STAT_ASSIGN_FUNCTION);
             
             // EVALUATE RIGHT EXPRESSION
             this.enter_function_declaration(assign_name);
@@ -556,7 +555,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             this.set_function_declaration_type(assign_name, ast_expr_node.ic_type);
                 
             // CHECK LEFT TYPE == RIGHT TYPE
-            if (ast_id_left_node.ic_type != TYPES.UNKNOW && assign_ast.ic_type != ast_id_left_node.ic_type){
+            if (ast_id_left_node.ic_type != this._type_unknow && assign_ast.ic_type != ast_id_left_node.ic_type){
                 this.add_error(ctx.ArgumentsWithIds, AST.EXPR_MEMBER_FUNC_DECL, 'Error:left type [' + assign_ast.ic_type + '] and right type [' + ast_id_left_node.ic_type + '] are different for function declaration.')
             }
 
@@ -570,19 +569,8 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             const cst_expr_node = ctx.AssignExpr;
             const ast_expr_node = this.visit(cst_expr_node);
 
-            if (ast_id_left_node.members[0].ic_type == TYPES.UNKNOW){
+            if (ast_id_left_node.members[0].ic_type == this._type_unknow){
                 ast_id_left_node.members[0].ic_type = ast_expr_node.ic_type;
-                
-                // LOOP ON LEFT MEMBERS
-                // let loop_index;
-                // let loop_member;
-                // const last_index = ast_id_left_node.members.length - 1;
-                // for(loop_index=last_index; loop_index >= 0; loop_index--){
-                //     loop_member = ast_id_left_node.members[loop_index];
-                //     if (loop_member.ic_type == TYPES.UNKNOW){
-                //         loop_member.ic_type = ast_expr_node.ic_type;
-                //     }
-                // }
             }
 
             const assign_ast = {
@@ -619,24 +607,16 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             for(opd_index=0; opd_index < operands_names.length; opd_index++){
                 loop_name = operands_names[opd_index];
                 loop_type = opd_index < operands_types.length ?operands_types[opd_index] : default_type;
-                operands.push( { opd_name:loop_name, opd_type:loop_type } )
-
-                // const opd_record:SymbolDeclarationRecord = { name:loop_name, path:method_name, ic_type:loop_type, is_constant:true, init_value:undefined, uses_count:0, uses_scopes:[method_name] };
-                // func_scope.symbols_opds_table.set(loop_name, opd_record);
-                // func_scope.symbols_opds_ordered_list.push(loop_name);
-    
+                operands.push( { opd_name:loop_name, opd_type:loop_type } );
             }
             
-            this.register_function_declaration(method_name, TYPES.INTEGER, ctx.is_exported, operands, [], ctx, AST.STAT_ASSIGN_METHOD);
+            this.register_function_declaration(method_name, this.get_integer_type(ctx, ast_id_left_node), ctx.is_exported, operands, [], ctx, AST.STAT_ASSIGN_METHOD);
             
             // EVALUATE RIGHT EXPRESSION
             this.enter_function_declaration(method_name);
             const cst_expr_node = ctx.AssignExpr;
             const ast_expr_node = this.visit(cst_expr_node);
             this.leave_function_declaration();
-
-            // this.set_function_declaration_statements(method_name, [ast_expr_node]);
-            // this.set_function_declaration_type(method_name, ast_expr_node.ic_type);
             
             this.unregister_function_declaration(method_name);
 
@@ -649,7 +629,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
                 expression:ast_expr_node
             };
 
-            // if (ast_expr_node.ic_type != TYPES.INTEGER){
+            // if (ast_expr_node.ic_type != this._type_integer){
             //     this._scopes_map.delete(method_name);
             //     const method_new_name = ast_expr_node.ic_type + '.' + last_member.func_name;
             //     assign_ast.name = method_new_name;
@@ -657,7 +637,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             // }
 
             // CHECK LEFT TYPE == RIGHT TYPE
-            if (ast_id_left_node.ic_type != TYPES.UNKNOW && assign_ast.ic_type != ast_id_left_node.ic_type){
+            if (ast_id_left_node.ic_type != this._type_unknow && assign_ast.ic_type != ast_id_left_node.ic_type){
                 ast_id_left_node.ic_type = assign_ast.ic_type;
                 // this.add_error(ctx, AST.EXPR_MEMBER_METHOD_DECL, 'Error:left type [' + assign_ast.ic_type + '] and right type [' + ast_id_left_node.ic_type + '] are different for method [' + method_name + '] declaration.')
             }
@@ -681,7 +661,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
     functionStatement(ctx:any) {
         // console.log('functionStatement', ctx)
 
-        const function_name = ctx.functionName[0].image ? ctx.functionName[0].image : TYPES.UNKNOW;
+        const function_name = ctx.functionName[0].image ? ctx.functionName[0].image : this._type_unknow;
         const returned_type = this.visit(ctx.returnedType[0]);
         const function_is_exported:boolean = ctx.Export && ctx.Export[0] ? true : false;
 

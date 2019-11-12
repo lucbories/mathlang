@@ -2,10 +2,8 @@ import * as mocha from 'mocha';
 import * as chai from 'chai';
 const expect = chai.expect;
 
-import TYPES from '../../../../compiler/math_lang_types';
 
 import { IAstNodeKindOf as AST } from '../../../../core/icompiler_ast_node';
-
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
 
 
@@ -41,13 +39,13 @@ describe('MathLang assign parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.STAT_ASSIGN_VARIABLE,
-            ic_type: TYPES.INTEGER,
+            ic_type: compiler.TYPE_INTEGER,
             name:'a',
             is_async: false,
             members:EMPTY_ARRAY,
             expression: {
-                type:TYPES.INTEGER,
-                ic_type: TYPES.INTEGER,
+                type:AST.EXPR_PRIMARY_INTEGER,
+                ic_type: compiler.TYPE_INTEGER,
                 value:'456'
             }
         }
@@ -84,31 +82,31 @@ describe('MathLang assign parser', () => {
             statements:[
                 {
                     type:AST.STAT_ASSIGN_VARIABLE,
-                    ic_type: TYPES.INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     name:'a',
                     is_async: false,
                     members:EMPTY_ARRAY,
                     expression: {
-                        type:TYPES.INTEGER,
-                        ic_type: TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type: compiler.TYPE_INTEGER,
                         value:'12'
                     }
                 },
                 {
                     type:AST.STAT_ASSIGN_ATTRIBUTE,
-                    ic_type: TYPES.INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     name:'a',
                     is_async: false,
                     members:[
                         {
                             type: AST.EXPR_MEMBER_ATTRIBUTE,
-                            ic_type: TYPES.INTEGER,
+                            ic_type: compiler.TYPE_INTEGER,
                             attribute_name: 'b'
                         }
                     ],
                     expression: {
-                        type:TYPES.INTEGER,
-                        ic_type: TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type: compiler.TYPE_INTEGER,
                         value:'456'
                     }
                 }
@@ -143,28 +141,28 @@ describe('MathLang assign parser', () => {
             block:[
                 {
                     type:AST.STAT_ASSIGN_VARIABLE,
-                    ic_type: TYPES.INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     name:'b',
                     is_async: false,
                     members:EMPTY_ARRAY,
                     expression: {
-                        type:TYPES.INTEGER,
-                        ic_type: TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type: compiler.TYPE_INTEGER,
                         value:'5'
                     }
                 },
                 {
                     type:AST.STAT_ASSIGN_VARIABLE,
-                    ic_type: TYPES.INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     name:'a',
                     is_async: false,
                     members:EMPTY_ARRAY,
                     expression: {
                         type:AST.EXPR_BINOP_ADDSUB,
-                        ic_type: TYPES.INTEGER,
+                        ic_type: compiler.TYPE_INTEGER,
                         lhs:{
-                            type:TYPES.INTEGER,
-                            ic_type: TYPES.INTEGER,
+                            type:AST.EXPR_PRIMARY_INTEGER,
+                            ic_type: compiler.TYPE_INTEGER,
                             value:'456'
                         },
                         operator: {
@@ -174,18 +172,18 @@ describe('MathLang assign parser', () => {
                         },
                         rhs:{
                             type:AST.EXPR_PARENTHESIS,
-                            ic_type: TYPES.INTEGER,
+                            ic_type: compiler.TYPE_INTEGER,
                             expression: {
                                 type:AST.EXPR_BINOP_MULTDIV,
-                                ic_type: TYPES.INTEGER,
+                                ic_type: compiler.TYPE_INTEGER,
                                 lhs:{
                                     type:AST.EXPR_UNOP_PREUNOP,
-                                    ic_type: TYPES.INTEGER,
+                                    ic_type: compiler.TYPE_INTEGER,
                                     ic_function:'add_one',
                                     operator:'++',
                                     rhs: {
                                         type:AST.EXPR_MEMBER_ID,
-                                        ic_type: TYPES.INTEGER,
+                                        ic_type: compiler.TYPE_INTEGER,
                                         name:'b',
                                         members:EMPTY_ARRAY
                                     }
@@ -196,8 +194,8 @@ describe('MathLang assign parser', () => {
                                     value:'*'
                                 },
                                 rhs:{
-                                    type:TYPES.INTEGER,
-                                    ic_type: TYPES.INTEGER,
+                                    type:AST.EXPR_PRIMARY_INTEGER,
+                                    ic_type: compiler.TYPE_INTEGER,
                                     value:'8'
                                 }
                             }
@@ -215,7 +213,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'statement');
 
         // ERRORS
-        const expected_errors = 1;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -236,18 +234,18 @@ describe('MathLang assign parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.STAT_ASSIGN_FUNCTION,
-            ic_type: TYPES.FLOAT,
+            ic_type: compiler.TYPE_FLOAT,
             name:'f',
             is_async: false,
             members:EMPTY_ARRAY,
             operands_names:['x'],
-            operands_types:[TYPES.FLOAT],
+            operands_types:[compiler.TYPE_FLOAT],
             expression: {
                 type:AST.EXPR_BINOP_ADDSUB,
-                ic_type: TYPES.FLOAT,
+                ic_type: compiler.TYPE_FLOAT,
                 lhs:{
-                    type:TYPES.INTEGER,
-                    ic_type: TYPES.INTEGER,
+                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     value:'456'
                 },
                 operator: {
@@ -257,18 +255,18 @@ describe('MathLang assign parser', () => {
                 },
                 rhs:{
                     type:AST.EXPR_PARENTHESIS,
-                    ic_type: TYPES.FLOAT,
+                    ic_type: compiler.TYPE_FLOAT,
                     expression: {
                         type:AST.EXPR_BINOP_MULTDIV,
-                        ic_type: TYPES.FLOAT,
+                        ic_type: compiler.TYPE_FLOAT,
                         lhs:{
                             type:AST.EXPR_UNOP_PREUNOP,
-                            ic_type: TYPES.FLOAT,
+                            ic_type: compiler.TYPE_FLOAT,
                             ic_function:'add_one',
                             operator:'++',
                             rhs: {
                                 type:AST.EXPR_MEMBER_ID,
-                                ic_type: TYPES.FLOAT,
+                                ic_type: compiler.TYPE_FLOAT,
                                 name:'x',
                                 members:EMPTY_ARRAY
                             }
@@ -279,8 +277,8 @@ describe('MathLang assign parser', () => {
                             value:'*'
                         },
                         rhs:{
-                            type:TYPES.INTEGER,
-                            ic_type: TYPES.INTEGER,
+                            type:AST.EXPR_PRIMARY_INTEGER,
+                            ic_type: compiler.TYPE_INTEGER,
                             value:'8'
                         }
                     }
@@ -296,7 +294,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'statement');
 
         // ERRORS
-        const expected_errors = 1;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -317,18 +315,18 @@ describe('MathLang assign parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.STAT_ASSIGN_FUNCTION,
-            ic_type: TYPES.INTEGER,
+            ic_type: compiler.TYPE_INTEGER,
             name:'fxy',
             is_async: false,
-            operands_types: [TYPES.INTEGER, TYPES.INTEGER],
+            operands_types: [compiler.TYPE_INTEGER, compiler.TYPE_INTEGER],
             operands_names:['x','y'],
             members:EMPTY_ARRAY,
             expression: {
                 type:AST.EXPR_BINOP_ADDSUB,
-                ic_type: TYPES.INTEGER,
+                ic_type: compiler.TYPE_INTEGER,
                 lhs:{
-                    type:TYPES.INTEGER,
-                    ic_type: TYPES.INTEGER,
+                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     value:'456'
                 },
                 operator: {
@@ -338,18 +336,18 @@ describe('MathLang assign parser', () => {
                 },
                 rhs:{
                     type:AST.EXPR_PARENTHESIS,
-                    ic_type: TYPES.INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     expression: {
                         type:AST.EXPR_BINOP_MULTDIV,
-                        ic_type: TYPES.INTEGER,
+                        ic_type: compiler.TYPE_INTEGER,
                         lhs:{
                             type:AST.EXPR_UNOP_PREUNOP,
-                            ic_type: TYPES.INTEGER,
+                            ic_type: compiler.TYPE_INTEGER,
                             ic_function:'add_one',
                             operator:'++',
                             rhs: {
                                 type:AST.EXPR_MEMBER_ID,
-                                ic_type: TYPES.INTEGER,
+                                ic_type: compiler.TYPE_INTEGER,
                                 name:'x',
                                 members:EMPTY_ARRAY
                             }
@@ -360,8 +358,8 @@ describe('MathLang assign parser', () => {
                             value:'*'
                         },
                         rhs:{
-                            type:TYPES.INTEGER,
-                            ic_type: TYPES.INTEGER,
+                            type:AST.EXPR_PRIMARY_INTEGER,
+                            ic_type: compiler.TYPE_INTEGER,
                             value:'8'
                         }
                     }
@@ -377,7 +375,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'statement');
 
         // ERRORS
-        const expected_errors = 1;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -398,18 +396,18 @@ describe('MathLang assign parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.STAT_ASSIGN_FUNCTION,
-            ic_type: TYPES.INTEGER,
+            ic_type: compiler.TYPE_INTEGER,
             name:'fxy',
             is_async: false,
-            operands_types: [TYPES.INTEGER, TYPES.FLOAT],
+            operands_types: [compiler.TYPE_INTEGER, compiler.TYPE_FLOAT],
             operands_names:['x','y'],
             members:EMPTY_ARRAY,
             expression: {
                 type:AST.EXPR_BINOP_ADDSUB,
-                ic_type: TYPES.INTEGER,
+                ic_type: compiler.TYPE_INTEGER,
                 lhs:{
-                    type:TYPES.INTEGER,
-                    ic_type: TYPES.INTEGER,
+                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     value:'456'
                 },
                 operator: {
@@ -419,18 +417,18 @@ describe('MathLang assign parser', () => {
                 },
                 rhs:{
                     type:AST.EXPR_PARENTHESIS,
-                    ic_type: TYPES.INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     expression: {
                         type:AST.EXPR_BINOP_MULTDIV,
-                        ic_type: TYPES.INTEGER,
+                        ic_type: compiler.TYPE_INTEGER,
                         lhs:{
                             type:AST.EXPR_UNOP_PREUNOP,
-                            ic_type: TYPES.INTEGER,
+                            ic_type: compiler.TYPE_INTEGER,
                             ic_function:'add_one',
                             operator:'++',
                             rhs: {
                                 type:AST.EXPR_MEMBER_ID,
-                                ic_type: TYPES.INTEGER,
+                                ic_type: compiler.TYPE_INTEGER,
                                 name:'x',
                                 members:EMPTY_ARRAY
                             }
@@ -441,8 +439,8 @@ describe('MathLang assign parser', () => {
                             value:'*'
                         },
                         rhs:{
-                            type:TYPES.INTEGER,
-                            ic_type: TYPES.INTEGER,
+                            type:AST.EXPR_PRIMARY_INTEGER,
+                            ic_type: compiler.TYPE_INTEGER,
                             value:'8'
                         }
                     }
@@ -458,7 +456,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'statement');
 
         // ERRORS
-        const expected_errors = 1;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -479,18 +477,18 @@ describe('MathLang assign parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.STAT_ASSIGN_FUNCTION,
-            ic_type: TYPES.INTEGER,
+            ic_type: compiler.TYPE_INTEGER,
             name:'fxy',
             is_async: false,
-            operands_types: [TYPES.INTEGER, TYPES.FLOAT],
+            operands_types: [compiler.TYPE_INTEGER, compiler.TYPE_FLOAT],
             operands_names:['x','y'],
             members:EMPTY_ARRAY,
             expression: {
                 type:AST.EXPR_BINOP_ADDSUB,
-                ic_type: TYPES.INTEGER,
+                ic_type: compiler.TYPE_INTEGER,
                 lhs:{
-                    type:TYPES.INTEGER,
-                    ic_type: TYPES.INTEGER,
+                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     value:'456'
                 },
                 operator: {
@@ -500,18 +498,18 @@ describe('MathLang assign parser', () => {
                 },
                 rhs:{
                     type:AST.EXPR_PARENTHESIS,
-                    ic_type: TYPES.INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     expression: {
                         type:AST.EXPR_BINOP_MULTDIV,
-                        ic_type: TYPES.INTEGER,
+                        ic_type: compiler.TYPE_INTEGER,
                         lhs:{
                             type:AST.EXPR_UNOP_PREUNOP,
-                            ic_type: TYPES.INTEGER,
+                            ic_type: compiler.TYPE_INTEGER,
                             ic_function:'add_one',
                             operator:'++',
                             rhs: {
                                 type:AST.EXPR_MEMBER_ID,
-                                ic_type: TYPES.INTEGER,
+                                ic_type: compiler.TYPE_INTEGER,
                                 name:'x',
                                 members:EMPTY_ARRAY
                             }
@@ -522,8 +520,8 @@ describe('MathLang assign parser', () => {
                             value:'*'
                         },
                         rhs:{
-                            type:TYPES.INTEGER,
-                            ic_type: TYPES.INTEGER,
+                            type:AST.EXPR_PRIMARY_INTEGER,
+                            ic_type: compiler.TYPE_INTEGER,
                             value:'8'
                         }
                     }
@@ -563,33 +561,33 @@ describe('MathLang assign parser', () => {
             statements:[
                 {
                     type:AST.STAT_ASSIGN_VARIABLE,
-                    ic_type: TYPES.INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     name:'fxy',
                     is_async: false,
                     members:EMPTY_ARRAY,
                     expression: {
-                        type:TYPES.INTEGER,
-                        ic_type: TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type: compiler.TYPE_INTEGER,
                         value:'0'
                     }
                 },
                 {
                     type:AST.STAT_ASSIGN_METHOD,
-                    ic_type: TYPES.INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     name:'fxy',
                     is_async: false,
                     members:[
                         {
                             type:AST.EXPR_MEMBER_METHOD_DECL,
-                            ic_type: TYPES.INTEGER,
+                            ic_type: compiler.TYPE_INTEGER,
                             func_name:'a',
                             operands_types:EMPTY_ARRAY,
                             operands_names:EMPTY_ARRAY
                         }
                     ],
                     expression: {
-                        type:TYPES.INTEGER,
-                        ic_type: TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type: compiler.TYPE_INTEGER,
                         value:'456'
                     }
                 }
@@ -636,38 +634,38 @@ describe('MathLang assign parser', () => {
             statements:[
                 {
                     type:AST.STAT_ASSIGN_VARIABLE,
-                    ic_type: TYPES.INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     name:'fxy',
                     is_async: false,
                     members:EMPTY_ARRAY,
                     expression: {
-                        type:TYPES.INTEGER,
-                        ic_type: TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type: compiler.TYPE_INTEGER,
                         value:'0'
                     }
                 },
                 {
                     type:AST.STAT_ASSIGN_METHOD,
-                    ic_type: TYPES.INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     name:'fxy',
                     is_async: false,
                     members:[
                         {
                             type:AST.EXPR_MEMBER_ATTRIBUTE,
-                            ic_type:TYPES.INTEGER,
+                            ic_type:compiler.TYPE_INTEGER,
                             attribute_name:'a'
                         },
                         {
                             type:AST.EXPR_MEMBER_METHOD_DECL,
-                            ic_type: TYPES.UNKNOW,
+                            ic_type: compiler.TYPE_UNKNOW,
                             func_name:'b',
                             operands_types:EMPTY_ARRAY,
                             operands_names:EMPTY_ARRAY
                         }
                     ],
                     expression: {
-                        type:TYPES.INTEGER,
-                        ic_type: TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type: compiler.TYPE_INTEGER,
                         value:'456'
                     }
                 }
@@ -718,39 +716,39 @@ describe('MathLang assign parser', () => {
             statements:[
                 {
                     type:AST.STAT_ASSIGN_VARIABLE,
-                    ic_type: TYPES.INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     name:'fxy',
                     is_async: false,
                     members:EMPTY_ARRAY,
                     expression: {
-                        type:TYPES.INTEGER,
-                        ic_type: TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type: compiler.TYPE_INTEGER,
                         value:'0'
                     }
                 },
                 {
                     type:AST.STAT_ASSIGN_METHOD,
-                    ic_type: TYPES.INTEGER,
+                    ic_type: compiler.TYPE_INTEGER,
                     name:'fxy',
                     is_async: false,
 
                     members:[
                         {
                             type:AST.EXPR_MEMBER_ATTRIBUTE,
-                            ic_type:TYPES.INTEGER,
+                            ic_type:compiler.TYPE_INTEGER,
                             attribute_name:'a'
                         },
                         {
                             type:AST.EXPR_MEMBER_METHOD_DECL,
-                            ic_type: TYPES.UNKNOW,
+                            ic_type: compiler.TYPE_UNKNOW,
                             func_name:'b',
-                            operands_types:<any>[TYPES.INTEGER, TYPES.INTEGER],
+                            operands_types:<any>[compiler.TYPE_INTEGER, compiler.TYPE_INTEGER],
                             operands_names:<any>['x', 'y']
                         }
                     ],
                     expression: {
-                        type:TYPES.INTEGER,
-                        ic_type: TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type: compiler.TYPE_INTEGER,
                         value:'456'
                     }
                 }
@@ -856,7 +854,7 @@ describe('MathLang assign parser', () => {
         const result = compiler.compile_ast(text, 'blockStatement');
 
         // ERRORS
-        const expected_errors = 2;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();

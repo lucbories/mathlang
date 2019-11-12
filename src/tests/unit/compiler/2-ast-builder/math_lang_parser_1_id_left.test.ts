@@ -2,10 +2,7 @@ import * as mocha from 'mocha';
 import * as chai from 'chai';
 const expect = chai.expect;
 
-import TYPES from '../../../../compiler/math_lang_types';
-
 import { IAstNodeKindOf as AST } from '../../../../core/icompiler_ast_node';
-
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
 
 
@@ -42,7 +39,7 @@ describe('MathLang id expression for left part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_ID,
-            ic_type: TYPES.UNKNOW,
+            ic_type: compiler.TYPE_UNKNOW,
             name:'a',
             members:EMPTY_ARRAY
         }
@@ -53,13 +50,16 @@ describe('MathLang id expression for left part parser', () => {
     it('Parse [a#b]' , () => {
         compiler.reset();
         const text = 'a#b';
+
+        compiler.TYPE_UNKNOW.add_attribute('b', compiler.TYPE_FLOAT);
         const result = compiler.compile_ast(text, 'idLeft');
+        compiler.TYPE_UNKNOW.del_attribute('b');
 
         // ERRORS
-        const expected_errors = 2;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         // console.log('errors', errors);
-        expect(result).equals(false);
+        expect(result).equals(true);
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
             console.log('errors', errors);
@@ -74,12 +74,12 @@ describe('MathLang id expression for left part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_ATTRIBUTE,
-            ic_type: TYPES.UNKNOW,
+            ic_type: compiler.TYPE_UNKNOW,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_FLOAT,
                     attribute_name:'b'
                 }
             ]
@@ -91,13 +91,18 @@ describe('MathLang id expression for left part parser', () => {
     it('Parse [a#b#c]' , () => {
         compiler.reset();
         const text = 'a#b#c';
+
+        compiler.TYPE_UNKNOW.add_attribute('b', compiler.TYPE_FLOAT);
+        compiler.TYPE_FLOAT.add_attribute('c', compiler.TYPE_BOOLEAN);
         const result = compiler.compile_ast(text, 'idLeft');
+        compiler.TYPE_UNKNOW.del_attribute('b');
+        compiler.TYPE_FLOAT.del_attribute('c');
 
         // ERRORS
-        const expected_errors = 4;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         // console.log('errors', errors);
-        expect(result).equals(false);
+        expect(result).equals(true);
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
             console.log('errors', errors);
@@ -112,17 +117,17 @@ describe('MathLang id expression for left part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_ATTRIBUTE,
-            ic_type: TYPES.UNKNOW,
+            ic_type: compiler.TYPE_UNKNOW,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_FLOAT,
                     attribute_name:'b'
                 },
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_BOOLEAN,
                     attribute_name:'c'
                 }
             ]
@@ -134,12 +139,21 @@ describe('MathLang id expression for left part parser', () => {
     it('Parse [a#b#c[12]]' , () => {
         compiler.reset();
         const text = 'a#b#c[12]';
+
+        compiler.TYPE_UNKNOW.add_attribute('b', compiler.TYPE_FLOAT);
+        compiler.TYPE_FLOAT.add_attribute('c', compiler.TYPE_STRING);
+        compiler.TYPE_STRING.set_indexes_count(20);
+        compiler.TYPE_STRING.set_indexed_type(compiler.TYPE_INTEGER);
         const result = compiler.compile_ast(text, 'idLeft');
+        compiler.TYPE_UNKNOW.del_attribute('b');
+        compiler.TYPE_FLOAT.del_attribute('c');
+        compiler.TYPE_FLOAT.set_indexes_count(0);
+        compiler.TYPE_FLOAT.set_indexed_type(compiler.TYPE_UNKNOW);
 
         // ERRORS
-        const expected_errors = 5;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
-        expect(result).equals(false);
+        expect(result).equals(true);
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
             console.log('errors', errors);
@@ -154,26 +168,26 @@ describe('MathLang id expression for left part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_INDEXED,
-            ic_type: TYPES.UNKNOW,
+            ic_type: compiler.TYPE_UNKNOW,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_FLOAT,
                     attribute_name:'b'
                 },
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_STRING,
                     attribute_name:'c'
                 },
                 {
                     type:AST.EXPR_MEMBER_INDEXED,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_INTEGER,
                     indexes_expressions:[
                         {
-                            type:TYPES.INTEGER,
-                            ic_type:TYPES.INTEGER,
+                            type:AST.EXPR_PRIMARY_INTEGER,
+                            ic_type:compiler.TYPE_INTEGER,
                             value:'12'
                         }
                     ],
@@ -188,12 +202,23 @@ describe('MathLang id expression for left part parser', () => {
     it('Parse [a#b#c[12]#d]' , () => {
         compiler.reset();
         const text = 'a#b#c[12]#d';
+
+        compiler.TYPE_UNKNOW.add_attribute('b', compiler.TYPE_FLOAT);
+        compiler.TYPE_FLOAT.add_attribute('c', compiler.TYPE_STRING);
+        compiler.TYPE_STRING.set_indexes_count(20);
+        compiler.TYPE_STRING.set_indexed_type(compiler.TYPE_INTEGER);
+        compiler.TYPE_INTEGER.add_attribute('d', compiler.TYPE_BOOLEAN);
         const result = compiler.compile_ast(text, 'idLeft');
+        compiler.TYPE_UNKNOW.del_attribute('b');
+        compiler.TYPE_FLOAT.del_attribute('c');
+        compiler.TYPE_FLOAT.set_indexes_count(0);
+        compiler.TYPE_FLOAT.set_indexed_type(compiler.TYPE_UNKNOW);
+        compiler.TYPE_INTEGER.del_attribute('d');
 
         // ERRORS
-        const expected_errors = 7;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
-        expect(result).equals(false);
+        expect(result).equals(true);
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
             console.log('errors', errors);
@@ -208,26 +233,26 @@ describe('MathLang id expression for left part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_ATTRIBUTE,
-            ic_type: TYPES.UNKNOW,
+            ic_type: compiler.TYPE_UNKNOW,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_FLOAT,
                     attribute_name:'b'
                 },
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_STRING,
                     attribute_name:'c'
                 },
                 {
                     type:AST.EXPR_MEMBER_INDEXED,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_INTEGER,
                     indexes_expressions:[
                         {
-                            type:TYPES.INTEGER,
-                            ic_type:TYPES.INTEGER,
+                            type:AST.EXPR_PRIMARY_INTEGER,
+                            ic_type:compiler.TYPE_INTEGER,
                             value:'12'
                         }
                     ],
@@ -235,7 +260,7 @@ describe('MathLang id expression for left part parser', () => {
                 },
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_BOOLEAN,
                     attribute_name:'d'
                 }
             ]
@@ -265,7 +290,7 @@ describe('MathLang id expression for left part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_FUNC_DECL,
-            ic_type: TYPES.UNKNOW,
+            ic_type: compiler.TYPE_UNKNOW,
             name:'a',
             members:<any>[],
             operands_types:<any>[],
@@ -296,10 +321,10 @@ describe('MathLang id expression for left part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_FUNC_DECL,
-            ic_type: TYPES.UNKNOW,
+            ic_type: compiler.TYPE_UNKNOW,
             name:'a',
             members:<any>[],
-            operands_types:[TYPES.INTEGER],
+            operands_types:[compiler.TYPE_INTEGER],
             operands_names:['x']
         }
         expect(compiler_ast).eql(expected_ast);
@@ -326,12 +351,12 @@ describe('MathLang id expression for left part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_METHOD_DECL,
-            ic_type: TYPES.UNKNOW,
+            ic_type: compiler.TYPE_UNKNOW,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_METHOD_DECL,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_UNKNOW,
                     func_name:'b',
                     operands_types:EMPTY_ARRAY,
                     operands_names:EMPTY_ARRAY
@@ -362,14 +387,14 @@ describe('MathLang id expression for left part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_METHOD_DECL,
-            ic_type: TYPES.UNKNOW,
+            ic_type: compiler.TYPE_UNKNOW,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_METHOD_DECL,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_UNKNOW,
                     func_name:'b',
-                    operands_types:[TYPES.INTEGER],
+                    operands_types:[compiler.TYPE_INTEGER],
                     operands_names:['c']
                 }
             ]
@@ -398,14 +423,14 @@ describe('MathLang id expression for left part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_METHOD_DECL,
-            ic_type: TYPES.UNKNOW,
+            ic_type: compiler.TYPE_UNKNOW,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_METHOD_DECL,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_UNKNOW,
                     func_name:'b',
-                    operands_types:[TYPES.INTEGER, TYPES.FLOAT],
+                    operands_types:[compiler.TYPE_INTEGER, compiler.TYPE_FLOAT],
                     operands_names:['x', 'y']
                 }
             ]
@@ -434,12 +459,12 @@ describe('MathLang id expression for left part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_ID,
-            ic_type: TYPES.UNKNOW,
+            ic_type: compiler.TYPE_UNKNOW,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_UNKNOW,
                     attribute_name:'b'
                 }
             ]

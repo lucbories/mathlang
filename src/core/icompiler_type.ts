@@ -8,8 +8,10 @@ export default interface ICompilerType {
 
     get_base_type():ICompilerType;
 
-    get_indexes_count():number;
-    get_indexed_type():ICompilerType;
+	get_indexes_count():number;
+	set_indexes_count(count:number):void;
+	get_indexed_type():ICompilerType;
+	set_indexed_type(indexed_type:ICompilerType):void;
 
     add_attribute(attribute_name:string, attribute_type:ICompilerType):void;
     del_attribute(attribute_name:string):void;

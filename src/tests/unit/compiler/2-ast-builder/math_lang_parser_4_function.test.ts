@@ -2,10 +2,7 @@ import * as mocha from 'mocha';
 import * as chai from 'chai';
 const expect = chai.expect;
 
-import TYPES from '../../../../compiler/math_lang_types';
-
 import { IAstNodeKindOf as AST } from '../../../../core/icompiler_ast_node';
-
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
 
 
@@ -15,13 +12,13 @@ const EMPTY_ARRAY = <any>[];
 describe('MathLang function declaration parser', () => {
     const compiler = new MathLangCompiler();
 
-    it('Parse [function f() return boolean return true end function] statement' , () => {
+    it('Parse [function f() return BOOLEAN return true end function] statement' , () => {
         compiler.reset();
-        const text = 'function f() return boolean return true end function';
+        const text = 'function f() return BOOLEAN return true end function';
         const result = compiler.compile_ast(text, 'program');
 
         // ERRORS
-        const expected_errors = 3;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -46,7 +43,7 @@ describe('MathLang function declaration parser', () => {
             block:[
                 {
                     type:AST.STAT_FUNCTION,
-                    ic_type: 'boolean',
+                    ic_type: compiler.TYPE_BOOLEAN,
                     name: 'f',
                     is_exported:false,
                     operands_types:EMPTY_ARRAY,
@@ -54,10 +51,10 @@ describe('MathLang function declaration parser', () => {
                     block: [
                         {
                             type:AST.STAT_RETURN,
-                            ic_type:TYPES.KEYWORD,
+                            ic_type:compiler.TYPE_KEYWORD,
                             expression:{
                                 type:AST.EXPR_UNOP_PRE_TRUE,
-                                ic_type:TYPES.KEYWORD
+                                ic_type:compiler.TYPE_KEYWORD
                             }
                         }
                     ]
@@ -67,13 +64,13 @@ describe('MathLang function declaration parser', () => {
         expect(compiler_ast).eql(expected_ast);
     });
 
-    it('Parse [function f(x) return boolean return true end function] statement' , () => {
+    it('Parse [function f(x) return BOOLEAN return true end function] statement' , () => {
         compiler.reset();
-        const text = 'function f(x) return boolean return true end function';
+        const text = 'function f(x) return BOOLEAN return true end function';
         const result = compiler.compile_ast(text, 'program');
 
         // ERRORS
-        const expected_errors = 3;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -98,18 +95,18 @@ describe('MathLang function declaration parser', () => {
             block:[
                 {
                     type:AST.STAT_FUNCTION,
-                    ic_type: 'boolean',
+                    ic_type: compiler.TYPE_BOOLEAN,
                     name: 'f',
                     is_exported:false,
-                    operands_types:[TYPES.INTEGER],
+                    operands_types:[compiler.TYPE_INTEGER],
                     operands_names:['x'],
                     block: [
                         {
                             type:AST.STAT_RETURN,
-                            ic_type:TYPES.KEYWORD,
+                            ic_type:compiler.TYPE_KEYWORD,
                             expression:{
                                 type:AST.EXPR_UNOP_PRE_TRUE,
-                                ic_type:TYPES.KEYWORD
+                                ic_type:compiler.TYPE_KEYWORD
                             }
                         }
                     ]
@@ -119,13 +116,14 @@ describe('MathLang function declaration parser', () => {
         expect(compiler_ast).eql(expected_ast);
     });
 
-    it('Parse [function f(x is bigfloat) return boolean return 1+2 end function] statement' , () => {
+
+    it('Parse [function f(x is BIGFLOAT) return BOOLEAN return 1+2 end function] statement' , () => {
         compiler.reset();
-        const text = 'function f(x is bigfloat) return boolean return 1+2 end function';
+        const text = 'function f(x is BIGFLOAT) return BOOLEAN return 1+2 end function';
         const result = compiler.compile_ast(text, 'program');
 
         // ERRORS
-        const expected_errors = 5;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -150,21 +148,21 @@ describe('MathLang function declaration parser', () => {
             block:[
                 {
                     type:AST.STAT_FUNCTION,
-                    ic_type: 'boolean',
+                    ic_type: compiler.TYPE_BOOLEAN,
                     name: 'f',
                     is_exported:false,
-                    operands_types:['bigfloat'],
+                    operands_types:[compiler.TYPE_BIGFLOAT],
                     operands_names:['x'],
                     block: [
                         {
                             type:AST.STAT_RETURN,
-                            ic_type:TYPES.INTEGER,
+                            ic_type:compiler.TYPE_INTEGER,
                             expression:{
                                 type:AST.EXPR_BINOP_ADDSUB,
-                                ic_type:TYPES.INTEGER,
+                                ic_type:compiler.TYPE_INTEGER,
                                 lhs:{
-                                    type:TYPES.INTEGER,
-                                    ic_type:TYPES.INTEGER,
+                                    type:AST.EXPR_PRIMARY_INTEGER,
+                                    ic_type:compiler.TYPE_INTEGER,
                                     value:'1'
                                 },
                                 operator:{
@@ -173,8 +171,8 @@ describe('MathLang function declaration parser', () => {
                                     value:'+'
                                 },
                                 rhs:{
-                                    type:TYPES.INTEGER,
-                                    ic_type:TYPES.INTEGER,
+                                    type:AST.EXPR_PRIMARY_INTEGER,
+                                    ic_type:compiler.TYPE_INTEGER,
                                     value:'2'
                                 }
                             }
@@ -185,6 +183,7 @@ describe('MathLang function declaration parser', () => {
         }
         expect(compiler_ast).eql(expected_ast);
     });
+
 
     it('Parse [function f(x is BIGFLOAT, y is STRING) return STRING return x+y end function] statement' , () => {
         compiler.reset();
@@ -217,21 +216,21 @@ describe('MathLang function declaration parser', () => {
             block:[
                 {
                     type:AST.STAT_FUNCTION,
-                    ic_type: TYPES.STRING,
+                    ic_type: compiler.TYPE_STRING,
                     name: 'f',
                     is_exported:false,
-                    operands_types:[TYPES.BIGFLOAT, TYPES.STRING],
+                    operands_types:[compiler.TYPE_BIGFLOAT, compiler.TYPE_STRING],
                     operands_names:['x', 'y'],
                     block: [
                         {
                             type:AST.STAT_RETURN,
-                            ic_type:TYPES.STRING,
+                            ic_type:compiler.TYPE_STRING,
                             expression:{
                                 type:AST.EXPR_BINOP_ADDSUB,
-                                ic_type:TYPES.STRING,
+                                ic_type:compiler.TYPE_STRING,
                                 lhs:{
                                     type:AST.EXPR_MEMBER_ID,
-                                    ic_type:TYPES.BIGFLOAT,
+                                    ic_type:compiler.TYPE_BIGFLOAT,
                                     name:'x',
                                     members:EMPTY_ARRAY
                                 },
@@ -242,7 +241,7 @@ describe('MathLang function declaration parser', () => {
                                 },
                                 rhs:{
                                     type:AST.EXPR_MEMBER_ID,
-                                    ic_type:TYPES.STRING,
+                                    ic_type:compiler.TYPE_STRING,
                                     name:'y',
                                     members:EMPTY_ARRAY
                                 }
@@ -254,6 +253,7 @@ describe('MathLang function declaration parser', () => {
         }
         expect(compiler_ast).eql(expected_ast);
     });
+    
 
     it('Parse complex functions program (cross unordered references of variables and functions' , () => {
         compiler.reset();
@@ -293,29 +293,29 @@ describe('MathLang function declaration parser', () => {
         // console.log('compiler_ast', compiler_ast);
 
         // TEST AST
-        const json_result = `{
-            "type": "PROGRAM",
-            "modules":[],
+        const expected_ast = {
+            "type": AST.PROGRAM,
+            "modules":EMPTY_ARRAY,
             "block": [
                 {
-                    "type": "BLOCK",
+                    "type": AST.BLOCK,
                     "statements":[
                         {
-                            "type": "ASSIGN_STATEMENT_VARIABLE",
-                            "ic_type": "INTEGER",
+                            "type": AST.STAT_ASSIGN_VARIABLE,
+                            "ic_type": compiler.TYPE_INTEGER,
                             "name": "b",
                             "is_async":false,
-                            "members":[],
+                            "members":EMPTY_ARRAY,
                             "expression": {
                                 "name":"m2",
-                                "type": "FUNCTION_CALL_EXPRESSION",
-                                "ic_type": "INTEGER",
-                                "members":[],
-                                "operands_types":["INTEGER"],
+                                "type": AST.EXPR_MEMBER_FUNC_CALL,
+                                "ic_type": compiler.TYPE_INTEGER,
+                                "members":EMPTY_ARRAY,
+                                "operands_types":[compiler.TYPE_INTEGER],
                                 "operands_expressions":[
                                     {
-                                        "type": "INTEGER",
-                                        "ic_type": "INTEGER",
+                                        "type": AST.EXPR_PRIMARY_INTEGER,
+                                        "ic_type": compiler.TYPE_INTEGER,
                                         "value": "12"
                                     }
                                 ]
@@ -324,38 +324,38 @@ describe('MathLang function declaration parser', () => {
                     ]
                 },
                 {
-                    "type": "ASSIGN_STATEMENT_VARIABLE",
-                    "ic_type": "INTEGER",
+                    "type": AST.STAT_ASSIGN_VARIABLE,
+                    "ic_type": compiler.TYPE_INTEGER,
                     "name": "a",
                     "is_async":false,
-                    "members":[],
+                    "members":EMPTY_ARRAY,
                     "expression": {
-                        "type": "INTEGER",
-                        "ic_type": "INTEGER",
+                        type: AST.EXPR_PRIMARY_INTEGER,
+                        "ic_type": compiler.TYPE_INTEGER,
                         "value": "456"
                     }
                 },
                 {
                     "type": "FUNCTION_STATEMENT",
-                    "ic_type": "BIGFLOAT",
+                    "ic_type": compiler.TYPE_BIGFLOAT,
                     "name": "myfunc",
                     "is_exported":false,
-                    "operands_types": ["BIGFLOAT","INTEGER"],
+                    "operands_types": [compiler.TYPE_BIGFLOAT,compiler.TYPE_INTEGER],
                     "operands_names": ["x", "y"],
                     "block": [
                         {
                             "type": "IF_STATEMENT",
                             "condition": {
                                 "type": "COMPARATOR_EXPRESSION",
-                                "ic_type": "BOOLEAN",
+                                "ic_type": compiler.TYPE_BOOLEAN,
                                 "lhs": {
                                     "type": "ADDSUB_EXPRESSION",
-                                    "ic_type": "BIGFLOAT",
+                                    "ic_type": compiler.TYPE_BIGFLOAT,
                                     "lhs": {
                                         "type": "ID_MEMBER_EXPRESSION",
-                                        "ic_type": "BIGFLOAT",
+                                        "ic_type": compiler.TYPE_BIGFLOAT,
                                         "name": "x",
-                                        "members":[]
+                                        "members":EMPTY_ARRAY
                                     },
                                     "operator": {
                                         "ic_function":"add",
@@ -364,9 +364,9 @@ describe('MathLang function declaration parser', () => {
                                     },
                                     "rhs": {
                                         "type": "ID_MEMBER_EXPRESSION",
-                                        "ic_type": "INTEGER",
+                                        "ic_type": compiler.TYPE_INTEGER,
                                         "name": "y",
-                                        "members":[]
+                                        "members":EMPTY_ARRAY
                                     }
                                 },
                                 "operator": {
@@ -375,23 +375,23 @@ describe('MathLang function declaration parser', () => {
                                     "value": ">"
                                 },
                                 "rhs": {
-                                    "type": "INTEGER",
-                                    "ic_type": "INTEGER",
+                                    type: AST.EXPR_PRIMARY_INTEGER,
+                                    "ic_type": compiler.TYPE_INTEGER,
                                     "value": "0"
                                 }
                             },
                             "then": [
                                 {
                                     "type": "RETURN_STATEMENT",
-                                    "ic_type": "BIGFLOAT",
+                                    "ic_type": compiler.TYPE_BIGFLOAT,
                                     "expression": {
                                         "type": "ADDSUB_EXPRESSION",
-                                        "ic_type": "BIGFLOAT",
+                                        "ic_type": compiler.TYPE_BIGFLOAT,
                                         "lhs": {
                                             "type": "ID_MEMBER_EXPRESSION",
-                                            "ic_type": "BIGFLOAT",
+                                            "ic_type": compiler.TYPE_BIGFLOAT,
                                             "name": "x",
-                                            "members":[]
+                                            "members":EMPTY_ARRAY
                                         },
                                         "operator": {
                                             "ic_function":"add",
@@ -400,28 +400,29 @@ describe('MathLang function declaration parser', () => {
                                         },
                                         "rhs": {
                                             "type": "ID_MEMBER_EXPRESSION",
-                                            "ic_type": "INTEGER",
+                                            "ic_type": compiler.TYPE_INTEGER,
                                             "name": "y",
-                                            "members":[]
+                                            "members":EMPTY_ARRAY
                                         }
                                     }
                                 }
-                            ]
+                            ],
+                            else:<any>undefined
                         },
                         {
                             "type": "RETURN_STATEMENT",
-                            "ic_type": "BIGFLOAT",
+                            "ic_type": compiler.TYPE_BIGFLOAT,
                             "expression": {
                                 "type": "ADDSUB_EXPRESSION",
-                                "ic_type": "BIGFLOAT",
+                                "ic_type": compiler.TYPE_BIGFLOAT,
                                 "lhs": {
                                     "type": "ADDSUB_EXPRESSION",
-                                    "ic_type": "BIGFLOAT",
+                                    "ic_type": compiler.TYPE_BIGFLOAT,
                                     "lhs": {
                                         "type": "ID_MEMBER_EXPRESSION",
-                                        "ic_type": "BIGFLOAT",
+                                        "ic_type": compiler.TYPE_BIGFLOAT,
                                         "name": "x",
-                                        "members":[]
+                                        "members":EMPTY_ARRAY
                                     },
                                     "operator": {
                                         "ic_function":"add",
@@ -430,16 +431,16 @@ describe('MathLang function declaration parser', () => {
                                     },
                                     "rhs": {
                                         "type": "FUNCTION_CALL_EXPRESSION",
-                                        "ic_type": "INTEGER",
+                                        "ic_type": compiler.TYPE_INTEGER,
                                         "name": "m2",
-                                        "members":[],
-                                        "operands_types": ["INTEGER"],
+                                        "members":EMPTY_ARRAY,
+                                        "operands_types": [compiler.TYPE_INTEGER],
                                         "operands_expressions": [
                                             {
                                                 "type": "ID_MEMBER_EXPRESSION",
-                                                "ic_type": "INTEGER",
+                                                "ic_type": compiler.TYPE_INTEGER,
                                                 "name": "y",
-                                                "members":[]
+                                                "members":EMPTY_ARRAY
                                             }
                                         ]
                                     }
@@ -451,9 +452,9 @@ describe('MathLang function declaration parser', () => {
                                 },
                                 "rhs": {
                                     "type": "ID_MEMBER_EXPRESSION",
-                                    "ic_type": "INTEGER",
+                                    "ic_type": compiler.TYPE_INTEGER,
                                     "name": "a",
-                                    "members":[]
+                                    "members":EMPTY_ARRAY
                                 }
                             }
                         }
@@ -461,23 +462,23 @@ describe('MathLang function declaration parser', () => {
                 },
                 {
                     "type": "FUNCTION_STATEMENT",
-                    "ic_type": "INTEGER",
+                    "ic_type": compiler.TYPE_INTEGER,
                     "name": "m2",
                     "is_exported":false,
-                    "operands_types": ["INTEGER"],
+                    "operands_types": [compiler.TYPE_INTEGER],
                     "operands_names": ["x"],
                     "block": [
                         {
                             "type": "RETURN_STATEMENT",
-                            "ic_type": "INTEGER",
+                            "ic_type": compiler.TYPE_INTEGER,
                             "expression": {
                                 "type": "MULTDIV_EXPRESSION",
-                                "ic_type": "INTEGER",
+                                "ic_type": compiler.TYPE_INTEGER,
                                 "lhs": {
                                     "type": "ID_MEMBER_EXPRESSION",
-                                    "ic_type": "INTEGER",
+                                    "ic_type": compiler.TYPE_INTEGER,
                                     "name": "x",
-                                    "members":[]
+                                    "members":EMPTY_ARRAY
                                 },
                                 "operator": {
                                     "ic_function":"mul",
@@ -485,8 +486,8 @@ describe('MathLang function declaration parser', () => {
                                     "value": "*"
                                 },
                                 "rhs": {
-                                    "type": "INTEGER",
-                                    "ic_type": "INTEGER",
+                                    type: AST.EXPR_PRIMARY_INTEGER,
+                                    "ic_type": compiler.TYPE_INTEGER,
                                     "value": "2"
                                 }
                             }
@@ -494,9 +495,7 @@ describe('MathLang function declaration parser', () => {
                     ]
                 }
             ]
-        }`;
-        const expected_result_ast_json = JSON.parse(json_result);
-        const parser_result_ast_json = JSON.stringify(compiler_ast);
-        expect(JSON.parse(parser_result_ast_json)).eql(expected_result_ast_json);
+        };
+        expect(compiler_ast).eql(expected_ast);
     });
 });

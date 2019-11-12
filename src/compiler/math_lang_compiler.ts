@@ -7,12 +7,12 @@ import { math_lang_lexer, math_lang_parser } from './1-cst-builder/math_lang_par
 
 import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visitor';
 
-import { ModuleScope, FunctionScope } from './3-ic-builder/math_lang_function_scope';
-import { ICModule } from './3-ic-builder/math_lang_ast_to_ic_builder_base';
+// import { ModuleScope, FunctionScope } from './3-ic-builder/math_lang_function_scope';
+// import { ICModule } from './3-ic-builder/math_lang_ast_to_ic_builder_base';
 import MathLangAstToIcVisitor from './3-ic-builder/math_lang_ast_to_ic_builder';
-import {ICLabel} from './3-ic-builder/math_lang_ast_to_ic_builder_base';
+// import {ICLabel} from './3-ic-builder/math_lang_ast_to_ic_builder_base';
 
-import MathLangIcToMcVisitor from './4-mc-builder/math_lang_ic_to_mc_builder';
+// import MathLangIcToMcVisitor from './4-mc-builder/math_lang_ic_to_mc_builder';
 
 import CompilerScope from './0-common/compiler_scope';
 import CompilerFunction from './0-common/compiler_function';
@@ -92,20 +92,39 @@ export default class MathLangCompiler {
 
     private _compiler_scope:CompilerScope = undefined;
 
-    private _types_map:Map<string,IType>;
-    private _symbols:Map<string,FunctionScope>;
-
     private _errors:CompilerError[];
 
     private _text:string;
     private _lexemes:IToken[];
     private _cst:any;
     private _ast:any;
-    private _ic_modules:Map<string,ICModule>;
-    // private _ic_functions_labels:Map<string,ICLabel[]>;
-    private _mc_program:IProgram;
 
     private _ast_builder:MathLangCstToAstVisitor;
+
+    // STANDARD TYPES
+    public TYPE_KEYWORD_LABEL:string   = undefined;
+    public TYPE_KEYWORD:ICompilerType  = undefined;
+
+    public TYPE_UNKNOW_LABEL:string   = undefined;
+    public TYPE_UNKNOW:ICompilerType  = undefined;
+
+    public TYPE_BOOLEAN_LABEL:string  = undefined;
+    public TYPE_BOOLEAN:ICompilerType = undefined;
+
+    public TYPE_STRING_LABEL:string   = undefined;
+    public TYPE_STRING:ICompilerType  = undefined;
+
+    public TYPE_INTEGER_LABEL:string  = undefined;
+    public TYPE_INTEGER:ICompilerType = undefined;
+
+    public TYPE_BIGINTEGER_LABEL:string  = undefined;
+    public TYPE_BIGINTEGER:ICompilerType = undefined;
+
+    public TYPE_FLOAT_LABEL:string  = undefined;
+    public TYPE_FLOAT:ICompilerType = undefined;
+
+    public TYPE_BIGFLOAT_LABEL:string  = undefined;
+    public TYPE_BIGFLOAT:ICompilerType = undefined;
 
     
     /**
@@ -115,6 +134,32 @@ export default class MathLangCompiler {
      */
     constructor() {
         this._compiler_scope = new CompilerScope(AVAILABLE_MODULES, AVAILABLE_TYPES, AVAILABLE_RUNTIMES);
+
+        // INIT STANDARD TYPES
+        this.TYPE_KEYWORD_LABEL = 'KEYWORD';
+        this.TYPE_KEYWORD = this.get_scope().get_available_lang_type(this.TYPE_KEYWORD_LABEL);
+
+        this.TYPE_UNKNOW_LABEL = 'UNKNOW';
+        this.TYPE_UNKNOW = this.get_scope().get_available_lang_type(this.TYPE_UNKNOW_LABEL);
+
+        this.TYPE_BOOLEAN_LABEL = 'BOOLEAN';
+        this.TYPE_BOOLEAN = this.get_scope().get_available_lang_type(this.TYPE_BOOLEAN_LABEL);
+
+        this.TYPE_STRING_LABEL = 'STRING';
+        this.TYPE_STRING = this.get_scope().get_available_lang_type(this.TYPE_STRING_LABEL);
+
+        this.TYPE_INTEGER_LABEL = 'INTEGER';
+        this.TYPE_INTEGER = this.get_scope().get_available_lang_type(this.TYPE_INTEGER_LABEL);
+
+        this.TYPE_BIGINTEGER_LABEL = 'BIGINTEGER';
+        this.TYPE_BIGINTEGER = this.get_scope().get_available_lang_type(this.TYPE_BIGINTEGER_LABEL);
+
+        this.TYPE_FLOAT_LABEL = 'FLOAT';
+        this.TYPE_FLOAT = this.get_scope().get_available_lang_type(this.TYPE_FLOAT_LABEL);
+
+        this.TYPE_BIGFLOAT_LABEL = 'BIGFLOAT';
+        this.TYPE_BIGFLOAT = this.get_scope().get_available_lang_type(this.TYPE_BIGFLOAT_LABEL);
+
         this._ast_builder = new MathLangCstToAstVisitor(this._compiler_scope);
     }
 
@@ -127,14 +172,11 @@ export default class MathLangCompiler {
      * Reset compiler state.
      */
     reset() {
-        this._symbols = undefined;
         this._errors = [];
         this._text = undefined;
         this._lexemes = undefined;
         this._cst = undefined;
         this._ast = undefined;
-        this._ic_modules = undefined;
-        this._mc_program = undefined;
     }
 
 
@@ -144,14 +186,6 @@ export default class MathLangCompiler {
      * @return string text.
      */
     get_text() { return this._text; }
-
-
-    /**
-     * Get symbols map.
-     * 
-     * @return Map<string,FunctionScope>.
-     */
-    get_symbols() { return this._symbols; }
 
 
     /**
@@ -187,22 +221,6 @@ export default class MathLangCompiler {
 
 
     /**
-     * Get compiled IC functions.
-     * 
-     * @return Map<string,ICFunction>.
-     */
-    get_ic_modules_map() { return this._ic_modules; }
-
-
-    /**
-     * Get compiled program.
-     * 
-     * @return IProgram.
-     */
-    get_mc_program() { return this._mc_program; }
-
-
-    /**
      * Get compiler errors.
      * 
      * @return CompilerError[].
@@ -215,9 +233,9 @@ export default class MathLangCompiler {
      * 
      * @returns boolean, true if type exists.
      */
-    has_type(type_name:string){
-        return this._types_map.has(type_name);
-    }
+    // has_type(type_name:string){
+    //     return this._types_map.has(type_name);
+    // }
 
 
     /**
@@ -429,27 +447,27 @@ export default class MathLangCompiler {
     build_ic():boolean{
         // const modules_map:Map<string, ModuleScope> = this._ast_builder.get_compiler_scope().get_available_modules();
 
-        // const ic_builder = new MathLangAstToIcVisitor(modules_map, this._types_map);
-        // ic_builder.visit();
+        const ic_builder = new MathLangAstToIcVisitor(this._compiler_scope);
+        ic_builder.visit();
         // this._ic_modules = ic_builder.get_ic_modules_map();
 
-        // if (ic_builder.has_error()){
-        //     const errors = ic_builder.get_errors();
-        //     let ic_build_error;
-        //     for(ic_build_error of errors){                
-        //         const error:CompilerError = {
-        //             source:this._text,
-        //             step:CompilerStep.IC,
-        //             line:0,
-        //             column:0,
-        //             src_extract:'',
-        //             message:ic_build_error.message + ' with [ic_type=' + ic_build_error.ic_type + ', ic_source=' + ic_build_error.ic_source + ', ic_name=' + ic_build_error.ic_name + ', ic_index=' + ic_build_error.ic_index + ']',
-        //             solution:'IC build error [' + ic_build_error.message + ']'
-        //         };
-        //         this._errors.push(error);
-        //     }
-        //     return false;
-        // }
+        if (ic_builder.has_error()){
+            const errors = ic_builder.get_errors();
+            let ic_build_error;
+            for(ic_build_error of errors){                
+                const error:CompilerError = {
+                    source:this._text,
+                    step:CompilerStep.IC,
+                    line:0,
+                    column:0,
+                    src_extract:'',
+                    message:ic_build_error.message + ' with [ic_type=' + ic_build_error.ic_type + ', ic_source=' + ic_build_error.ic_source + ', ic_name=' + ic_build_error.ic_name + ', ic_index=' + ic_build_error.ic_index + ']',
+                    solution:'IC build error [' + ic_build_error.message + ']'
+                };
+                this._errors.push(error);
+            }
+            return false;
+        }
 
 
         return true;

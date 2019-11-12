@@ -2,10 +2,7 @@ import * as mocha from 'mocha';
 import * as chai from 'chai';
 const expect = chai.expect;
 
-import TYPES from '../../../../compiler/math_lang_types';
-
 import { IAstNodeKindOf as AST } from '../../../../core/icompiler_ast_node';
-
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
 
 
@@ -43,20 +40,20 @@ describe('MathLang if parser', () => {
         const expected_ast = {
             type:AST.STAT_IF,
             condition: {
-                type:TYPES.INTEGER,
-                ic_type:TYPES.INTEGER,
+                type:AST.EXPR_PRIMARY_INTEGER,
+                ic_type:compiler.TYPE_INTEGER,
                 value:'12'
             },
             then:[
                 {
                     type:AST.STAT_ASSIGN_VARIABLE,
-                    ic_type:TYPES.INTEGER,
+                    ic_type:compiler.TYPE_INTEGER,
                     name:'a',
                     is_async:false,
                     members:EMPTY_ARRAY,
                     expression: {
-                        type:TYPES.INTEGER,
-                        ic_type:TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type:compiler.TYPE_INTEGER,
                         value:'456'
                     }
                 }
@@ -99,10 +96,10 @@ describe('MathLang if parser', () => {
                     "type": AST.STAT_IF,
                     "condition": {
                         "type": AST.EXPR_BINOP_ADDSUB,
-                        "ic_type": TYPES.INTEGER,
+                        "ic_type": compiler.TYPE_INTEGER,
                         "lhs": {
-                            "type": TYPES.INTEGER,
-                            "ic_type": TYPES.INTEGER,
+                            type:AST.EXPR_PRIMARY_INTEGER,
+                            "ic_type": compiler.TYPE_INTEGER,
                             "value": "12"
                         },
                         "operator": {
@@ -111,33 +108,33 @@ describe('MathLang if parser', () => {
                             "value": "+"
                         },
                         "rhs": {
-                            "type":TYPES.INTEGER,
-                            "ic_type":TYPES.INTEGER,
+                            type:AST.EXPR_PRIMARY_INTEGER,
+                            "ic_type":compiler.TYPE_INTEGER,
                             "value": "2"
                         }
                     },
                     "then": [
                         {
                             "type":AST.STAT_ASSIGN_VARIABLE,
-                            "ic_type":TYPES.INTEGER,
+                            "ic_type":compiler.TYPE_INTEGER,
                             "name": "a",
                             "is_async":false,
                             "members":EMPTY_ARRAY,
                             "expression": {
-                                "type":TYPES.INTEGER,
-                                "ic_type": TYPES.INTEGER,
+                                type:AST.EXPR_PRIMARY_INTEGER,
+                                "ic_type": compiler.TYPE_INTEGER,
                                 "value": "456"
                             }
                         },
                         {
                             "type": AST.STAT_ASSIGN_VARIABLE,
-                            "ic_type": TYPES.INTEGER,
+                            "ic_type": compiler.TYPE_INTEGER,
                             "name": "b",
                             "is_async":false,
                             "members": EMPTY_ARRAY,
                             "expression": {
-                                "type": TYPES.INTEGER,
-                                "ic_type": TYPES.INTEGER,
+                                type:AST.EXPR_PRIMARY_INTEGER,
+                                "ic_type": compiler.TYPE_INTEGER,
                                 "value": "89"
                             }
                         }
@@ -177,20 +174,20 @@ describe('MathLang if parser', () => {
         const expected_ast = {
             type:AST.STAT_IF,
             condition: {
-                type:TYPES.INTEGER,
-                ic_type:TYPES.INTEGER,
+                type:AST.EXPR_PRIMARY_INTEGER,
+                ic_type:compiler.TYPE_INTEGER,
                 value:'12'
             },
             then:[
                 {
                     type:AST.STAT_ASSIGN_VARIABLE,
-                    ic_type:TYPES.INTEGER,
+                    ic_type:compiler.TYPE_INTEGER,
                     name:'a',
                     is_async:false,
                     members:EMPTY_ARRAY,
                     expression: {
-                        type:TYPES.INTEGER,
-                        ic_type:TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type:compiler.TYPE_INTEGER,
                         value:'456'
                     }
                 }
@@ -198,13 +195,13 @@ describe('MathLang if parser', () => {
             else:<any>[
                 {
                     type:AST.STAT_ASSIGN_VARIABLE,
-                    ic_type:TYPES.FLOAT,
+                    ic_type:compiler.TYPE_FLOAT,
                     name:'a',
                     is_async:false,
                     members:EMPTY_ARRAY,
                     expression: {
-                        type:TYPES.FLOAT,
-                        ic_type:TYPES.FLOAT,
+                        type:AST.EXPR_PRIMARY_FLOAT,
+                        ic_type:compiler.TYPE_FLOAT,
                         value:'789.23'
                     }
                 }

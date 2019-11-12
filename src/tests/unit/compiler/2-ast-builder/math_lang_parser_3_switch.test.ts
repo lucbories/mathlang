@@ -38,10 +38,8 @@ describe('MathLang switch parser', () => {
         // compiler.dump_tree('ast', compiler_ast);
 
         // TEST AST
-        const compiler_ast_json = JSON.stringify(compiler_ast);
-        const compiler_ast_json_parsed = JSON.parse(compiler_ast_json);
-        const expected_ast = JSON.parse(AST_SWITCH_JSON_1);
-        expect(compiler_ast_json_parsed).eql(expected_ast);
+        const expected_ast = AST_SWITCH_JSON_1(compiler);
+        expect(compiler_ast).eql(expected_ast);
     });
 
 

@@ -2,12 +2,8 @@ import * as mocha from 'mocha';
 import * as chai from 'chai';
 const expect = chai.expect;
 
-import TYPES from '../../../../compiler/math_lang_types';
-
 import { IAstNodeKindOf as AST } from '../../../../core/icompiler_ast_node';
-
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
-
 
 
 const EMPTY_ARRAY = <any>[];
@@ -21,7 +17,7 @@ describe('MathLang math expression parser', () => {
         const result = compiler.compile_ast(text, 'expression');
 
         // ERRORS
-        const expected_errors = 3;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -42,10 +38,10 @@ describe('MathLang math expression parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_BINOP_ADDSUB,
-            ic_type:TYPES.UNKNOW,
+            ic_type:compiler.TYPE_UNKNOW,
             lhs:{
-                type:TYPES.INTEGER,
-                ic_type:TYPES.INTEGER,
+                type:AST.EXPR_PRIMARY_INTEGER,
+                ic_type:compiler.TYPE_INTEGER,
                 value:'12'
             },
             operator: {
@@ -55,18 +51,18 @@ describe('MathLang math expression parser', () => {
             },
             rhs:{
                 type:'PARENTHESIS_EXPRESSION',
-                ic_type:TYPES.UNKNOW,
+                ic_type:compiler.TYPE_UNKNOW,
                 expression: {
                     type:AST.EXPR_BINOP_MULTDIV,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_UNKNOW,
                     lhs:{
                         type:'PREUNOP_EXPRESSION',
-                        ic_type:TYPES.UNKNOW,
+                        ic_type:compiler.TYPE_UNKNOW,
                         ic_function:'add_one',
                         operator:'++',
                         rhs: {
                             type:AST.EXPR_MEMBER_ID,
-                            ic_type:TYPES.UNKNOW,
+                            ic_type:compiler.TYPE_UNKNOW,
                             name:'b',
                             members:EMPTY_ARRAY
                         }
@@ -77,8 +73,8 @@ describe('MathLang math expression parser', () => {
                         value:'*'
                     },
                     rhs:{
-                        type:TYPES.INTEGER,
-                        ic_type:TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type:compiler.TYPE_INTEGER,
                         value:'8'
                     }
                 }
@@ -93,7 +89,7 @@ describe('MathLang math expression parser', () => {
         const result = compiler.compile_ast(text, 'expression');
 
         // ERRORS
-        const expected_errors = 3;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -114,21 +110,21 @@ describe('MathLang math expression parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_BINOP_MULTDIV,
-            ic_type:TYPES.UNKNOW,
+            ic_type:compiler.TYPE_UNKNOW,
             lhs:{
                 type:'PARENTHESIS_EXPRESSION',
-                ic_type:TYPES.UNKNOW,
+                ic_type:compiler.TYPE_UNKNOW,
                 expression: {
                     type:AST.EXPR_BINOP_MULTDIV,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_UNKNOW,
                     lhs:{
                         type:'PREUNOP_EXPRESSION',
-                        ic_type:TYPES.UNKNOW,
+                        ic_type:compiler.TYPE_UNKNOW,
                         ic_function:'sub_one',
                         operator:'--',
                         rhs: {
                             type:AST.EXPR_MEMBER_ID,
-                            ic_type:TYPES.UNKNOW,
+                            ic_type:compiler.TYPE_UNKNOW,
                             name:'b',
                             members:EMPTY_ARRAY
                         }
@@ -139,8 +135,8 @@ describe('MathLang math expression parser', () => {
                         value:'/'
                     },
                     rhs:{
-                        type:TYPES.INTEGER,
-                        ic_type:TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type:compiler.TYPE_INTEGER,
                         value:'8'
                     }
                 }
@@ -151,8 +147,8 @@ describe('MathLang math expression parser', () => {
                 value:'*'
             },
             rhs:{
-                type:TYPES.INTEGER,
-                ic_type:TYPES.INTEGER,
+                type:AST.EXPR_PRIMARY_INTEGER,
+                ic_type:compiler.TYPE_INTEGER,
                 value:'56'
             }
         }
@@ -165,7 +161,7 @@ describe('MathLang math expression parser', () => {
         const result = compiler.compile_ast(text, 'expression');
 
         // ERRORS
-        const expected_errors = 3;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -186,10 +182,10 @@ describe('MathLang math expression parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_BINOP_MULTDIV,
-            ic_type:TYPES.UNKNOW,
+            ic_type:compiler.TYPE_UNKNOW,
             lhs:{
-                type:TYPES.INTEGER,
-                ic_type:TYPES.INTEGER,
+                type:AST.EXPR_PRIMARY_INTEGER,
+                ic_type:compiler.TYPE_INTEGER,
                 value:'12'
             },
             operator: {
@@ -199,15 +195,15 @@ describe('MathLang math expression parser', () => {
             },
             rhs:{
                 type:AST.EXPR_BINOP_MULTDIV,
-                ic_type:TYPES.UNKNOW,
+                ic_type:compiler.TYPE_UNKNOW,
                 lhs:{
                     type:'PREUNOP_EXPRESSION',
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:compiler.TYPE_UNKNOW,
                     ic_function:'factorial',
                     operator:'!',
                     rhs: {
                         type:AST.EXPR_MEMBER_ID,
-                        ic_type:TYPES.UNKNOW,
+                        ic_type:compiler.TYPE_UNKNOW,
                         name:'b',
                         members:EMPTY_ARRAY
                     }
@@ -218,8 +214,8 @@ describe('MathLang math expression parser', () => {
                     value:'/'
                 },
                 rhs:{
-                    type:TYPES.INTEGER,
-                    ic_type:TYPES.INTEGER,
+                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ic_type:compiler.TYPE_INTEGER,
                     value:'78e-12'
                 }
             }
@@ -254,13 +250,13 @@ describe('MathLang math expression parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_BINOP_ADDSUB,
-            ic_type:TYPES.INTEGER,
+            ic_type:compiler.TYPE_INTEGER,
             lhs:{
                 type:AST.EXPR_BINOP_MULTDIV,
-                ic_type:TYPES.INTEGER,
+                ic_type:compiler.TYPE_INTEGER,
                 lhs:{
-                    type:TYPES.INTEGER,
-                    ic_type:TYPES.INTEGER,
+                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ic_type:compiler.TYPE_INTEGER,
                     value:'12'
                 },
                 operator:{
@@ -269,8 +265,8 @@ describe('MathLang math expression parser', () => {
                     value:'*'
                 },
                 rhs:{
-                    type:TYPES.INTEGER,
-                    ic_type:TYPES.INTEGER,
+                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ic_type:compiler.TYPE_INTEGER,
                     value:'56'
                 }
             },
@@ -281,10 +277,10 @@ describe('MathLang math expression parser', () => {
             },
             rhs:{
                 type:AST.EXPR_UNOP_POST,
-                ic_type:TYPES.INTEGER,
+                ic_type:compiler.TYPE_INTEGER,
                 lhs:{
-                    type:TYPES.INTEGER,
-                    ic_type:TYPES.INTEGER,
+                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ic_type:compiler.TYPE_INTEGER,
                     value:'78'
                 },
                 ic_function:'add_one',
@@ -321,10 +317,10 @@ describe('MathLang math expression parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_BINOP_COMPARE,
-            ic_type:TYPES.BOOLEAN,
+            ic_type:compiler.TYPE_BOOLEAN,
             lhs:{
                 type:AST.EXPR_MEMBER_ID,
-                ic_type:TYPES.UNKNOW,
+                ic_type:compiler.TYPE_UNKNOW,
                 name:'abc_UI_23',
                 members:EMPTY_ARRAY
             },
@@ -335,13 +331,13 @@ describe('MathLang math expression parser', () => {
             },
             rhs:{
                 type:AST.EXPR_BINOP_ADDSUB,
-                ic_type:TYPES.INTEGER,
+                ic_type:compiler.TYPE_INTEGER,
                 lhs:{
                     type:AST.EXPR_BINOP_MULTDIV,
-                    ic_type:TYPES.INTEGER,
+                    ic_type:compiler.TYPE_INTEGER,
                     lhs:{
-                        type:TYPES.INTEGER,
-                        ic_type:TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type:compiler.TYPE_INTEGER,
                         value:'12'
                     },
                     operator:{
@@ -350,8 +346,8 @@ describe('MathLang math expression parser', () => {
                         value:'*'
                     },
                     rhs:{
-                        type:TYPES.INTEGER,
-                        ic_type:TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type:compiler.TYPE_INTEGER,
                         value:'56'
                     }
                 },
@@ -361,8 +357,8 @@ describe('MathLang math expression parser', () => {
                     value:'+'
                 },
                 rhs:{
-                    type:TYPES.INTEGER,
-                    ic_type:TYPES.INTEGER,
+                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ic_type:compiler.TYPE_INTEGER,
                     value:'78'
                 }
             }
@@ -397,10 +393,10 @@ describe('MathLang math expression parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_BINOP_COMPARE,
-            ic_type:TYPES.BOOLEAN,
+            ic_type:compiler.TYPE_BOOLEAN,
             rhs:{
                 type:AST.EXPR_MEMBER_ID,
-                ic_type:TYPES.UNKNOW,
+                ic_type:compiler.TYPE_UNKNOW,
                 name:'a45Bc',
                 members:EMPTY_ARRAY
             },
@@ -411,13 +407,13 @@ describe('MathLang math expression parser', () => {
             },
             lhs:{
                 type:AST.EXPR_BINOP_ADDSUB,
-                ic_type:TYPES.INTEGER,
+                ic_type:compiler.TYPE_INTEGER,
                 lhs:{
                     type:AST.EXPR_BINOP_MULTDIV,
-                    ic_type:TYPES.INTEGER,
+                    ic_type:compiler.TYPE_INTEGER,
                     lhs:{
-                        type:TYPES.INTEGER,
-                        ic_type:TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type:compiler.TYPE_INTEGER,
                         value:'12'
                     },
                     operator:{
@@ -426,8 +422,8 @@ describe('MathLang math expression parser', () => {
                         value:'*'
                     },
                     rhs:{
-                        type:TYPES.INTEGER,
-                        ic_type:TYPES.INTEGER,
+                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ic_type:compiler.TYPE_INTEGER,
                         value:'56'
                     }
                 },
@@ -437,8 +433,8 @@ describe('MathLang math expression parser', () => {
                     value:'+'
                 },
                 rhs:{
-                    type:TYPES.INTEGER,
-                    ic_type:TYPES.INTEGER,
+                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ic_type:compiler.TYPE_INTEGER,
                     value:'78'
                 }
             }

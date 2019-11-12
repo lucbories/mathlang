@@ -19,6 +19,14 @@ function dump_tree(label:string, tree:any) {
 describe('MathLang id expression for right part parser', () => {
     const compiler = new MathLangCompiler();
 
+    const type_unknow = compiler.get_scope().get_available_lang_type('UNKNOW');
+    const type_boolean = compiler.get_scope().get_available_lang_type('BOOLEAN');
+    const type_string = compiler.get_scope().get_available_lang_type('STRING');
+    const type_integer = compiler.get_scope().get_available_lang_type('INTEGER');
+    const type_biginteger = compiler.get_scope().get_available_lang_type('BIGINTEGER');
+    const type_float = compiler.get_scope().get_available_lang_type('FLOAT');
+    const type_bigfloat = compiler.get_scope().get_available_lang_type('BIGFLOAT');
+
     it('Parse [a]' , () => {
         compiler.reset();
         const text = 'a';
@@ -40,7 +48,7 @@ describe('MathLang id expression for right part parser', () => {
         const nomembers = <any>[];
         const expected_ast = {
             type:AST.EXPR_MEMBER_ID,
-            ic_type: TYPES.UNKNOW,
+            ic_type: type_unknow,
             name:'a',
             members:nomembers
         }
@@ -51,12 +59,15 @@ describe('MathLang id expression for right part parser', () => {
     it('Parse [a#b]' , () => {
         compiler.reset();
         const text = 'a#b';
+        
+        type_unknow.add_attribute('b', type_float);
         const result = compiler.compile_ast(text, 'idRight');
+        type_unknow.del_attribute('b');
 
         // ERRORS
-        const expected_errors = 2;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
-        expect(result).equals(false);
+        expect(result).equals(true);
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
             console.log('errors', errors);
@@ -71,12 +82,12 @@ describe('MathLang id expression for right part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_ATTRIBUTE,
-            ic_type: TYPES.UNKNOW,
+            ic_type: type_unknow,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_float,
                     attribute_name:'b'
                 }
             ]
@@ -88,12 +99,17 @@ describe('MathLang id expression for right part parser', () => {
     it('Parse [a#b#c]' , () => {
         compiler.reset();
         const text = 'a#b#c';
+        
+        type_unknow.add_attribute('b', type_float);
+        type_float.add_attribute('c', type_boolean);
         const result = compiler.compile_ast(text, 'idRight');
+        type_unknow.del_attribute('b');
+        type_float.del_attribute('c');
 
         // ERRORS
-        const expected_errors = 4;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
-        expect(result).equals(false);
+        expect(result).equals(true);
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
             console.log('errors', errors);
@@ -108,17 +124,17 @@ describe('MathLang id expression for right part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_ATTRIBUTE,
-            ic_type: TYPES.UNKNOW,
+            ic_type: type_unknow,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_float,
                     attribute_name:'b'
                 },
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_boolean,
                     attribute_name:'c'
                 }
             ]
@@ -130,12 +146,21 @@ describe('MathLang id expression for right part parser', () => {
     it('Parse [a#b#c[12]]' , () => {
         compiler.reset();
         const text = 'a#b#c[12]';
+
+        type_unknow.add_attribute('b', type_float);
+        type_float.add_attribute('c', type_string);
+        type_string.set_indexes_count(20);
+        type_string.set_indexed_type(type_integer);
         const result = compiler.compile_ast(text, 'idRight');
+        type_unknow.del_attribute('b');
+        type_float.del_attribute('c');
+        type_float.set_indexes_count(0);
+        type_float.set_indexed_type(type_unknow);
 
         // ERRORS
-        const expected_errors = 5;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
-        expect(result).equals(false);
+        expect(result).equals(true);
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
             console.log('errors', errors);
@@ -150,26 +175,26 @@ describe('MathLang id expression for right part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_INDEXED,
-            ic_type: TYPES.UNKNOW,
+            ic_type: type_unknow,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_float,
                     attribute_name:'b'
                 },
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_string,
                     attribute_name:'c'
                 },
                 {
                     type:AST.EXPR_MEMBER_INDEXED,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_integer,
                     indexes_expressions:[
                         {
-                            type:TYPES.INTEGER,
-                            ic_type:TYPES.INTEGER,
+                            type:AST.EXPR_PRIMARY_INTEGER,
+                            ic_type:type_integer,
                             value:'12'
                         }
                     ],
@@ -184,12 +209,23 @@ describe('MathLang id expression for right part parser', () => {
     it('Parse [a#b#c[12]#d]' , () => {
         compiler.reset();
         const text = 'a#b#c[12]#d';
+
+        type_unknow.add_attribute('b', type_float);
+        type_float.add_attribute('c', type_string);
+        type_string.set_indexes_count(20);
+        type_string.set_indexed_type(type_integer);
+        type_integer.add_attribute('d', type_boolean);
         const result = compiler.compile_ast(text, 'idRight');
+        type_unknow.del_attribute('b');
+        type_float.del_attribute('c');
+        type_float.set_indexes_count(0);
+        type_float.set_indexed_type(type_unknow);
+        type_integer.del_attribute('d');
 
         // ERRORS
-        const expected_errors = 7;
+        const expected_errors = 0;
         const errors = compiler.get_errors();
-        expect(result).equals(false);
+        expect(result).equals(true);
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
             console.log('errors', errors);
@@ -204,26 +240,26 @@ describe('MathLang id expression for right part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_ATTRIBUTE,
-            ic_type: TYPES.UNKNOW,
+            ic_type: type_unknow,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_float,
                     attribute_name:'b'
                 },
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_string,
                     attribute_name:'c'
                 },
                 {
                     type:AST.EXPR_MEMBER_INDEXED,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_integer,
                     indexes_expressions:[
                         {
-                            type:TYPES.INTEGER,
-                            ic_type:TYPES.INTEGER,
+                            type:AST.EXPR_PRIMARY_INTEGER,
+                            ic_type:type_integer,
                             value:'12'
                         }
                     ],
@@ -231,7 +267,7 @@ describe('MathLang id expression for right part parser', () => {
                 },
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_boolean,
                     attribute_name:'d'
                 }
             ]
@@ -264,7 +300,7 @@ describe('MathLang id expression for right part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_FUNC_CALL,
-            ic_type: TYPES.UNKNOW,
+            ic_type: type_unknow,
             name:'a',
             members:<any>[],
             operands_types:<any>[],
@@ -298,14 +334,14 @@ describe('MathLang id expression for right part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_FUNC_CALL,
-            ic_type: TYPES.UNKNOW,
+            ic_type: type_unknow,
             name:'a',
             members:<any>[],
-            operands_types:[TYPES.UNKNOW],
+            operands_types:[type_unknow],
             operands_expressions:[
                 {
                     type:AST.EXPR_MEMBER_ID,
-                    ic_type: TYPES.UNKNOW,
+                    ic_type: type_unknow,
                     name:'x',
                     members:<any>[]
                 }
@@ -338,12 +374,12 @@ describe('MathLang id expression for right part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_UNKNOW,
-            ic_type: TYPES.UNKNOW,
+            ic_type: type_unknow,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_METHOD_CALL,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_unknow,
                     func_name:'b',
                     operands_types:<any>[],
                     operands_expressions:<any>[]
@@ -377,18 +413,18 @@ describe('MathLang id expression for right part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_UNKNOW,
-            ic_type: TYPES.UNKNOW,
+            ic_type: type_unknow,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_METHOD_CALL,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_unknow,
                     func_name:'b',
-                    operands_types:[TYPES.UNKNOW],
+                    operands_types:[type_unknow],
                     operands_expressions:[
                         {
                             type:AST.EXPR_MEMBER_ID,
-                            ic_type: TYPES.UNKNOW,
+                            ic_type: type_unknow,
                             name:'c',
                             members:<any>[]
                         }
@@ -422,24 +458,24 @@ describe('MathLang id expression for right part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_UNKNOW,
-            ic_type: TYPES.UNKNOW,
+            ic_type: type_unknow,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_METHOD_CALL,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_unknow,
                     func_name:'b',
-                    operands_types:[TYPES.UNKNOW, TYPES.UNKNOW],
+                    operands_types:[type_unknow, type_unknow],
                     operands_expressions:[
                         {
                             type:AST.EXPR_MEMBER_ID,
-                            ic_type: TYPES.UNKNOW,
+                            ic_type: type_unknow,
                             name:'x',
                             members:<any>[]
                         },
                         {
                             type:AST.EXPR_MEMBER_ID,
-                            ic_type: TYPES.UNKNOW,
+                            ic_type: type_unknow,
                             name:'y',
                             members:<any>[]
                         }
@@ -454,10 +490,13 @@ describe('MathLang id expression for right part parser', () => {
     it('Parse [a#b.c()]' , () => {
         compiler.reset();
         const text = 'a#b.c()';
+
+        type_unknow.add_attribute('b', type_float);
         const result = compiler.compile_ast(text, 'idRight');
+        type_unknow.del_attribute('b');
 
         // ERRORS
-        const expected_errors = 3;
+        const expected_errors = 1;
         const errors = compiler.get_errors();
         if (errors.length != expected_errors){
             const errors = compiler.get_errors();
@@ -473,17 +512,17 @@ describe('MathLang id expression for right part parser', () => {
         // TEST AST
         const expected_ast = {
             type:AST.EXPR_MEMBER_UNKNOW,
-            ic_type: TYPES.UNKNOW,
+            ic_type: type_unknow,
             name:'a',
             members:[
                 {
                     type:AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_float,
                     attribute_name:'b'
                 },
                 {
                     type:AST.EXPR_MEMBER_METHOD_CALL,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_unknow,
                     func_name:'c',
                     operands_expressions:<any>[],
                     operands_types:<any>[]

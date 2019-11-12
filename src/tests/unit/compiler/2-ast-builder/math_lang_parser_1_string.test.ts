@@ -2,57 +2,80 @@ import * as mocha from 'mocha';
 import * as chai from 'chai';
 const expect = chai.expect;
 
-import parse from '../../../../compiler/math_lang_processor';
+import { IAstNodeKindOf as AST } from '../../../../core/icompiler_ast_node';
+import MathLangCompiler from '../../../../compiler/math_lang_compiler';
 
 
-function dump_ast(label:string, ast:any) {
-    const json = JSON.stringify(ast);
-    console.log(label, json)
-}
-
-
+const EMPTY_ARRAY = <any>[];
 
 describe('MathLang string parser', () => {
+    const compiler = new MathLangCompiler();
+    const type_string = compiler.get_scope().get_available_lang_type('STRING');
 
     it('Parse emty string' , () => {
+        compiler.reset();
         const text = '\'\'';
-        const parser_result = parse(text, false, 'expression');
+        const result = compiler.compile_ast(text, 'expression');
 
-        // console.log(parser_result);
+        // ERRORS
+        const expected_errors = 0;
+        const errors = compiler.get_errors();
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
+            // GET AST
+            const compiler_ast = compiler.get_ast();
+            compiler.dump_tree('ast', compiler_ast);
 
-        const ast_expr_node = parser_result.ast;
-        // console.log('simple string ast expr node', ast_expr_node);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
 
-        expect(ast_expr_node.type).equals('STRING');
-        expect(ast_expr_node.value).equals('\'\'');
+        // TEST AST
+        const expected_ast = {
+            type:AST.EXPR_PRIMARY_STRING,
+            ic_type: type_string,
+            value:'\'\''
+        }
+        expect(compiler_ast).eql(expected_ast);
     });
+    
 
     it('Parse simple string' , () => {
-        const text = '\'hello!\'';
-        const parser_result = parse(text, false, 'expression');
+        compiler.reset();
+        const text = '\'hello\'';
+        const result = compiler.compile_ast(text, 'expression');
 
-        // console.log(parser_result);
+        // ERRORS
+        const expected_errors = 0;
+        const errors = compiler.get_errors();
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
+            // GET AST
+            const compiler_ast = compiler.get_ast();
+            compiler.dump_tree('ast', compiler_ast);
 
-        const ast_expr_node = parser_result.ast;
-        // console.log('simple string ast expr node', ast_expr_node);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
 
-        expect(ast_expr_node.type).equals('STRING');
-        expect(ast_expr_node.value).equals('\'hello!\'');
+        // TEST AST
+        const expected_ast = {
+            type:AST.EXPR_PRIMARY_STRING,
+            ic_type: type_string,
+            value:'\'hello\''
+        }
+        expect(compiler_ast).eql(expected_ast);
     });
 });

@@ -10,13 +10,15 @@ import ICompilerType from '../../core/icompiler_type';
 import ICompilerScope from '../../core/icompiler_scope';
 import ICompilerSymbol from '../../core/icompiler_symbol';
 import ICompilerFunction from '../../core/icompiler_function';
-import { IIcNodeKindOf, ICompilerIcOperand, ICompilerIcOperandSource, ICompilerIcFunction, ICompilerIcInstruction,
+
+import { IIcNodeKindOf, ICompilerIcIdAccessor, ICompilerIcOperand, ICompilerIcOtherOperand, ICompilerIcOperandSource,
+    ICompilerIcFunction, ICompilerIcInstruction,
     ICompilerIcFunctionEnter, ICompilerIcFunctionLeave, ICompilerIcConstant } from '../../core/icompiler_ic_node';
 import ICompilerIcNode from '../../core/icompiler_ic_node';
 
 // import { FunctionScope, ModuleScope } from './math_lang_function_scope';
 // import IC from './math_lang_ic';
-// import { ICompilerError, ICFunction, ICIdAccessor, ICInstruction, ICompilerIcOperand, ICompilerIcOperandSource} from './math_lang_ast_to_ic_builder_base';
+// import { ICompilerError, ICFunction,, ICInstruction, ICompilerIcOperand, ICompilerIcOperandSource} from './math_lang_ast_to_ic_builder_base';
 import MathLangAstToIcVisitorStatements from './math_lang_ast_to_ic_builder_statements';
 
 import CompilerIcNode from '../0-common/compiler_ic_node';
@@ -209,7 +211,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
      * 
      * @returns ICompilerIcOperand
      */
-    visit_value_id(ast_expression:any):ICompilerIcOperand|ICompilerError{
+    visit_value_id(ast_expression:any):ICompilerIcOperand|ICompilerIcOtherOperand|ICompilerError{
         let id_value_type:ICompilerType = ast_expression.ic_type ? ast_expression.ic_type : undefined;
         if (! id_value_type){
             id_value_type = this.get_functions_stack_symbol_type(ast_expression.name);
@@ -239,7 +241,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
             if (ast_expression.type == AST.EXPR_MEMBER_FUNC_DECL){
                 ic_name_prefix = '';
-                const accessor:ICIdAccessor = {
+                const accessor:ICompilerIcIdAccessor = {
                     id:ast_expression.name,
                     ic_type:ast_expression.ic_type,
                     operands_types:ast_expression.operands_types,
@@ -253,6 +255,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
                 };
 
                 return {
+                    ic_code:,
                     ic_type:id_value_type,
                     ic_source:ICompilerIcOperandSource.FROM_ID,
                     ic_name:ic_name_prefix + ast_expression.name,
@@ -268,10 +271,10 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
                 const ic_type = ast_expression.ic_type;
                 const ic_call = {
                     ic_type:ic_type,
-                    ic_code:IC.FUNCTION_CALL,
+                    ic_code:IIcNodeKindOf.FUNCTION_CALL,
                     ic_function:ast_expression.name,
                     ic_operands:<any>[],
-                    text:ic_type + ':' + IC.FUNCTION_CALL + ' ' + ast_expression.name + ' ' + 'OPERANDS_COUNT' + '=[' + ast_expression.operands_expressions.length  + ']'
+                    text:ic_type + ':' + IIcNodeKindOf.FUNCTION_CALL + ' ' + ast_expression.name + ' ' + 'OPERANDS_COUNT' + '=[' + ast_expression.operands_expressions.length  + ']'
                 };
 
                 // PROCESS OPERANDS
@@ -306,8 +309,8 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
         }
 
         // LOOP ON ID ACCESSORS
-        const accessors:ICIdAccessor[] = [];
-        let loop_accessor:ICIdAccessor;
+        const accessors:ICompilerIcIdAccessor[] = [];
+        let loop_accessor:ICompilerIcIdAccessor;
         let loop_index = 0;
         let loop_member = ast_expression.members[loop_index];
         let loop_previous_type:string = id_value_type;

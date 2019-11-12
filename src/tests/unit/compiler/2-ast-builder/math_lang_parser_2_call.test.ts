@@ -2,166 +2,208 @@ import * as mocha from 'mocha';
 import * as chai from 'chai';
 const expect = chai.expect;
 
-import parse from '../../../../compiler/math_lang_processor';
-import TYPES from '../../../../compiler/math_lang_types';
-
 import { IAstNodeKindOf as AST } from '../../../../core/icompiler_ast_node';
+import MathLangCompiler from '../../../../compiler/math_lang_compiler';
 
 
-function dump_ast(label:string, ast:any) {
-    const json = JSON.stringify(ast);
-    console.log(label, json)
-}
-
-
-const empty_array = <any>[];
+const EMPTY_ARRAY = <any>[];
 
 describe('MathLang call parser', () => {
+    const compiler = new MathLangCompiler();
+
+    const type_unknow = compiler.get_scope().get_available_lang_type('UNKNOW');
+    const type_boolean = compiler.get_scope().get_available_lang_type('BOOLEAN');
+    const type_string = compiler.get_scope().get_available_lang_type('STRING');
+    const type_integer = compiler.get_scope().get_available_lang_type('INTEGER');
+    const type_biginteger = compiler.get_scope().get_available_lang_type('BIGINTEGER');
+    const type_float = compiler.get_scope().get_available_lang_type('FLOAT');
+    const type_bigfloat = compiler.get_scope().get_available_lang_type('BIGFLOAT');
 
     it('Parse f() statement' , () => {
+        compiler.reset();
         const text = 'f()';
-        const parser_result = parse(text, false, 'expression');
+        const result = compiler.compile_ast(text, 'expression');
 
-        // console.log(parser_result.cst);
-        // console.log(parser_result.ast);
+        // ERRORS
+        const expected_errors = 1;
+        const errors = compiler.get_errors();
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
+            // GET AST
+            const compiler_ast = compiler.get_ast();
+            compiler.dump_tree('ast', compiler_ast);
 
-        const ast_expr_node = parser_result.ast;
-        
-        const result = {
-            type:AST.EXPR_MEMBER_FUNC_CALL,
-            ic_type:TYPES.UNKNOW,
-            name:'f',
-            members:empty_array,
-            operands_expressions:empty_array,
-            operands_types:empty_array
+            expect(errors.length).equals(expected_errors);
+            return;
         }
-        expect(ast_expr_node).eql(result);
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
+
+        // TEST AST
+        const expected_ast = {
+            type:AST.EXPR_MEMBER_FUNC_CALL,
+            ic_type: type_unknow,
+            name:'f',
+            members:EMPTY_ARRAY,
+            operands_expressions:EMPTY_ARRAY,
+            operands_types:EMPTY_ARRAY
+        }
+        expect(compiler_ast).eql(expected_ast);
     });
 
+
     it('Parse fx(23) statement' , () => {
+        compiler.reset();
         const text = 'fx(23)';
-        const parser_result = parse(text, false, 'expression');
+        const result = compiler.compile_ast(text, 'expression');
 
-        // console.log(parser_result.ast);
+        // ERRORS
+        const expected_errors = 1;
+        const errors = compiler.get_errors();
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
+            // GET AST
+            const compiler_ast = compiler.get_ast();
+            compiler.dump_tree('ast', compiler_ast);
 
-        const ast_expr_node = parser_result.ast;
-        // console.log('fx(23) expr node', ast_expr_node);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
+        
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
 
-        const result = {
+        // TEST AST
+        const expected_ast = {
             type:AST.EXPR_MEMBER_FUNC_CALL,
-            ic_type:TYPES.UNKNOW,
+            ic_type: type_unknow,
             name:'fx',
-            members:empty_array,
+            members:EMPTY_ARRAY,
             operands_expressions:[
                 {
-                    type:TYPES.INTEGER,
-                    ic_type:TYPES.INTEGER,
+                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ic_type:type_integer,
                     value:'23'
                 }
             ],
-            operands_types:[TYPES.INTEGER]
+            operands_types:[type_integer]
         }
-        expect(ast_expr_node).eql(result);
+        expect(compiler_ast).eql(expected_ast);
     });
+
 
     it('Parse fx(,) statement' , () => {
-        const text = 'fx(23,)';
-        const parser_result = parse(text, false, 'expression');
+        compiler.reset();
+        const text = 'fx(,)';
+        const result = compiler.compile_ast(text, 'expression');
 
-        // console.log(parser_result);
+        // ERRORS
+        const expected_errors = 1;
+        const errors = compiler.get_errors();
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(1);
-        expect(parser_result.ast).is.undefined;
-        expect(parser_result.cst).is.undefined;
+            // GET AST
+            const compiler_ast = compiler.get_ast();
+            compiler.dump_tree('ast', compiler_ast);
+        }
+        expect(errors.length).equals(expected_errors);
     });
+
 
     it('Parse fx(,23) statement' , () => {
-        const text = 'fx(23,)';
-        const parser_result = parse(text, false, 'expression');
+        compiler.reset();
+        const text = 'fx(,23)';
+        const result = compiler.compile_ast(text, 'expression');
 
-        // console.log(parser_result);
+        // ERRORS
+        const expected_errors = 1;
+        const errors = compiler.get_errors();
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(1);
-        expect(parser_result.ast).is.undefined;
-        expect(parser_result.cst).is.undefined;
+            // GET AST
+            const compiler_ast = compiler.get_ast();
+            compiler.dump_tree('ast', compiler_ast);
+        }
+        expect(errors.length).equals(expected_errors);
     });
+
 
     it('Parse fx(23,) statement' , () => {
+        compiler.reset();
         const text = 'fx(23,)';
-        const parser_result = parse(text, false, 'expression');
+        const result = compiler.compile_ast(text, 'expression');
 
-        // console.log(parser_result);
+        // ERRORS
+        const expected_errors = 1;
+        const errors = compiler.get_errors();
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(1);
-        expect(parser_result.ast).is.undefined;
-        expect(parser_result.cst).is.undefined;
+            // GET AST
+            const compiler_ast = compiler.get_ast();
+            compiler.dump_tree('ast', compiler_ast);
+        }
+        expect(errors.length).equals(expected_errors);
     });
 
+
     it('Parse fx(23, efg) statement' , () => {
+        compiler.reset();
         const text = 'fx(23, efg)';
-        const parser_result = parse(text, false, 'expression');
+        const result = compiler.compile_ast(text, 'expression');
 
-        // console.log(parser_result.ast.args.items);
+        // ERRORS
+        const expected_errors = 1;
+        const errors = compiler.get_errors();
+        if (errors.length != expected_errors){
+            const errors = compiler.get_errors();
+            console.log('errors', errors);
 
-        expect(parser_result).to.be.an('object');
-        expect(parser_result.lexErrors).to.be.an('array');
-        expect(parser_result.parseErrors).to.be.an('array');
-        expect(parser_result.lexErrors.length).equals(0);
-        expect(parser_result.parseErrors.length).equals(0);
-        expect(parser_result.ast).to.be.an('object');
-        expect(parser_result.cst).to.be.an('object');
+            // GET AST
+            const compiler_ast = compiler.get_ast();
+            compiler.dump_tree('ast', compiler_ast);
 
-        const ast_expr_node = parser_result.ast;
-        // console.log('fx(23) expr node', ast_expr_node);
+            expect(errors.length).equals(expected_errors);
+            return;
+        }
         
-        const result = {
+        // GET AST
+        const compiler_ast = compiler.get_ast();
+        // console.log('compiler_ast', compiler_ast);
+
+        // TEST AST
+        const expected_ast = {
             type:AST.EXPR_MEMBER_FUNC_CALL,
-            ic_type:TYPES.UNKNOW,
+            ic_type: type_unknow,
             name:'fx',
-            members:empty_array,
+            members:EMPTY_ARRAY,
             operands_expressions:[
                 {
-                    type:TYPES.INTEGER,
-                    ic_type:TYPES.INTEGER,
+                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ic_type:type_integer,
                     value:'23'
                 },
                 {
                     type:AST.EXPR_MEMBER_ID,
-                    ic_type:TYPES.UNKNOW,
+                    ic_type:type_unknow,
                     name:'efg',
-                    members:empty_array
+                    members:EMPTY_ARRAY
                 }
             ],
-            operands_types:[TYPES.INTEGER, TYPES.UNKNOW]
+            operands_types:[type_integer, type_unknow]
         }
-        expect(ast_expr_node).eql(result);
+        expect(compiler_ast).eql(expected_ast);
     });
 });

@@ -1,6 +1,5 @@
-import IType from '../../core/itype';
 
-import { ModuleScope } from './math_lang_function_scope';
+import ICompilerScope from '../../core/icompiler_scope';
 
 import MathLangAstToIcVisitorExpressions from './math_lang_ast_to_ic_builder_expressions';
 
@@ -19,7 +18,7 @@ export default class MathLangAstToIcVisitor extends MathLangAstToIcVisitorExpres
      * 
      * @param _ast_functions AST functions scopes
      */
-    constructor(ast_modules:Map<string,ModuleScope>, types_map:Map<string,IType>) {
-        super(ast_modules, types_map);
+    constructor(compiler_scope:ICompilerScope) {
+        super(compiler_scope);
     }
 }

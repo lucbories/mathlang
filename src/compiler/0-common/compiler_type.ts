@@ -5,6 +5,9 @@ import ICompilerFunction from '../../core/icompiler_function';
 
 
 export default class CompilerType implements ICompilerType {
+    private _indexed_type:ICompilerType = undefined;
+    private _indexed_count:number = 0;
+
     constructor(
         // private _compiler_scope:ICompilerScope,
         private _name:string,
@@ -30,11 +33,19 @@ export default class CompilerType implements ICompilerType {
 
     // INDEXED TYPE
     get_indexes_count():number {
-        return 0;
+        return this._indexed_count;
+    }
+
+    set_indexes_count(count:number):void {
+        this._indexed_count = count;
     }
 
     get_indexed_type():ICompilerType {
-        return undefined;
+        return this._indexed_type;
+    }
+
+    set_indexed_type(indexed_type:ICompilerType):void {
+        this._indexed_type = indexed_type;
     }
 
     // ATTRIBUTES

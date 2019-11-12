@@ -1,6 +1,5 @@
 
 import MathLangCstToAstVisitorExpression from './math_lang_cst_to_ast_visitor_expressions';
-import TYPES from '../math_lang_types';
 
 import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
 import CompilerScope from '../0-common/compiler_scope';
@@ -29,7 +28,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         
         const ast_record = {
             type: AST.EXPR_RECORD,
-            ic_type:TYPES.RECORD,
+            ic_type:this.get_record_type(ctx, AST.EXPR_RECORD),
             items:<any> {}
         };
         const cst_keys   = Array.isArray(ctx.key)   ? ctx.key   : [ctx.key];
@@ -66,7 +65,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         if (!ctx.BinaryExpression) {
             return {
                 type: AST.EXPR_ARGS,
-                ic_type:TYPES.ARRAY,
+                ic_type:this.get_array_type(ctx, AST.EXPR_ARGS),
                 ic_subtypes:[],
                 items:[]
             }
@@ -92,7 +91,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         
         return {
             type: AST.EXPR_ARGS,
-            ic_type:TYPES.ARRAY,
+            ic_type:this.get_array_type(ctx, AST.EXPR_ARGS),
             ic_subtypes:ic_unique_subtypes.length == 1 ? ic_unique_subtypes : ic_subtypes,
             items: nodes
         }
@@ -113,7 +112,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         if ( ! ctx.ArgumentWithIds) {
             return {
                 type: AST.EXPR_ARGS_IDS,
-                ic_type:TYPES.ARRAY,
+                ic_type:this.get_array_type(ctx, AST.EXPR_ARGS_IDS),
                 ic_subtypes:[],
                 items: []
             }
@@ -133,7 +132,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         
         return {
             type: AST.EXPR_ARGS_IDS,
-            ic_type:TYPES.ARRAY,
+            ic_type:this.get_array_type(ctx, AST.EXPR_ARGS_IDS),
             ic_subtypes:ic_subtypes,
             items: ids
         }
@@ -150,7 +149,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
     ArgumentWithIds(ctx:any) {
         // this.dump_ctx('ArgumentWithIds', ctx);
 
-        const arg_type = ctx.arg_type && ctx.arg_type[0] ? this.visit(ctx.arg_type[0]) : 'INTEGER';
+        const arg_type = ctx.arg_type && ctx.arg_type[0] ? this.visit(ctx.arg_type[0]) : this.get_type('INTEGER', ctx, 'ArgumentWithIds');
         return { id:ctx.arg_id[0].image, type: arg_type };
     }
 
@@ -168,8 +167,8 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         if (!ctx.BinaryExpression) {
             return {
                 type: AST.EXPR_ARRAY,
-                ic_type:TYPES.ARRAY,
-                ic_subtypes:[TYPES.UNKNOW],
+                ic_type:this.get_array_type(ctx, AST.EXPR_ARRAY),
+                ic_subtypes:[this.get_unknow_type(ctx, AST.EXPR_ARRAY)],
                 items:<any>undefined
             }
         }
@@ -197,7 +196,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         
         return {
             type: AST.EXPR_ARRAY,
-            ic_type:TYPES.ARRAY,
+            ic_type:this.get_array_type(ctx, AST.EXPR_ARRAY),
             ic_subtypes:ic_unique_subtypes.length == 1 ? ic_unique_subtypes : ic_subtypes,
             items: nodes
         }

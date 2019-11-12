@@ -8,7 +8,7 @@ import CompilerFunction from '../0-common/compiler_function'; // TODO replace by
 import CompilerModule from '../0-common/compiler_module'; // TODO replace by interface
 
 import { math_lang_parser } from '../1-cst-builder/math_lang_parser';
-import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES,  TYPES } from '../math_lang_types';
+import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES } from '../math_lang_types';
 
 
 
@@ -24,7 +24,7 @@ const BaseVisitor = math_lang_parser.getBaseCstVisitorConstructor()
 type AstBuilderErrorRecord = {
     context:object,
     type:string,
-    ic_type:string,
+    ic_type:ICompilerType,
     message:string
 };
 
@@ -55,12 +55,17 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     protected _errors:AstBuilderErrorArray       = undefined;
     protected _unknow_symbols:string[]           = undefined;
 
-    protected _compiler_scope:ICompilerScope     = undefined;
     protected _default_module:CompilerModule     = undefined;
     protected _default_function:CompilerFunction = undefined;
     
     protected _current_module:CompilerModule     = undefined;
     protected _current_function:CompilerFunction = undefined;
+
+    protected _type_unknow:ICompilerType         = undefined;
+    protected _type_integer:ICompilerType        = undefined;
+    protected _type_error:ICompilerType          = undefined;
+    protected _type_record:ICompilerType         = undefined;
+    protected _type_array:ICompilerType          = undefined;
     
     // protected _current_scope_path:string   = 'default:main';
 
@@ -72,11 +77,165 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * 
      * @param compiler_scope compiler scope.
      */
-    constructor(compiler_scope:ICompilerScope) {
+    constructor(protected _compiler_scope:ICompilerScope) {
         super();
-        this._compiler_scope   = compiler_scope;
 
         this.reset();
+
+        this._type_unknow  = this._compiler_scope.get_available_lang_type('UNKNOW');
+        this._type_integer = this._compiler_scope.get_available_lang_type('INTEGER');
+        this._type_error   = this._compiler_scope.get_available_lang_type('ERROR');
+        this._type_record  = this._compiler_scope.get_available_lang_type('RECORD');
+        this._type_array   = this._compiler_scope.get_available_lang_type('ARRAY');
+    }
+
+
+    /**
+     * Get type instance.
+     * 
+     * @param type_name      type name to check.
+     * @param cst_context    CST context for error log.
+     * @param ast_node_type  AST node type for error log.
+     * 
+     * @returns ICompilerType
+     */
+    get_type(type_name:string, cst_context:any, ast_node_type:any){
+        const get_type = this._compiler_scope.get_available_lang_type(type_name);
+        if (! get_type){
+            this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
+        }
+        return get_type;
+    }
+
+
+    /**
+     * Get BOOLEAN type instance.
+     * 
+     * @param cst_context    CST context for error log.
+     * @param ast_node_type  AST node type for error log.
+     * 
+     * @returns ICompilerType
+     */
+    get_boolean_type(cst_context:any, ast_node_type:any){
+        return this.get_type('BOOLEAN', cst_context, ast_node_type);
+    }
+
+
+    /**
+     * Get INTEGER type instance.
+     * 
+     * @param cst_context    CST context for error log.
+     * @param ast_node_type  AST node type for error log.
+     * 
+     * @returns ICompilerType
+     */
+    get_integer_type(cst_context:any, ast_node_type:any){
+        return this._type_integer;
+        // return this.get_type('INTEGER', cst_context, ast_node_type);
+    }
+
+
+    /**
+     * Get BIGINTEGER type instance.
+     * 
+     * @param cst_context    CST context for error log.
+     * @param ast_node_type  AST node type for error log.
+     * 
+     * @returns ICompilerType
+     */
+    get_biginteger_type(cst_context:any, ast_node_type:any){
+        return this.get_type('BIGINTEGER', cst_context, ast_node_type);
+    }
+
+
+    /**
+     * Get FLOAT type instance.
+     * 
+     * @param cst_context    CST context for error log.
+     * @param ast_node_type  AST node type for error log.
+     * 
+     * @returns ICompilerType
+     */
+    get_float_type(cst_context:any, ast_node_type:any){
+        return this.get_type('FLOAT', cst_context, ast_node_type);
+    }
+
+
+    /**
+     * Get BIGFLOAT type instance.
+     * 
+     * @param cst_context    CST context for error log.
+     * @param ast_node_type  AST node type for error log.
+     * 
+     * @returns ICompilerType
+     */
+    get_bigfloat_type(cst_context:any, ast_node_type:any){
+        return this.get_type('BIGFLOAT', cst_context, ast_node_type);
+    }
+
+
+    /**
+     * Get STRING type instance.
+     * 
+     * @param cst_context    CST context for error log.
+     * @param ast_node_type  AST node type for error log.
+     * 
+     * @returns ICompilerType
+     */
+    get_string_type(cst_context:any, ast_node_type:any){
+        return this.get_type('STRING', cst_context, ast_node_type);
+    }
+
+
+    /**
+     * Get KEYWORD type instance.
+     * 
+     * @param cst_context    CST context for error log.
+     * @param ast_node_type  AST node type for error log.
+     * 
+     * @returns ICompilerType
+     */
+    get_keyword_type(cst_context:any, ast_node_type:any){
+        return this.get_type('KEYWORD', cst_context, ast_node_type);
+    }
+
+
+    /**
+     * Get UNKNOW type instance.
+     * 
+     * @param cst_context    CST context for error log.
+     * @param ast_node_type  AST node type for error log.
+     * 
+     * @returns ICompilerType
+     */
+    get_unknow_type(cst_context:any, ast_node_type:any){
+        return this.get_type('UNKNOW', cst_context, ast_node_type);
+    }
+
+
+    /**
+     * Get RECORD type instance.
+     * 
+     * @param cst_context    CST context for error log.
+     * @param ast_node_type  AST node type for error log.
+     * 
+     * @returns ICompilerType
+     */
+    get_record_type(cst_context:any, ast_node_type:any){
+        return this._type_record;
+    }
+
+
+    /**
+     * Get ARRAY type instance.
+     * 
+     * @param cst_context    CST context for error log.
+     * @param ast_node_type  AST node type for error log.
+     * 
+     * @returns ICompilerType
+     */
+    get_array_type(cst_context:any, ast_node_type:any){
+        return this._type_array;
     }
 
 
@@ -109,51 +268,15 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * 
      * @returns true for success, else false.
      */
-    check_method(type_name:string, method_name:string, operands_types:string[], cst_context:string, ast_node_type:any){
-        const obj_type = this._compiler_scope.get_available_lang_type(type_name);
-        return obj_type ? obj_type.has_method_with_types_names(method_name, operands_types) : false;
-/*
-        let has_error = false;
-
-        // CHECK VALUE TYPE
-        const value_type:IType = this._types_map.get(type_name);
-        if (! value_type){
-            this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
-            has_error = true;
-        }
-
-        // CHECK METHOD OPERANDS TYPES
-        const opd_types:IType[] = [];
-        
-        operands_types.forEach(
-            (opd_type_name, index)=>{
-                const opd_type:IType = this._types_map.get(type_name);
-                if (! opd_type){
-                    this.add_error(cst_context, ast_node_type, 'Error:type [' + opd_type.get_name() + '] not found for operand [' + index + '] of value type [' + type_name + '] method [' + method_name + ']');
-                    has_error = true;
-                } else {
-                    opd_types.push(opd_type);
-                }
-            }
-        )
-
-        // CHECK VALUE TYPE METHOD
-        if (! has_error){
-            const has_method:IMethod = value_type.get_method(method_name, opd_types);
-            if (! has_method){
-                this.add_error(cst_context, ast_node_type, 'Error:method not found [' + method_name + '] for value type [' + type_name + ']');
-                has_error = true;
-            }
-        }
-
-        return ! has_error;*/
+    check_method(value_type:ICompilerType, method_name:string, operands_types:string[], cst_context:string, ast_node_type:any){
+        return value_type ? value_type.has_method_with_types_names(method_name, operands_types) : false;
     }
 
 
     /**
      * Test if the named attribute exists in given value type.
      * 
-     * @param type_name      value type name to check.
+     * @param value_type     value type to check.
      * @param attribute_name attribute name to check.
      * @param attribute_type attribute type name to check.
      * @param cst_context    CST context for error log.
@@ -161,68 +284,45 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * 
      * @returns true for success, else false.
      */
-    check_attribute(type_name:string, attribute_name:string, attribute_type_name:string, cst_context:string, ast_node_type:any){
-        let has_error = false;
-
-        // CHECK VALUE TYPE
-        const value_type:ICompilerType = this._compiler_scope.get_available_lang_type(type_name);
-        if (! value_type){
-            this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
-            return false;
-        }
-
-        const attribute_type = value_type.get_attribute(attribute_name);
-        return attribute_type ? attribute_type.get_type_name() == attribute_type_name : false;
+    check_attribute(value_type:ICompilerType, attribute_name:string, attribute_type:ICompilerType, cst_context:string, ast_node_type:any){
+        return this.get_attribute_type(value_type, attribute_name, cst_context, ast_node_type) == attribute_type;
     }
 
 
     /**
      * Test if the named attribute exists in given value type.
      * 
-     * @param type_name      value type name to check.
-     * @param attribute_name attribute name to check.
+     * @param value_type     value type.
+     * @param attribute_name attribute name to get.
      * @param cst_context    CST context for error log.
      * @param ast_node_type  AST node type for error log.
      * 
-     * @returns type name.
+     * @returns ICompilerType
      */
-    get_attribute_type(type_name:string, attribute_name:string, cst_context:string, ast_node_type:any){
-        let has_error = false;
-
-        // CHECK VALUE TYPE
-        const value_type:ICompilerType = this._compiler_scope.get_available_lang_type(type_name);
-        if (! value_type){
-            this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
-           return TYPES.UNKNOW;
+    get_attribute_type(value_type:ICompilerType, attribute_name:string, cst_context:string, ast_node_type:any):ICompilerType{
+        if (value_type) {
+            const attribute_type = value_type.get_attribute(attribute_name);
+            if (attribute_type) return attribute_type;
         }
 
-        const attribute_type = value_type.get_attribute(attribute_name);
-
-        return attribute_type ? attribute_type.get_type_name() : TYPES.UNKNOW;
+        return this.get_unknow_type(cst_context, ast_node_type);
     }
 
 
     /**
      * Test indexes count for a given type.
      * 
-     * @param type_name      value type name to check.
+     * @param value_type     value type to check.
      * @param indexes_count  indexes count.
      * @param cst_context    CST context for error log.
      * @param ast_node_type  AST node type for error log.
      * 
      * @returns true for success, else false.
      */
-    check_type_indexes(type_name:string, indexes_count:number, cst_context:string, ast_node_type:any):boolean{
-        // CHECK VALUE TYPE
-        const value_type:ICompilerType = this._compiler_scope.get_available_lang_type(type_name);
-        if (! value_type){
-            this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
-            return false;
-        }
-
+    check_type_indexes(value_type:ICompilerType, indexes_count:number, cst_context:string, ast_node_type:any):boolean{
         const has_indexes = value_type.get_indexes_count() == indexes_count;
         if (! has_indexes){
-            this.add_error(cst_context, ast_node_type, 'Error:type [' + type_name + '] has not indexes [' + indexes_count + ']');
+            this.add_error(cst_context, ast_node_type, 'Error:type [' + (value_type ? value_type.get_type_name() : 'bad type instance') + '] has not indexes [' + indexes_count + ']');
             return false;
         }
 
@@ -233,27 +333,20 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     /**
      * Get type at given index.
      * 
-     * @param type_name      value type name to check.
+     * @param value_type     value type to check.
      * @param cst_context    CST context for error log.
      * @param ast_node_type  AST node type for error log.
      * 
-     * @returns type.
+     * @returns ICompilerType
      */
-    get_indexed_type(type_name:string, cst_context:any, ast_node_type:any):string{
-        // CHECK VALUE TYPE
-        const value_type:ICompilerType = this._compiler_scope.get_available_lang_type(type_name);
-        if (! value_type){
-            this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
-            return TYPES.UNKNOW;
-        }
-
-        const type_instance = value_type.get_indexed_type();
+    get_indexed_type(value_type:ICompilerType, cst_context:any, ast_node_type:any):ICompilerType{
+        const type_instance = value_type ? value_type.get_indexed_type() : this._type_unknow;
         if (! type_instance){
-            this.add_error(cst_context, ast_node_type, 'Error:type [' + type_name + '] has no indexed type');
-            return TYPES.UNKNOW;
+            this.add_error(cst_context, ast_node_type, 'Error:type [' + (value_type ? value_type.get_type_name() : 'bad type instance') + '] has no indexed type');
+            return this.get_unknow_type(cst_context, ast_node_type);
         }
 
-        return type_instance.get_type_name();
+        return type_instance;
     }
 
 
@@ -285,17 +378,20 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param right_type    right operand type.
      * @param cst_context   CST context for error log.
      * @param ast_node_type AST node type for error log.
-     * @returns result type
+     * @returns ICompilerType
      */
-	compute_binop_type(operator:string, left_type:any, right_type:any, cst_context:any, ast_node_type:string):string {
-        const key:string = operator + left_type.ic_type + right_type.ic_type;
+	compute_binop_type(operator:string, left_type:any, right_type:any, cst_context:any, ast_node_type:string):ICompilerType {
+        const key_left:string = left_type ? left_type.ic_type.get_type_name() : 'UNKNOW';
+        const key_right:string = right_type ? right_type.ic_type.get_type_name() : 'UNKNOW';
+        const key:string = operator + key_left + key_right;
+
         // console.log('compute_binop_type.key', key);
         const get_type_name = BINOP_TYPES.get(key);
-        const type_name = get_type_name ? get_type_name : TYPES.UNKNOW;
+        const type_name = get_type_name ? get_type_name : 'UNKNOW';
 
         this.check_type(type_name, cst_context, ast_node_type);
 
-        return type_name;
+        return this.get_type(type_name, cst_context, ast_node_type);
     }
 
 
@@ -305,17 +401,19 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param right_type    right operand type.
      * @param cst_context   CST context for error log.
      * @param ast_node_type AST node type for error log.
-     * @returns result type
+     * @returns ICompilerType
      */
-	compute_preunop_type(operator:string, right_type:any, cst_context:any, ast_node_type:string):string {
-        const key:string = operator + right_type.ic_type;
+	compute_preunop_type(operator:string, right_type:any, cst_context:any, ast_node_type:string):ICompilerType {
+        const key_right:string = right_type ? right_type.ic_type.get_type_name() : 'UNKNOW';
+        const key:string = operator + key_right;
+
         // console.log('compute_preunop_type.key', key);
         const get_type_name = PREUNOP_TYPES.get(key);
-        const type_name = get_type_name ? get_type_name : TYPES.UNKNOW;
+        const type_name = get_type_name ? get_type_name : 'UNKNOW';
 
         this.check_type(type_name, cst_context, ast_node_type);
 
-        return type_name;
+        return this.get_type(type_name, cst_context, ast_node_type);
     }
 
 
@@ -325,24 +423,26 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @param left_type     left operand type.
      * @param cst_context   CST context for error log.
      * @param ast_node_type AST node type for error log.
-     * @returns result type
+     * @returns ICompilerType
      */
-	compute_postunop_type(operator:string, left_type:any, cst_context:any, ast_node_type:string):string {
-        const key:string = operator + left_type.ic_type;
+	compute_postunop_type(operator:string, left_type:any, cst_context:any, ast_node_type:string):ICompilerType {
+        const key_left:string = left_type ? left_type.ic_type.get_type_name() : 'UNKNOW';
+        const key:string = operator + key_left;
+
         // console.log('compute_postunop_type.key', key);
         const get_type_name = POSTUNOP_TYPES.get(key);
-        const type_name = get_type_name ? get_type_name : TYPES.UNKNOW;
+        const type_name = get_type_name ? get_type_name : 'UNKNOW';
 
         this.check_type(type_name, cst_context, ast_node_type);
 
-        return type_name;
+        return this.get_type(type_name, cst_context, ast_node_type);
     }
 
 
     /**
      * Get symbol (identifier) type.
      * @param name   symbol name
-     * @returns result type
+     * @returns ICompilerType
      */
 	get_symbol_type(name:string):ICompilerType {
         let loop_scope;
@@ -357,7 +457,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
                 return loop_scope.get_symbol_operand(name).type;
             }
         }
-        return undefined;
+        return this._type_unknow;
     }
 
 
@@ -370,7 +470,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
 	get_function_type(module_instance:CompilerModule, func_name:string):ICompilerType {
         const func_scope = module_instance.get_module_function(func_name);
         if (! func_scope) {
-            return undefined;
+            return this._type_unknow;
         }
         return func_scope.get_returned_type();
     }
@@ -421,8 +521,6 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
         // PROCESS OPERANDS
         let opd_decl:any;
         for(opd_decl of operands_declarations){
-            this.check_type(opd_decl.opd_type, cst_context, ast_node_type);
-
             func.add_symbol_operand(opd_decl.opd_name, opd_decl.opd_type, undefined);
         }
     }
@@ -606,7 +704,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
 
         const error_node = {
             type: ast_node_type,
-            ic_type: TYPES.ERROR,
+            ic_type: this._type_error,
             context:cst_context,
             message:message
         };
@@ -646,7 +744,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
 
         this._scopes_stack     = new Array();
         this._default_module   = new CompilerModule(this._compiler_scope, 'default');
-        this._default_function = new CompilerFunction('main', undefined); // TODO DEFINE NONE TYPE
+        this._default_function = new CompilerFunction('main', this._type_unknow); // TODO DEFINE NONE TYPE
         this._default_module.add_module_function(this._default_function);
 
         this._current_module   = this._default_module;

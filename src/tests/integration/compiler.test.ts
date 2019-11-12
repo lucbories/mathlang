@@ -3,9 +3,9 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import TYPES from '../../compiler/math_lang_types';
-import AST from '../../compiler/2-ast-builder/old_math_lang_ast';
+// import AST from '../../compiler/2-ast-builder/old_math_lang_ast';
 import MathLangCompiler from '../../compiler/math_lang_compiler';
-import DEFAULT_TYPES from '../../features/default_types';
+// import DEFAULT_TYPES from '../../features/default_types';
 
 import VMEngine from '../../engine/vm/vmengine';
 
