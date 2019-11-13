@@ -8,6 +8,7 @@ export enum IIcNodeKindOf {
     CONSTANT_FALSE           ='constant-false',
     CONSTANT_NULL            ='constant-null',
     CONSTANT_VALUE           ='constant-value',
+    CONSTANT_LABEL           ='constant-label',
     
     OPERAND_FROM_STACK          ='operand-from-stack',
     OPERAND_FROM_FUNC_LOCAL     ='operand-from-function-local',
@@ -36,7 +37,8 @@ export enum IIcNodeKindOf {
     IF_THEN                     = 'if-then',
     IF_THEN_ELSE                = 'if-then-else',
 
-    // TEST_EQUAL                  = 'test-equal',
+    TEST_EQUAL                  = 'test-equal',
+    TEST_TRUE                   = 'test-true',
     // TEST_NOT_EQUAL              = 'test-not-equal',
     // TEST_POSITIVE               = 'test-positive',
     // TEST_NEGATIVE               = 'test-negative',
@@ -47,33 +49,31 @@ export enum IIcNodeKindOf {
 }
 
 
-export enum ICompilerIcOperandSource {
-    FROM_STACK       = 'FROM_STACK',
-    FROM_REGISTER    = 'FROM_REGISTER',
-    FROM_ID          = 'FROM_ID',
-    FROM_INLINE      = 'FROM_INLINE'
-}
+// export enum ICompilerIcOperandSource {
+    // FROM_STACK       = 'FROM_STACK',
+    // FROM_REGISTER    = 'FROM_REGISTER',
+    // FROM_ID          = 'FROM_ID',
+    // FROM_INLINE      = 'FROM_INLINE'
+// }
 
 
-export type ICompilerIcIdAccessor = {
-    id:string,
-    ic_type:string,
-    operands_types:[],
-    operands_names:[],
-    operands_expressions:[],
-    is_attribute:boolean,
-    is_method_call:boolean,
-    is_method_decl:boolean,
-    is_indexed:boolean,
-    indexed_args_count:number
-}
+// export type ICompilerIcIdAccessor = {
+    // id:string,
+    // ic_type:string,
+    // operands_types:[],
+    // operands_names:[],
+    // operands_expressions:[],
+    // is_attribute:boolean,
+    // is_method_call:boolean,
+    // is_method_decl:boolean,
+    // is_indexed:boolean,
+    // indexed_args_count:number
+// }
 
 
 
-export default interface ICompilerIcNode {
-	// get_node_kindof():IIcNodeKindOf
-	// get_node_type():string
-	
+export default ICompilerIcNode;
+export interface ICompilerIcNode {
 	ic_code:IIcNodeKindOf;
 	ic_type:ICompilerType;
 }
@@ -86,6 +86,10 @@ export interface ICompilerIcInstruction extends ICompilerIcNode {
 
 export interface ICompilerIcInstrCall extends ICompilerIcInstruction {
     ic_func_name:string
+}
+
+export interface ICompilerIcInstrGotoLabel extends ICompilerIcInstruction {
+    ic_label:string
 }
 
 
@@ -119,6 +123,10 @@ export interface ICompilerIcOperand extends ICompilerIcNode {
 
 // OPERANDS FROM STACK
 export interface ICompilerIcStackOperand extends ICompilerIcOperand {
+}
+
+
+export interface ICompilerIcConstant extends ICompilerIcStackOperand {
 }
 
 

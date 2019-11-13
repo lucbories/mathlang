@@ -1,4 +1,6 @@
 
+import ICompilerType from './icompiler_type';
+
 export enum IAstNodeKindOf {
     PROGRAM                 ='PROGRAM',
     BLOCK                   ='BLOCK',
@@ -61,7 +63,36 @@ export enum IAstNodeKindOf {
     EXPR_BINOP              ='BINOP'
 }
 
-export default interface ICompilerAstNode {
-	get_node_kindof():IAstNodeKindOf
-	get_node_type():string
+export default ICompilerAstNode;
+export interface ICompilerAstNode {
+	ast_code:IAstNodeKindOf;
+}
+
+export interface ICompilerAstTypedNode extends ICompilerAstNode {
+	ic_type:ICompilerType;
+}
+
+export interface ICompilerAstExpressionNode extends ICompilerAstTypedNode {
+    expression:ICompilerAstTypedNode
+}
+
+export interface ICompilerAstBlockNode extends ICompilerAstTypedNode {
+    statements:ICompilerAstNode[]
+}
+/*
+{
+    type: AST.STAT_FUNCTION,
+    ic_type:returned_type,
+    func_name:function_name,
+    is_exported: function_is_exported,
+    operands_types:operands_decl && operands_decl.ic_subtypes ? operands_decl.ic_subtypes : [],
+    operands_names:operands_decl && operands_decl.items ? operands_decl.items : [],
+    statements:statements
+}
+*/
+export interface ICompilerAstFunctionNode extends ICompilerAstBlockNode {
+    func_name:string;
+    is_exported:boolean;
+    operands_types:string[],
+    operands_names:string[]
 }

@@ -5,9 +5,9 @@ import ICompilerType from '../../core/icompiler_type';
 import ICompilerScope from '../../core/icompiler_scope';
 import ICompilerSymbol from '../../core/icompiler_symbol';
 import ICompilerFunction from '../../core/icompiler_function';
-import { IIcNodeKindOf, ICompilerIcIdAccessor, ICompilerIcOperand, ICompilerIcOtherOperand, ICompilerIcOperandSource,
+import { IIcNodeKindOf, ICompilerIcOperand,
     ICompilerIcFunction, ICompilerIcInstruction,
-    ICompilerIcFunctionEnter, ICompilerIcFunctionLeave, ICompilerIcConstant } from '../../core/icompiler_ic_node';
+    ICompilerIcFunctionEnter, ICompilerIcFunctionLeave } from '../../core/icompiler_ic_node';
 import ICompilerIcNode from '../../core/icompiler_ic_node';
 
 import CompilerIcNode from '../0-common/compiler_ic_node';
@@ -43,7 +43,6 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
      * @returns IC Operand object
      */
     visit_expression(ast_expression:any):ICompilerIcOperand|ICompilerError{
-        
         switch(ast_expression.type){
             // ID EXPRESSION
             case AST.EXPR_MEMBER_METHOD_DECL:
@@ -118,8 +117,12 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
         }
 
         // ADD IC FUNCTION CALL STATEMENT
-        const instr = CompilerIcNode.create_function_call(ic_op, ic_type, [ic_left, ic_right]);
-        this.get_current_function()().add_ic_statement(instr);
+        const instr = CompilerIcNode.create_function_call(this.get_compiler_scope(), ic_op, ic_type, [ic_left, ic_right]);
+        if (! instr){
+            this.add_error(ast_expression, 'Error:registration for module [' + this.get_current_module().get_module_name() + '] function [' + ast_expression.name + '] failed:function not found');
+            return undefined;
+        }
+        this.get_current_function().add_ic_statement(instr);
 
         return CompilerIcNode.create_operand_from_stack(this.get_compiler_scope(), ic_type);
     }
@@ -153,8 +156,12 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
         }
 
         // ADD IC STATEMENT
-        const instr = CompilerIcNode.create_function_call(ic_op, ic_type, [ic_right]);
-        this.get_current_function()().add_ic_statement(instr);
+        const instr = CompilerIcNode.create_function_call(this.get_compiler_scope(), ic_op, ic_type, [ic_right]);
+        if (! instr){
+            this.add_error(ast_expression, 'Error:registration for module [' + this.get_current_module().get_module_name() + '] function [' + ast_expression.name + '] failed:function not found');
+            return undefined;
+        }
+        this.get_current_function().add_ic_statement(instr);
 
         return CompilerIcNode.create_operand_from_stack(this.get_compiler_scope(), ic_type);
     }
@@ -188,8 +195,12 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
         }
 
         // ADD IC STATEMENT
-        const instr = CompilerIcNode.create_function_call(ic_op, ic_type, [ic_left]);
-        this.get_current_function()().add_ic_statement(instr);
+        const instr = CompilerIcNode.create_function_call(this.get_compiler_scope(), ic_op, ic_type, [ic_left]);
+        if (! instr){
+            this.add_error(ast_expression, 'Error:registration for module [' + this.get_current_module().get_module_name() + '] function [' + ast_expression.name + '] failed:function not found');
+            return undefined;
+        }
+        this.get_current_function().add_ic_statement(instr);
 
         return CompilerIcNode.create_operand_from_stack(this.get_compiler_scope(), ic_type);
     }
@@ -202,7 +213,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
      * 
      * @returns ICompilerIcOperand
      */
-    visit_value_id(ast_expression:any):ICompilerIcOperand|ICompilerIcOtherOperand|ICompilerError{
+    visit_value_id(ast_expression:any):ICompilerIcOperand|ICompilerError{
         let id_value_type:ICompilerType = ast_expression.ic_type ? ast_expression.ic_type : undefined;
         if (! id_value_type){
             id_value_type = this.get_functions_stack_symbol_type(ast_expression.name);
@@ -228,7 +239,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
         // VARIABLE
         if (ast_expression.members.length == 0){
-            ic_name_prefix = this.get_current_function()().get_func_name() + '/';
+            ic_name_prefix = this.get_current_function().get_func_name() + '/';
 
             if (ast_expression.type == AST.EXPR_MEMBER_FUNC_DECL){
 				// GET FUNCTION DECLARATION OPERANDS
@@ -240,7 +251,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 				for(loop_opd_index = 0; loop_opd_index < opds_count; loop_opd_index++){
 					loop_opd_type = ast_expression.operands_types[loop_opd_index];
 					loop_opd_name = ast_expression.operands_names[loop_opd_index];
-					opds_records[loop_opd_index] = CompilerIcNode.create_(this.get_compiler_scope(), loop_opd_name, loop_opd_type);
+					// TODO opds_records[loop_opd_index] = CompilerIcNode.create_(this.get_compiler_scope(), loop_opd_name, loop_opd_type);
 				}
 				
 				return this.declare_function(ast_expression.name, id_value_type, opds_records);
@@ -256,37 +267,41 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
                 for(loop_opd_index=0; loop_opd_index < opds_count; loop_opd_index++){
                     loop_ast_opd = ast_expression.operands_expressions[loop_opd_index];
                     loop_ic_opd = this.visit_expression(loop_ast_opd);
-                    ic_operands.push(loop_ic_opd);
+                    // ic_operands.push(loop_ic_opd); TODO
                 }
 
-				const ic_call = CompilerIcNode.create_function_call(ast_expression.name, ast_expression.ic_type, ic_operands);
+                const ic_call = CompilerIcNode.create_function_call(this.get_compiler_scope(), ast_expression.name, ast_expression.ic_type, ic_operands);
+                if (! ic_call){
+                    this.add_error(ast_expression, 'Error:registration for module [' + this.get_current_module().get_module_name() + '] function [' + ast_expression.name + '] failed:function not found');
+                    return undefined;
+                }
                 this.get_current_function().add_ic_statement(ic_call);
 
-				return CompilerIcNode.create_()
-                return {
-                    ic_type:ic_type,
-                    ic_source:ICompilerIcOperandSource.FROM_STACK,
-                    ic_name:undefined,
-                    ic_id_accessors:[],
-                    ic_id_accessors_str:''
-                };
+				// return CompilerIcNode.create_() TODO
+                // return {
+                //     ic_type:ic_type,
+                //     ic_source:ICompilerIcOperandSource.FROM_STACK,
+                //     ic_name:undefined,
+                //     ic_id_accessors:[],
+                //     ic_id_accessors_str:''
+                // };
             }
 
-            return {
-                ic_type:id_value_type,
-                ic_source:ICompilerIcOperandSource.FROM_ID,
-                ic_name:ic_name_prefix + ast_expression.name,
-                ic_id_accessors:[],
-                ic_id_accessors_str:''
-            };
+            // return {TODO
+            //     ic_type:id_value_type,
+            //     // ic_source:ICompilerIcOperandSource.FROM_ID,
+            //     ic_name:ic_name_prefix + ast_expression.name,
+            //     // ic_id_accessors:[],
+            //     ic_id_accessors_str:''
+            // };
         }
 
         // LOOP ON ID ACCESSORS
-        const accessors:ICompilerIcIdAccessor[] = [];
-        let loop_accessor:ICompilerIcIdAccessor;
+        // const accessors:ICompilerIcIdAccessor[] = [];
+        // let loop_accessor:ICompilerIcIdAccessor;
         let loop_index = 0;
         let loop_member = ast_expression.members[loop_index];
-        let loop_previous_type:string = id_value_type;
+        let loop_previous_type:ICompilerType = id_value_type;
         let id_str = '';
         while(loop_member){
             // CHECK TYPE
@@ -296,79 +311,79 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
 
             // METHOD DECLARATION
             if (loop_member.type == AST.EXPR_MEMBER_METHOD_DECL){
-                ic_name_prefix = this.get_current_function().func_name + '/';
-                loop_accessor={
-                    id:loop_member.func_name,
-                    ic_type:loop_member.ic_type,
-                    operands_types:loop_member.operands_types,
-                    operands_names:loop_member.operands_names,
-                    operands_expressions:[],
-                    is_attribute:false,
-                    is_method_call:false,
-                    is_method_decl:true,
-                    is_indexed:false,
-                    indexed_args_count:0
-                }
+                // ic_name_prefix = this.get_current_function().get_func_name() + '/';
+                // loop_accessor={ TODO
+                //     id:loop_member.func_name,
+                //     ic_type:loop_member.ic_type,
+                //     operands_types:loop_member.operands_types,
+                //     operands_names:loop_member.operands_names,
+                //     operands_expressions:[],
+                //     is_attribute:false,
+                //     is_method_call:false,
+                //     is_method_decl:true,
+                //     is_indexed:false,
+                //     indexed_args_count:0
+                // }
 
                 id_str = loop_previous_type + '.' + loop_member.func_name;
-                accessors.push(loop_accessor);
+                // accessors.push(loop_accessor);
             }
 
             // METHOD CALL
             if (loop_member.type == AST.EXPR_MEMBER_METHOD_CALL){
-                ic_name_prefix = this.get_current_function().func_name + '/';
-                loop_accessor={
-                    id:loop_member.func_name,
-                    ic_type:loop_member.ic_type,
-                    operands_types:loop_member.operands_types,
-                    operands_names:[],
-                    operands_expressions:loop_member.operands_expressions,
-                    is_attribute:false,
-                    is_method_call:true,
-                    is_method_decl:false,
-                    is_indexed:false,
-                    indexed_args_count:0
-                }
-                id_str = loop_previous_type + '.' + loop_member.func_name;
-                accessors.push(loop_accessor);
+                // ic_name_prefix = this.get_current_function().func_name + '/';
+                // loop_accessor={
+                //     id:loop_member.func_name,
+                //     ic_type:loop_member.ic_type,
+                //     operands_types:loop_member.operands_types,
+                //     operands_names:[],
+                //     operands_expressions:loop_member.operands_expressions,
+                //     is_attribute:false,
+                //     is_method_call:true,
+                //     is_method_decl:false,
+                //     is_indexed:false,
+                //     indexed_args_count:0
+                // }
+                // id_str = loop_previous_type + '.' + loop_member.func_name;
+                // accessors.push(loop_accessor);
             }
 
             // ATTRIBUTE
             if (loop_member.type == AST.EXPR_MEMBER_ATTRIBUTE){
                 ic_name_prefix = this.get_current_function().get_func_name() + '/';
-                loop_accessor={
-                    id:loop_member.attribute_name,
-                    ic_type:loop_member.ic_type,
-                    operands_types:[],
-                    operands_names:[],
-                    operands_expressions:[],
-                    is_attribute:true,
-                    is_method_call:false,
-                    is_method_decl:false,
-                    is_indexed:false,
-                    indexed_args_count:0
-                }
-                id_str += '#' + loop_member.attribute_name;
-                accessors.push(loop_accessor);
+                // loop_accessor={
+                //     id:loop_member.attribute_name,
+                //     ic_type:loop_member.ic_type,
+                //     operands_types:[],
+                //     operands_names:[],
+                //     operands_expressions:[],
+                //     is_attribute:true,
+                //     is_method_call:false,
+                //     is_method_decl:false,
+                //     is_indexed:false,
+                //     indexed_args_count:0
+                // }
+                // id_str += '#' + loop_member.attribute_name;
+                // accessors.push(loop_accessor);
             }
 
             // INDEXED
             if (loop_member.type == AST.EXPR_MEMBER_INDEXED){
                 ic_name_prefix = this.get_current_function().get_func_name() + '/';
-                loop_accessor={
-                    id:undefined,
-                    ic_type:undefined,
-                    operands_types:[],
-                    operands_names:[],
-                    operands_expressions:[],
-                    is_attribute:false,
-                    is_method_call:false,
-                    is_method_decl:false,
-                    is_indexed:true,
-                    indexed_args_count:loop_member.expression.items.length
-                }
-                id_str += '[' + loop_member.expression.items.length + ']';
-                accessors.push(loop_accessor);
+                // loop_accessor={
+                //     id:undefined,
+                //     ic_type:undefined,
+                //     operands_types:[],
+                //     operands_names:[],
+                //     operands_expressions:[],
+                //     is_attribute:false,
+                //     is_method_call:false,
+                //     is_method_decl:false,
+                //     is_indexed:true,
+                //     indexed_args_count:loop_member.expression.items.length
+                // }
+                // id_str += '[' + loop_member.expression.items.length + ']';
+                // accessors.push(loop_accessor);
             }
 
             loop_previous_type = loop_member.ic_type;
@@ -376,12 +391,12 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
             loop_member = ast_expression.members.length > loop_index ? ast_expression.members[loop_index] : undefined;
         }
 
-        return {
-            ic_type:ast_expression.ic_type,
-            ic_source:ICompilerIcOperandSource.FROM_ID,
-            ic_name:ic_name_prefix + ast_expression.name,
-            ic_id_accessors:accessors,
-            ic_id_accessors_str:id_str
-        };
+        // return {TODO
+        //     ic_type:ast_expression.ic_type,
+        //     ic_source:ICompilerIcOperandSource.FROM_ID,
+        //     ic_name:ic_name_prefix + ast_expression.name,
+        //     ic_id_accessors:accessors,
+        //     ic_id_accessors_str:id_str
+        // };
     }
 }

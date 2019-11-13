@@ -5,11 +5,15 @@ import ICompilerType from '../../core/icompiler_type';
 import ICompilerScope from '../../core/icompiler_scope';
 import ICompilerSymbol from '../../core/icompiler_symbol';
 import ICompilerFunction from '../../core/icompiler_function';
-import { IIcNodeKindOf, ICompilerIcIdAccessor, ICompilerIcOperand, ICompilerIcOtherOperand, ICompilerIcOperandSource,
+
+import { IIcNodeKindOf, ICompilerIcNode, ICompilerIcOperand,
     ICompilerIcFunction, ICompilerIcInstruction,
-    ICompilerIcFunctionEnter, ICompilerIcFunctionLeave, ICompilerIcConstant } from '../../core/icompiler_ic_node';
-import ICompilerIcNode from '../../core/icompiler_ic_node';
-import ICompilerAstNode from '../../core/icompiler_ast_node';
+    ICompilerIcFunctionEnter, ICompilerIcFunctionLeave, ICompilerIcConstant
+ } from '../../core/icompiler_ic_node';
+
+import { ICompilerAstNode, ICompilerAstTypedNode , ICompilerAstBlockNode, ICompilerAstFunctionNode,
+    ICompilerAstExpressionNode
+ } from '../../core/icompiler_ast_node';
 
 import CompilerIcNode from '../0-common/compiler_ic_node';
 import CompilerType from '../0-common/compiler_type';
@@ -36,8 +40,8 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
     }
 
 
-    abstract visit_expression(ast_expression:any, ast_func_scope:FunctionScope, ic_function:ICFunction):ICOperand|ICError;
-    abstract visit_value_id(ast_expression:any, ast_func_scope:FunctionScope, ic_function:ICFunction):ICOperand|ICError;
+    abstract visit_expression(ast_expression:any):ICompilerIcOperand|ICompilerError;
+    abstract visit_value_id(ast_expression:any):ICompilerIcOperand|ICompilerError;
 
 
     /**
@@ -61,9 +65,9 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * 
      * @param compiler_function Compiler function to visit
      */
-    visit_function(compiler_function:ICompilerFunction) {
+    visit_function(compiler_function:ICompilerFunction):void {
 		// GET FUNCTION AST NODE
-		const ast_expression:ICompilerAstNode = compiler_function.get_ast_node();
+		const ast_expression:ICompilerAstFunctionNode = <ICompilerAstFunctionNode>compiler_function.get_ast_node();
 		/*
 			{
 				type: AST.STAT_FUNCTION,
@@ -85,7 +89,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
 		for(loop_opd_index = 0; loop_opd_index < opds_count; loop_opd_index++){
 			loop_opd_type = ast_expression.operands_types[loop_opd_index];
 			loop_opd_name = ast_expression.operands_names[loop_opd_index];
-			opds_records[loop_opd_index] = CompilerIcNode.create_(this.get_compiler_scope(), loop_opd_name, loop_opd_type);
+			// TODO opds_records[loop_opd_index] = CompilerIcNode.create_(this.get_compiler_scope(), loop_opd_name, loop_opd_type);
 		}
 		
         // REGISTER IC FUNCTION
@@ -100,7 +104,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         const ast_statements = ast_expression.statements;
         let loop_ast_statement;
         for(loop_ast_statement of ast_statements){
-            this.visit_statement(loop_ast_statement, ast_expression, ic_function);
+            this.visit_statement(loop_ast_statement);
         }
 
         this.leave_function_declaration(ast_expression.func_name, ast_expression.ic_type);
@@ -111,12 +115,10 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * Visit AST statements.
      * 
      * @param ast_statements AST statements array
-     * @param ast_func_scope AST functions scopes
-     * @param ic_function Intermediate Code function
      */
-    visit_statements(ast_statements:any[], ast_func_scope:FunctionScope, ic_function:ICFunction) {
+    visit_statements(ast_statements:ICompilerAstNode[]):void {
         ast_statements.forEach(
-            (ast_statement)=>this.visit_statement(ast_statement, ast_func_scope, ic_function)
+            (ast_statement)=>this.visit_statement(ast_statement)
         );
     }
 
@@ -125,61 +127,60 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * Visit AST statement.
      * 
      * @param ast_statement AST statement to convert
-     * @param ast_func_scope AST functions scopes
-     * @param ic_function Intermediate Code function
      */
-    visit_statement(ast_statement:any, ast_func_scope:FunctionScope, ic_function:ICFunction) {
-         switch(ast_statement.type){
+    visit_statement(ast_statement:ICompilerAstNode):void {
+         switch(ast_statement.ast_code){
             case AST.BLOCK:{
                 // LOOP ON FUNCTION STATEMENTS
+                const func_node:ICompilerAstBlockNode = <ICompilerAstBlockNode>ast_statement;
                 let loop_ast_statement;
-                for(loop_ast_statement of ast_statement.statements){
-                    this.visit_statement(loop_ast_statement, ast_func_scope, ic_function);
+                for(loop_ast_statement of func_node.statements){
+                    this.visit_statement(loop_ast_statement);
                 }
                 return;
             }
 
             case AST.STAT_ASSIGN_VARIABLE:{
-                this.visit_assign_variable_statement(ast_statement, ast_func_scope, ic_function);
+                this.visit_assign_variable_statement(ast_statement);
                 return;
             }
             case AST.STAT_ASSIGN_FUNCTION:{
-                this.visit_assign_function_or_method_statement(ast_statement, ast_func_scope, ic_function);
+                this.visit_assign_function_or_method_statement(ast_statement);
                 return;
             }
             case AST.STAT_ASSIGN_ATTRIBUTE:{
-                this.visit_assign_attribute_statement(ast_statement, ast_func_scope, ic_function);
+                this.visit_assign_attribute_statement(ast_statement);
                 return;
             }
             case AST.STAT_ASSIGN_METHOD:{
-                this.visit_assign_function_or_method_statement(ast_statement, ast_func_scope, ic_function);
+                this.visit_assign_function_or_method_statement(ast_statement);
                 return;
             }
 
             case AST.STAT_RETURN:{
-                this.visit_return_statement(ast_statement, ast_func_scope, ic_function);
+                this.visit_return_statement(<ICompilerAstTypedNode>ast_statement);
                 return;
             }
 
             case AST.STAT_IF:{
-                this.visit_if_statement(ast_statement, ast_func_scope, ic_function);
+                this.visit_if_statement(ast_statement);
                 return;
             }
             case AST.STAT_SWITCH:{
-                this.visit_switch_statement(ast_statement, ast_func_scope, ic_function);
+                this.visit_switch_statement(ast_statement);
                 return;
             }
 
             // case AST.STAT_FOR:{
-            //     this.visit_for_statement(ast_statement, ast_func_scope, ic_function);
+            //     this.visit_for_statement(ast_statement);
             //     return;
             // }
             // case AST.STAT_LOOP:{
-            //     this.visit_loop_statement(ast_statement, ast_func_scope, ic_function);
+            //     this.visit_loop_statement(ast_statement);
             //     return;
             // }
             // case AST.STAT_WHILE:{
-            //     this.visit_while_statement(ast_statement, ast_func_scope, ic_function);
+            //     this.visit_while_statement(ast_statement);
             //     return;
             // }
         }
@@ -190,26 +191,19 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * Visit AST Return statement.
      * 
      * @param ast_statement AST statement
-     * @param ast_func_scope AST functions scopes
-     * @param ic_function Intermediate Code function
      */
-    visit_return_statement(ast_statement:any, ast_func_scope:FunctionScope, ic_function:ICFunction){
-        const ast_expression = ast_statement.expression;
-        const ic_expression_opd = this.visit_expression(ast_expression, ast_func_scope, ic_function);
+    visit_return_statement(ast_statement:ICompilerAstTypedNode):void {
+        const ast_expression:ICompilerAstExpressionNode = <ICompilerAstExpressionNode>ast_statement;
+        const ic_expression = this.visit_expression(ast_expression.expression);
 
-        if (this.test_if_error(ic_expression_opd)){
-            return this.add_error(ast_expression, 'Error in return expression:not a valid expression');
+        if (this.test_if_error(ic_expression)){
+            this.add_error(ast_expression, 'Error in return expression:not a valid expression');
+            return;
         }
 
-        const ic_expression_opd_str:string = this.get_operand_source_str(ic_expression_opd);
-        const ic_return = {
-            ic_type:ast_statement.ic_type,
-            ic_code:IC.FUNCTION_RETURN,
-            operands:[ic_expression_opd],
-            text:ic_expression_opd.ic_type + ':' + IC.FUNCTION_RETURN +  ' ' + ic_expression_opd.ic_type+ ':' + ic_expression_opd_str
-        }
+        const ic_return = CompilerIcNode.create_function_return(this.get_compiler_scope(), ast_statement.ic_type, ic_expression);
 
-        ic_function.statements.push(ic_return);
+        this.add_current_function_statement(ic_return);
     }
 
 
@@ -217,118 +211,63 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * Visit AST If statement.
      * 
      * @param ast_statement AST statement
-     * @param ast_func_scope AST functions scopes
-     * @param ic_function Intermediate Code function
      */
-    visit_if_statement(ast_statement:any, ast_func_scope:FunctionScope, ic_function:ICFunction){
+    visit_if_statement(ast_statement:ICompilerAstNode):void {
         // BUILD THEN LABEL
-        const then_label = this.add_function_label(ic_function);
-        const then_label_opd = {
-            ic_type:TYPES.STRING,
-            ic_source:ICOperandSource.FROM_INLINE,
-            ic_name:then_label,
-            ic_id_accessors:<any>[],
-            ic_id_accessors_str:then_label
-        };
+        const then_label = this.get_current_function().add_ic_label(undefined);
+		const then_label_opd:ICompilerIcNode = CompilerIcNode.create_label(this.get_compiler_scope(), then_label);
 
         // BUILD ELSE LABEL
-        const else_label = this.add_function_label(ic_function);
-        const else_label_opd = {
-            ic_type:TYPES.STRING,
-            ic_source:ICOperandSource.FROM_INLINE,
-            ic_name:else_label,
-            ic_id_accessors:<any>[],
-            ic_id_accessors_str:else_label
-        };
+        const else_label = this.get_current_function().add_ic_label(undefined);
+		const else_label_opd:ICompilerIcNode = CompilerIcNode.create_label(this.get_compiler_scope(), else_label);
 
         // BUILD END IF LABEL
-        const endif_label = this.add_function_label(ic_function);
-        const endif_label_opd = {
-            ic_type:TYPES.STRING,
-            ic_source:ICOperandSource.FROM_INLINE,
-            ic_name:endif_label,
-            ic_id_accessors:<any>[],
-            ic_id_accessors_str:endif_label
-        };
+        const endif_label = this.get_current_function().add_ic_label(undefined);
+		const endif_label_opd:ICompilerIcNode = CompilerIcNode.create_label(this.get_compiler_scope(), endif_label);
 
         // BUILD CONDITION IC OPERAND
-        const ic_condition_opd = this.visit_expression(ast_statement.condition, ast_func_scope, ic_function);
+        const ic_condition_opd:ICompilerIcNode = this.visit_expression(ast_statement.condition);
         if (this.test_if_error(ic_condition_opd)){
-            return this.add_error(ast_statement.condition, 'Error in if condition:not a valid expression');
+            this.add_error(ast_statement.condition, 'Error in if condition:not a valid expression');
+            return;
         }
-        let ic_left_str:string = this.get_operand_source_str(ic_condition_opd);
-
-        // BUILD TRUE IC OPERAND
-        const ic_true_opd = this.get_true_operand();
-        let ic_right_str:string = this.get_operand_source_str(ic_true_opd);
 
         // ADD TEST IC STATEMENT
-        ic_function.statements.push({
-            ic_type:TYPES.BOOLEAN,
-            ic_code:IC.FUNCTION_CALL,
-            ic_function:'equal',
-            ic_operands:[ic_condition_opd, ic_true_opd],
-            text:TYPES.BOOLEAN + ':' + IC.FUNCTION_CALL + ' ' + 'equal' + ' ' + ic_condition_opd.ic_type + ':' + ic_left_str  + ' ' + ic_true_opd.ic_type + ':' + ic_right_str
-        });
-
+		const ic_condition_test:ICompilerIcNode = CompilerIcNode.create_test_true(this.get_compiler_scope(), ic_condition_opd);
+		this.add_current_function_statement(ic_condition_test);
+		
+		// ADD IF THEN ELSE IC STATEMENT
         if (ast_statement.else){
-            const ic_if_then_else_statement = {
-                ic_type:TYPES.UNKNOW,
-                ic_code:IC.IF_THEN_ELSE,
-                operands:[then_label_opd, else_label_opd, endif_label_opd],
-                text:TYPES.UNKNOW + ':' + IC.IF_THEN_ELSE + ' LABEL:[' + then_label + '] LABEL:[' + else_label + '] LABEL:[' + endif_label + ']'
-            };
-            ic_function.statements.push(ic_if_then_else_statement);
+			const ic_if_then_else_statement:ICompilerIcNode = CompilerIcNode.create_if_then_else(this.get_compiler_scope(), :[then_label_opd, else_label_opd, endif_label_opd]);
+			this.add_current_function_statement(ic_if_then_else_statement);
         }
 
         // ADD IF THEN IC STATEMENT
-        else  {
-            const ic_if_then_statement = {
-                ic_type:TYPES.UNKNOW,
-                ic_code:IC.IF_THEN,
-                operands:[then_label_opd, endif_label_opd],
-                text:TYPES.UNKNOW + ':' + IC.IF_THEN + ' LABEL:[' + then_label + '] LABEL:[' + endif_label + ']'
-            };
-            ic_function.statements.push(ic_if_then_statement);
+        else {
+			const ic_if_then_statement:ICompilerIcNode = CompilerIcNode.create_if_then(this.get_compiler_scope(), :[then_label_opd, endif_label_opd]);
+			this.add_current_function_statement(ic_if_then_statement);
         }
-        const then_label_index = ic_function.statements.length;
 
         // ADD IF THEN IC STATEMENTS
-        this.visit_statements(ast_statement.then, ast_func_scope, ic_function);
+        this.get_current_function().set_ic_label_index(then_label, undefined);
+        this.visit_statements(ast_statement.then);
         
         // ADD GOTO END IF IC STATEMENT
-        const ic_if_then_goto_statement = {
-            ic_type:TYPES.UNKNOW,
-            ic_code:IC.GOTO,
-            ic_label:endif_label,
-            operands:<any>[],
-            text:TYPES.UNKNOW + ':' + IC.GOTO + ' LABEL:[' + endif_label + ']'
-        };
-        ic_function.statements.push(ic_if_then_goto_statement);
-
-        const else_label_index = ic_function.statements.length;
+		const ic_if_end_goto_statement:ICompilerIcNode = CompilerIcNode.create_goto_label(this.get_compiler_scope(), endif_label);
+		this.add_current_function_statement(ic_if_end_goto_statement);
         
         // ADD ELSE IC STATEMENTS
+        this.get_current_function().set_ic_label_index(else_label, undefined);
         if (ast_statement.else) {
             // ADD ELSE IC STATEMENTS
-            this.visit_statements(ast_statement.else, ast_func_scope, ic_function);
+            this.visit_statements(ast_statement.else);
 
             // ADD GOTO END IF IC STATEMENT
-            const ic_if_then_goto_statement = {
-                ic_type:TYPES.UNKNOW,
-                ic_code:IC.GOTO,
-                ic_label:endif_label,
-                operands:<any>[],
-                text:TYPES.UNKNOW + ':' + IC.GOTO + ' LABEL:[' + endif_label + ']'
-            };
-            ic_function.statements.push(ic_if_then_goto_statement);
+			const ic_if_end_goto_statement:ICompilerIcNode = CompilerIcNode.create_goto_label(this.get_compiler_scope(), endif_label);
+			this.add_current_function_statement(ic_if_end_goto_statement);
         }
-        
-        const endif_label_index = ic_function.statements.length;
 
-        this.update_function_label_index(then_label,  ic_function, then_label_index);
-        this.update_function_label_index(else_label,  ic_function, else_label_index);
-        this.update_function_label_index(endif_label, ic_function, endif_label_index);
+        this.get_current_function().set_ic_label_index(endif_label, undefined);
     }
 
 
@@ -336,10 +275,8 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * Visit AST Switch statement.
      * 
      * @param ast_statement AST statement
-     * @param ast_func_scope AST functions scopes
-     * @param ic_function Intermediate Code function
      */
-    visit_switch_statement(ast_statement:any, ast_func_scope:FunctionScope, ic_function:ICFunction){
+    visit_switch_statement(ast_statement:ICompilerAstNode){
         // BUILD THEN LABEL
         const switch_var = ast_statement.var;
         const switch_var_type = this.get_symbol_type(ast_func_scope.module_name, switch_var);
@@ -397,7 +334,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
                 else:undefined
             };
 
-            this.visit_if_statement(loop_ast_if, ast_func_scope, ic_function);
+            this.visit_if_statement(loop_ast_if);
             
             loop_last_index = ic_function.statements.length - 1;
             loop_endif_label = ic_function.statements[loop_last_index].ic_label;
@@ -415,12 +352,10 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * Visit AST Assign statement.
      * 
      * @param ast_statement AST statement
-     * @param ast_func_scope AST functions scopes
-     * @param ic_function Intermediate Code function
      */
-    visit_assign_variable_statement(ast_statement:any, ast_func_scope:FunctionScope, ic_function:ICFunction){
+    visit_assign_variable_statement(ast_statement:ICompilerAstNode){
         // GET LEFT
-        const ic_left = this.visit_value_id(ast_statement, ast_func_scope, ic_function);
+        const ic_left = this.visit_value_id(ast_statement);
         const ic_left_type = ast_statement.ic_type;
 
         // CHECK RETURN TYPE
@@ -436,7 +371,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
 
 
         // GET RIGHT
-        const ic_right = this.visit_expression(ast_statement.expression, ast_func_scope, ic_function);
+        const ic_right = this.visit_expression(ast_statement.expression);
         const ic_right_type = ast_statement.expression.ic_type;
 
         // CHECK RETURN TYPE
@@ -473,12 +408,10 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * Visit AST Assign statement.
      * 
      * @param ast_statement AST statement
-     * @param ast_func_scope AST functions scopes
-     * @param ic_function Intermediate Code function
      */
-    visit_assign_attribute_statement(ast_statement:any, ast_func_scope:FunctionScope, ic_function:ICFunction){
+    visit_assign_attribute_statement(ast_statement:ICompilerAstNode){
         // GET LEFT
-        const ic_left = this.visit_value_id(ast_statement, ast_func_scope, ic_function);
+        const ic_left = this.visit_value_id(ast_statement);
         const ic_left_type = ast_statement.ic_type;
 
         // CHECK RETURN TYPE
@@ -494,7 +427,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
 
 
         // GET RIGHT
-        const ic_right = this.visit_expression(ast_statement.expression, ast_func_scope, ic_function);
+        const ic_right = this.visit_expression(ast_statement.expression);
         const ic_right_type = ast_statement.expression.ic_type;
 
         // CHECK RETURN TYPE
@@ -531,12 +464,10 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * Visit AST Methor or Function Assign statement.
      * 
      * @param ast_statement AST statement
-     * @param ast_func_scope AST functions scopes
-     * @param ic_function Intermediate Code function
      */
-    visit_assign_function_or_method_statement(ast_statement:any, ast_func_scope:FunctionScope, ic_function:ICFunction){
+    visit_assign_function_or_method_statement(ast_statement:ICompilerAstNode){
         // GET LEFT
-        const ic_left = this.visit_value_id(ast_statement, ast_func_scope, ic_function);
+        const ic_left = this.visit_value_id(ast_statement);
         const ic_left_type = ast_statement.ic_type;
 
         // CHECK RETURN TYPE
@@ -569,12 +500,12 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         }
 
         // DECLARE METHOD
-        this.declare_function(ast_func_scope.module_name, assign_function_name, ic_left_type, opds_records, opds_records_str, []);
+        this.declare_function(assign_function_name, ic_left_type, opds_records);
         const assign_function = this._ic_modules.get(ast_func_scope.module_name).module_functions.get(assign_function_name);
 
 
         // GET RIGHT
-        const ic_right = this.visit_expression(ast_statement.expression, ast_func_scope, assign_function);
+        const ic_right = this.visit_expression(ast_statement.expression);
         const ic_right_type = ast_statement.expression.ic_type;
 
         // CHECK RETURN TYPE

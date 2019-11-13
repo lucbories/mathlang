@@ -129,7 +129,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
         if (node_rhs && node_op) {
             return {
-                type: AST.EXPR_UNOP_PREUNOP,
+                ast_code: AST.EXPR_UNOP_PREUNOP,
                 ic_type:this.compute_preunop_type(node_op, node_rhs, ctx, AST.EXPR_UNOP_PREUNOP),
                 rhs: node_rhs,
                 operator: node_op,
@@ -139,21 +139,21 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
         if (ctx.True) {
             return {
-                type: AST.EXPR_UNOP_PRE_TRUE,
+                ast_code: AST.EXPR_UNOP_PRE_TRUE,
                 ic_type:this.get_keyword_type('KEYWORD', AST.EXPR_UNOP_PRE_TRUE)
             }
         }
 
         if (ctx.False) {
             return {
-                type: AST.EXPR_UNOP_PRE_FALSE,
+                ast_code: AST.EXPR_UNOP_PRE_FALSE,
                 ic_type:this.get_keyword_type('KEYWORD', AST.EXPR_UNOP_PRE_FALSE)
             }
         }
 
         if (ctx.Null) {
             return {
-                type: AST.EXPR_UNOP_PRE_NULL,
+                ast_code: AST.EXPR_UNOP_PRE_NULL,
                 ic_type:this.get_keyword_type('NULL', AST.EXPR_UNOP_PRE_NULL)
             }
         }
@@ -170,7 +170,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
         
         if (node_lhs && node_op) {
             return {
-                type: AST.EXPR_UNOP_POST,
+                ast_code: AST.EXPR_UNOP_POST,
                 ic_type:this.compute_postunop_type(node_op, node_lhs, ctx, AST.EXPR_UNOP_POST),
                 lhs: node_lhs,
                 operator: node_op,
@@ -212,7 +212,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
         const symbol_type = this.get_symbol_type(id);
 
         const ast_node = {
-            type: AST.EXPR_MEMBER_ID,
+            ast_code: AST.EXPR_MEMBER_ID,
             ic_type: symbol_type,
             name: id,
             members:<any>[]
@@ -244,13 +244,13 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
                 // APPEND AST NODE
                 member_ast_node = {
-                    type: AST.EXPR_MEMBER_INDEXED,
+                    ast_code: AST.EXPR_MEMBER_INDEXED,
                     ic_type: this.get_indexed_type(member_previous_ic_type, cst_node, AST.EXPR_MEMBER_INDEXED),
                     member_index: cst_node_index,
                     indexes_expressions:indexes
                 }
 
-                ast_node.type = AST.EXPR_MEMBER_INDEXED;
+                ast_node.ast_code = AST.EXPR_MEMBER_INDEXED;
                 ast_node.members.push(member_ast_node);
             }
             
@@ -258,16 +258,16 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             else {
                 // CHECK ATTRIBUTE
                 const attribute_id = this.visit(cst_node);
-                this.check_attribute(member_previous_ic_type, attribute_id, this.get_unknow_type(ctx, ast_node), ctx, ast_node.type);
+                this.check_attribute(member_previous_ic_type, attribute_id, this.get_unknow_type(ctx, ast_node), ctx, ast_node.ast_code);
 
                 // APPEND AST NODE
                 member_ast_node = {
-                    type: AST.EXPR_MEMBER_ATTRIBUTE,
-                    ic_type: this.get_attribute_type(member_previous_ic_type, attribute_id, ctx, ast_node.type),
+                    ast_code: AST.EXPR_MEMBER_ATTRIBUTE,
+                    ic_type: this.get_attribute_type(member_previous_ic_type, attribute_id, ctx, ast_node.ast_code),
                     attribute_name:attribute_id
                 }
 
-                ast_node.type = AST.EXPR_MEMBER_ATTRIBUTE;
+                ast_node.ast_code = AST.EXPR_MEMBER_ATTRIBUTE;
                 ast_node.members.push(member_ast_node)
             }
 
@@ -298,7 +298,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
             // NO TEST OF EXISTING FUNCTION/METHOD TO BE ABLE TO DECLARE NEW ONE
 
-            ast_node.type = AST.EXPR_MEMBER_FUNC_DECL;
+            ast_node.ast_code = AST.EXPR_MEMBER_FUNC_DECL;
             ast_node.operands_names = ast_func_decl_node.items;
             ast_node.operands_types = ast_func_decl_node.ic_subtypes;
         }
@@ -314,8 +314,8 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
             // NO TEST OF EXISTING FUNCTION/METHOD TO BE ABLE TO DECLARE NEW ONE
 
-            ast_node.type = AST.EXPR_MEMBER_METHOD_DECL;
-            ast_func_decl_node.type = AST.EXPR_MEMBER_METHOD_DECL;
+            ast_node.ast_code = AST.EXPR_MEMBER_METHOD_DECL;
+            ast_func_decl_node.ast_code = AST.EXPR_MEMBER_METHOD_DECL;
             ast_node.members.push(ast_func_decl_node);
         }
 
@@ -361,7 +361,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
                 this.check_method(last_member_type, id, ast_func_call_node.ic_subtypes, cst_func_call_node, AST.EXPR_MEMBER_FUNC_CALL);
             }
 
-            ast_node.type = AST.EXPR_MEMBER_FUNC_CALL;
+            ast_node.ast_code = AST.EXPR_MEMBER_FUNC_CALL;
             ast_node.ic_type = this.get_function_type(this._current_module, ast_node.name);
             ast_node.operands_expressions = ast_func_call_node.items;
             ast_node.operands_types = ast_func_call_node.ic_subtypes;
@@ -386,13 +386,13 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
                 if (module_function) {
                     ast_func_call_node.ic_type = module_function.get_returned_type();
             
-                    ast_node.type = AST.EXPR_MEMBER_FUNC_CALL;
+                    ast_node.ast_code = AST.EXPR_MEMBER_FUNC_CALL;
                     ast_node.ic_type = ast_func_call_node.ic_type;
                     ast_node.members.push(ast_func_call_node);
                 } else if (module_const) {
                     ast_func_call_node.ic_type = module_function.get_returned_type();
             
-                    ast_node.type = AST.EXPR_MEMBER_ATTRIBUTE;
+                    ast_node.ast_code = AST.EXPR_MEMBER_ATTRIBUTE;
                     ast_node.ic_type = ast_func_call_node.ic_type;
                     ast_node.members.push(ast_func_call_node);
                 } else {
@@ -400,7 +400,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
                     
                     ast_func_call_node.ic_type = this.get_unknow_type(ctx, ast_node);
                     
-                    ast_node.type = AST.EXPR_MEMBER_UNKNOW;
+                    ast_node.ast_code = AST.EXPR_MEMBER_UNKNOW;
                     ast_node.ic_type = ast_func_call_node.ic_type;
                     ast_node.members.push(ast_func_call_node);
                 }
@@ -423,7 +423,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
                     this.add_error(ctx, AST.EXPR_MEMBER_METHOD_CALL, 'Error:unknow called function [' + id + '] of module [' + object_or_module_name + ']');
                 }
             
-                ast_node.type = AST.EXPR_MEMBER_METHOD_CALL;
+                ast_node.ast_code = AST.EXPR_MEMBER_METHOD_CALL;
                 ast_node.ic_type = ast_func_call_node.ic_type;
                 ast_node.members.push(ast_func_call_node);
             }
@@ -431,7 +431,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             else {
                 this.add_error(ctx, AST.EXPR_MEMBER_UNKNOW, 'Error:unknow module or var [' + object_or_module_name + '] for called function/method [' + id + ']');
 
-                ast_node.type = AST.EXPR_MEMBER_UNKNOW;
+                ast_node.ast_code = AST.EXPR_MEMBER_UNKNOW;
                 ast_node.ic_type = ast_func_call_node.ic_type;
                 ast_node.members.push(ast_func_call_node);
             }
@@ -464,7 +464,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
         const ast_args_node:any = this.visit(cst_args_node);
 
         const ast_function_declaration = {
-            type: AST.EXPR_MEMBER_METHOD_DECL,
+            ast_code: AST.EXPR_MEMBER_METHOD_DECL,
             ic_type: this.get_unknow_type(ctx, ast_args_node),
             func_name:id,
             operands_types:ast_args_node.ic_subtypes,
@@ -503,7 +503,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
         if (ctx.StringLiteral) {
             return {
-                type: AST.EXPR_PRIMARY_STRING,
+                ast_code: AST.EXPR_PRIMARY_STRING,
                 ic_type:this.get_string_type(ctx, AST.EXPR_PRIMARY_STRING),
                 value:ctx.StringLiteral[0].image
             }
@@ -511,7 +511,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
         if (ctx.Integer1Literal) {
             return {
-                type: AST.EXPR_PRIMARY_INTEGER,
+                ast_code: AST.EXPR_PRIMARY_INTEGER,
                 ic_type:this.get_integer_type(ctx, AST.EXPR_PRIMARY_INTEGER),
                 value:ctx.Integer1Literal[0].image
             }
@@ -519,7 +519,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
         if (ctx.Integer2Literal) {
             return {
-                type: AST.EXPR_PRIMARY_INTEGER,
+                ast_code: AST.EXPR_PRIMARY_INTEGER,
                 ic_type:this.get_integer_type(ctx, AST.EXPR_PRIMARY_INTEGER),
                 value:ctx.Integer2Literal[0].image
             }
@@ -527,7 +527,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
         if (ctx.FloatLiteral) {
             return {
-                type: AST.EXPR_PRIMARY_FLOAT,
+                ast_code: AST.EXPR_PRIMARY_FLOAT,
                 ic_type:this.get_float_type(ctx, AST.EXPR_PRIMARY_FLOAT),
                 value:ctx.FloatLiteral[0].image
             }
@@ -535,7 +535,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
         if (ctx.BigInteger1Literal) {
             return {
-                type: AST.EXPR_PRIMARY_BIGINTEGER,
+                ast_code: AST.EXPR_PRIMARY_BIGINTEGER,
                 ic_type:this.get_biginteger_type(ctx, AST.EXPR_PRIMARY_BIGINTEGER),
                 value:ctx.BigInteger1Literal[0].image
             }
@@ -543,7 +543,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
         if (ctx.BigInteger2Literal) {
             return {
-                type: AST.EXPR_PRIMARY_BIGINTEGER,
+                ast_code: AST.EXPR_PRIMARY_BIGINTEGER,
                 ic_type:this.get_biginteger_type(ctx, AST.EXPR_PRIMARY_BIGINTEGER),
                 value:ctx.BigInteger2Literal[0].image
             }
@@ -551,7 +551,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
         if (ctx.BigFloat1Literal) {
             return {
-                type: AST.EXPR_PRIMARY_BIGFLOAT,
+                ast_code: AST.EXPR_PRIMARY_BIGFLOAT,
                 ic_type:this.get_bigfloat_type(ctx, AST.EXPR_PRIMARY_BIGFLOAT),
                 value:ctx.BigFloat1Literal[0].image
             }
@@ -559,7 +559,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
         if (ctx.BigFloat2Literal) {
             return {
-                type: AST.EXPR_PRIMARY_BIGFLOAT,
+                ast_code: AST.EXPR_PRIMARY_BIGFLOAT,
                 ic_type:this.get_bigfloat_type(ctx, AST.EXPR_PRIMARY_BIGFLOAT),
                 value:ctx.BigFloat2Literal[0].image
             }
@@ -567,7 +567,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
         if (ctx.BigFloat3Literal) {
             return {
-                type: AST.EXPR_PRIMARY_BIGFLOAT,
+                ast_code: AST.EXPR_PRIMARY_BIGFLOAT,
                 ic_type:this.get_bigfloat_type(ctx, AST.EXPR_PRIMARY_BIGFLOAT),
                 value:ctx.BigFloat3Literal[0].image
             }
@@ -587,7 +587,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
         }
 
         return {
-            type: AST.EXPR_PRIMARY_UNKNOW,
+            ast_code: AST.EXPR_PRIMARY_UNKNOW,
             ctx:ctx
         }
     }
@@ -597,7 +597,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
         const node_expr = this.visit(ctx.BinaryExpression);
         return {
-            type: AST.EXPR_PARENTHESIS,
+            ast_code: AST.EXPR_PARENTHESIS,
             ic_type:node_expr.ic_type,
             expression: node_expr
         }

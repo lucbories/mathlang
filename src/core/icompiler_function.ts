@@ -34,6 +34,7 @@ export interface ICompilerFunction {
     add_ic_label(label_index:number):string;
     has_ic_label(label_name:string):boolean;
     get_ic_label_index(label_name:string):number;
+    set_ic_label_index(label_name:string, label_index:number):void;
     
     // SYMBOLS
     get_symbol(symbol_name:string):ICompilerSymbol;

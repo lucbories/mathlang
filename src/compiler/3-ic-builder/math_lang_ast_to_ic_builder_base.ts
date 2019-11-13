@@ -5,7 +5,7 @@ import ICompilerSymbol from '../../core/icompiler_symbol';
 import ICompilerFunction from '../../core/icompiler_function';
 import ICompilerModule from '../../core/icompiler_module';
 import ICompilerScope from '../../core/icompiler_scope';
-import { ICompilerIcOperand, ICompilerIcInstruction } from '../../core/icompiler_ic_node';
+import { ICompilerIcNode, ICompilerIcFunction, ICompilerIcOperand, ICompilerIcInstruction } from '../../core/icompiler_ic_node';
 
 import CompilerIcNode from '../0-common/compiler_ic_node';
 import CompilerModule from '../0-common/compiler_module';
@@ -60,6 +60,16 @@ export default class MathLangAstToIcVisitorBase {
      */
     get_current_function():ICompilerFunction{
         return this._current_function;
+    }
+
+
+    /**
+     * Add a statement to the current function.
+     * 
+     * @param statement
+     */
+    add_current_function_statement(ic_statement:ICompilerIcNode):void {
+        this._current_function.add_ic_statement(ic_statement);
     }
 
 
