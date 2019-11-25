@@ -73,7 +73,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         }
 
         return {
-            type: AST.PROGRAM,
+            ast_code: AST.PROGRAM,
             block: statements,
             modules:modules
         }
@@ -130,7 +130,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         }
 
         return {
-            type: AST.STAT_MODULE,
+            ast_code: AST.STAT_MODULE,
             module_name: module_name,
             uses:uses,
             functions:functions,
@@ -153,7 +153,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         const used_module_scope = this._compiler_scope.get_module(used_module_name);
         if (! used_module_scope) {
             return {
-                type: AST.STAT_USE,
+                ast_code: AST.STAT_USE,
                 module_name: used_module_name,
                 module_alias: 'USED MODULE NOT FOUND',
                 modules_imports: ctx.importedModuleItem ? ctx.importedModuleItem.map((x:any)=>x.image) : []
@@ -176,7 +176,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 		this._current_module.add_used_module(used_module_scope);
 
         return {
-            type: AST.STAT_USE,
+            ast_code: AST.STAT_USE,
             module_name: used_module_name,
             module_alias: module_alias,
             modules_imports: modules_imports_array
@@ -203,7 +203,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         }
 
         return {
-            type: AST.BLOCK,
+            ast_code: AST.BLOCK,
             statements: statements
         }
     }
@@ -268,7 +268,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         }
 
         return {
-            type: AST.STAT_UNKNOW,
+            ast_code: AST.STAT_UNKNOW,
             ctx:ctx
         }
     }
@@ -301,7 +301,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         }
 
         return {
-            type: AST.STAT_IF,
+            ast_code: AST.STAT_IF,
             condition:node_1,
             then:statements_then,
             else:ctx.Else ? statements_else : undefined
@@ -328,7 +328,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         }
 
         return {
-            type: AST.STAT_WHILE,
+            ast_code: AST.STAT_WHILE,
             condition:node_1,
             block:statements
         }
@@ -355,7 +355,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         }
 
         return {
-            type: AST.STAT_FOR,
+            ast_code: AST.STAT_FOR,
             var:node_var,
             in:node_in,
             block:statements
@@ -388,7 +388,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         }
 
         return {
-            type: AST.STAT_LOOP,
+            ast_code: AST.STAT_LOOP,
             var:node_var,
             from:node_from,
             to:node_to,
@@ -420,7 +420,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         }
 
         return {
-            type: AST.STAT_SWITCH,
+            ast_code: AST.STAT_SWITCH,
             ic_type:ast_var_type,
             var:ast_var,
             items:ast_items
@@ -489,13 +489,13 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
         
         // *** ASSIGN A VARIABLE: NO ACCESSORS, NOT A FUNCTION DECLARATION ***
-        if (ast_id_left_node.members.length == 0 && ast_id_left_node.type == AST.EXPR_MEMBER_ID){
+        if (ast_id_left_node.members.length == 0 && ast_id_left_node.ast_code == AST.EXPR_MEMBER_ID){
             // EVALUATE RIGHT EXPRESSION
             const cst_expr_node = ctx.AssignExpr;
             const ast_expr_node = this.visit(cst_expr_node);
 
             const assign_ast = {
-                type: AST.STAT_ASSIGN_VARIABLE,
+                ast_code: AST.STAT_ASSIGN_VARIABLE,
                 ic_type: ast_expr_node.ic_type,
                 name:assign_name,
                 is_async:ctx.Async ? true : false,
@@ -511,9 +511,9 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
 
         // *** ASSIGN A FUNCTION DECLARATION: NO ACCESSORS ***
-        if (ast_id_left_node.members.length == 0 && ast_id_left_node.type == AST.EXPR_MEMBER_FUNC_DECL){
+        if (ast_id_left_node.members.length == 0 && ast_id_left_node.ast_code == AST.EXPR_MEMBER_FUNC_DECL){
             let assign_ast = {
-                type: AST.STAT_ASSIGN_FUNCTION,
+                ast_code: AST.STAT_ASSIGN_FUNCTION,
                 ic_type: this._type_unknow,
                 name:assign_name,
                 is_async:ctx.Async ? true : false,
@@ -564,7 +564,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
 
         // *** ASSIGN AN ATTRIBUTE ***
-        if (ast_id_left_node.members.length > 0 && ast_id_left_node.type == AST.EXPR_MEMBER_ATTRIBUTE){
+        if (ast_id_left_node.members.length > 0 && ast_id_left_node.ast_code == AST.EXPR_MEMBER_ATTRIBUTE){
             // EVALUATE RIGHT EXPRESSION
             const cst_expr_node = ctx.AssignExpr;
             const ast_expr_node = this.visit(cst_expr_node);
@@ -574,7 +574,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             }
 
             const assign_ast = {
-                type: AST.STAT_ASSIGN_ATTRIBUTE,
+                ast_code: AST.STAT_ASSIGN_ATTRIBUTE,
                 ic_type: ast_expr_node.ic_type,
                 name:assign_name,
                 is_async:ctx.Async ? true : false,
@@ -587,7 +587,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
 
         // *** METHOD DECLARATION ***
-        if (ast_id_left_node.members.length > 0 && ast_id_left_node.type == AST.EXPR_MEMBER_METHOD_DECL){
+        if (ast_id_left_node.members.length > 0 && ast_id_left_node.ast_code == AST.EXPR_MEMBER_METHOD_DECL){
             const last_member = ast_id_left_node.members[ast_id_left_node.members.length - 1];
             const operands_types = last_member.operands_types;
             const operands_names = last_member.operands_names;
@@ -621,7 +621,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             this.unregister_function_declaration(method_name);
 
             const assign_ast = {
-                type: AST.STAT_ASSIGN_METHOD,
+                ast_code: AST.STAT_ASSIGN_METHOD,
                 ic_type: ast_expr_node.ic_type,
                 name:assign_name,
                 is_async:ctx.Async ? true : false,
@@ -695,7 +695,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         }
 
         return {
-            type: AST.STAT_FUNCTION,
+            ast_code: AST.STAT_FUNCTION,
             ic_type:returned_type,
             name:function_name,
             is_exported: function_is_exported,
@@ -719,7 +719,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         const node_expr = this.visit(ctx.expression);
 
         return {
-            type: AST.STAT_RETURN,
+            ast_code: AST.STAT_RETURN,
             ic_type:node_expr.ic_type,
             expression:node_expr
         }
@@ -739,7 +739,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         const name = ctx.ID[0].image;
 
         return {
-            type: AST.STAT_DISPOSE,
+            ast_code: AST.STAT_DISPOSE,
             name:name
         }
     }
@@ -758,7 +758,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         const node_record = this.visit(ctx.Record);
 
         return {
-            type: AST.STAT_EMIT,
+            ast_code: AST.STAT_EMIT,
             event:ctx.ID[0].image,
             operands:node_record
         }
@@ -782,7 +782,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         }
 
         return {
-            type: AST.STAT_ON,
+            ast_code: AST.STAT_ON,
             event:ctx.eventName[0].image,
             record:ctx.recordName[0].image,
             block:statements
@@ -813,7 +813,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         }
 
         return {
-            type: AST.STAT_WAIT,
+            ast_code: AST.STAT_WAIT,
             asyncVariables: vars,
             block:statements
         }

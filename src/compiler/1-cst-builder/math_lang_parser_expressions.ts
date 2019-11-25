@@ -111,21 +111,27 @@ export class MathLangParserExpressions extends MathLangParserStatements {
      *          .id(id:id list)
      */
     idLeft = this.RULE("idLeft", () => {
-        // MAIN ID
+        // MAIN ID:VAR
         this.CONSUME(t.ID);
 
-        // MAIN ID ATTRIBUTES OR INDEXED ACCESSES (OPTIONAL)
+        // OPTION 1
         this.MANY( () => 
             this.OR( [
+				// VAR ATTRIBUTE
                 { ALT: () => this.SUBRULE(this.dashIdExpression, { LABEL:'attributeOrIndexed' } ) },
+				
+				// VAR INDEXED ACCESS
                 { ALT: () => this.SUBRULE1(this.indexedBracketsExpression, { LABEL:'attributeOrIndexed' } ) }
             ])
         );
 
-        // METHOD DECLARATION (OPTIONAL)
+        // OPTION 2
         this.OPTION( ()=>{
             this.OR2( [
+				// FUNCTION DECLARATION
                 { ALT: () => this.SUBRULE(this.ArgumentsWithIds) },
+				
+				// VAR METHOD DECLARATION
                 { ALT: () => this.SUBRULE(this.dotIdArgsDeclarationExpression) }
             ])
         });
@@ -144,22 +150,44 @@ export class MathLangParserExpressions extends MathLangParserStatements {
      *          .id(expr list)
      */
     idRight = this.RULE("idRight", () => {
-        // MAIN ID
+        // MAIN ID:VAR OR MODULE
         this.CONSUME(t.ID);
 
-        // MAIN ID ATTRIBUTES OR INDEXED ACCESSES (OPTIONAL)
+        // OPTION 1
         this.MANY( () => 
             this.OR( [
+				// VAR#ATTRIBUTE
                 { ALT: () => this.SUBRULE(this.dashIdExpression, { LABEL:'attributeOrIndexed' } ) },
-                { ALT: () => this.SUBRULE(this.indexedBracketsExpression, { LABEL:'attributeOrIndexed' } ) }
+				
+				// VAR INDEXED ACCESS
+                { ALT: () => this.SUBRULE(this.indexedBracketsExpression, { LABEL:'attributeOrIndexed' } ) },
+				
+				// MODULE.VAR#ATTRIBUTE
+                { ALT: () => {
+					this.CONSUME2(t.Dot);
+					this.CONSUME2(t.ID);
+					this.SUBRULE2(this.dashIdExpression);
+					}
+				}
             ])
         );
 
-        // METHOD DECLARATION (OPTIONAL)
+        // OPTION 2
         this.OPTION( ()=>{
             this.OR2( [
+				// FUNCTION CALL
                 { ALT: () => this.SUBRULE(this.Arguments) },
-                { ALT: () => this.SUBRULE(this.dotIdArgsCallExpression) }
+				
+				// MODULE.FUNCTION CALL OR VAR.METHOD CALL
+                { ALT: () => this.SUBRULE(this.dotIdArgsCallExpression) },
+				
+				// MODULE.VAR.METHOD CALL
+                { ALT: () => {
+					this.CONSUME3(t.Dot);
+					this.CONSUME3(t.ID);
+					this.SUBRULE3(this.dotIdArgsCallExpression);
+					}
+				}
             ])
         });
     });

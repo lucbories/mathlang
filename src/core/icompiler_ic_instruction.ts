@@ -92,11 +92,18 @@ export enum IIcNodeKindOf {
     CONSTANT_FALSE           ='constant-false',
     CONSTANT_NULL            ='constant-null',
     CONSTANT_VALUE           ='constant-value',
+    CONSTANT_LABEL           ='constant-label',
     
     OPERAND_FROM_STACK          ='operand-from-stack',
+<<<<<<< HEAD:src/core/icompiler_ic_instruction.ts
     OPERAND_FROM_ID             ='operand-from-id',
     OPERAND_FROM_ATTRIBUTE      ='operand-from-attribute',
     OPERAND_FROM_INDEX          ='operand-from-index',
+=======
+    OPERAND_FROM_FUNC_LOCAL     ='operand-from-function-local',
+    OPERAND_FROM_MODULE_CONST   ='operand-from-module-const',
+    OPERAND_FROM_MODULE_FUNC    ='operand-from-module-func',
+>>>>>>> 25db4a4c979ec0a431e5173f610e6cec19384aae:src/core/icompiler_ic_node.ts
 	
     FUNCTION_DECLARE            ='function-declare',
     FUNCTION_DECLARE_ENTER      ='function-declare-enter',
@@ -123,7 +130,8 @@ export enum IIcNodeKindOf {
     IF_THEN                     = 'if-then',
     IF_THEN_ELSE                = 'if-then-else',
 
-    // TEST_EQUAL                  = 'test-equal',
+    TEST_EQUAL                  = 'test-equal',
+    TEST_TRUE                   = 'test-true',
     // TEST_NOT_EQUAL              = 'test-not-equal',
     // TEST_POSITIVE               = 'test-positive',
     // TEST_NEGATIVE               = 'test-negative',
@@ -134,6 +142,7 @@ export enum IIcNodeKindOf {
 }
 
 
+<<<<<<< HEAD:src/core/icompiler_ic_instruction.ts
 export type ICompilerIcIdAccessor = {
     id:string,
     ic_type:string,
@@ -146,13 +155,33 @@ export type ICompilerIcIdAccessor = {
     is_indexed:boolean,
     indexed_args_count:number
 }
+=======
+// export enum ICompilerIcOperandSource {
+    // FROM_STACK       = 'FROM_STACK',
+    // FROM_REGISTER    = 'FROM_REGISTER',
+    // FROM_ID          = 'FROM_ID',
+    // FROM_INLINE      = 'FROM_INLINE'
+// }
+
+
+// export type ICompilerIcIdAccessor = {
+    // id:string,
+    // ic_type:string,
+    // operands_types:[],
+    // operands_names:[],
+    // operands_expressions:[],
+    // is_attribute:boolean,
+    // is_method_call:boolean,
+    // is_method_decl:boolean,
+    // is_indexed:boolean,
+    // indexed_args_count:number
+// }
+>>>>>>> 25db4a4c979ec0a431e5173f610e6cec19384aae:src/core/icompiler_ic_node.ts
 
 
 
-export default interface ICompilerIcNode {
-	// get_node_kindof():IIcNodeKindOf
-	// get_node_type():string
-	
+export default ICompilerIcNode;
+export interface ICompilerIcNode {
 	ic_code:IIcNodeKindOf;
 	ic_type:ICompilerType;
 }
@@ -165,6 +194,10 @@ export interface ICompilerIcInstruction extends ICompilerIcNode {
 
 export interface ICompilerIcInstrCall extends ICompilerIcInstruction {
     ic_func_name:string
+}
+
+export interface ICompilerIcInstrGotoLabel extends ICompilerIcInstruction {
+    ic_label:string
 }
 
 
@@ -191,6 +224,7 @@ export interface ICompilerIcFunctionLeave extends ICompilerIcNode {
 }
 
 
+<<<<<<< HEAD:src/core/icompiler_ic_instruction.ts
 export interface ICompilerIcMethod extends ICompilerIcFunction {
     object_name:string,
     object_type:ICompilerType,
@@ -198,10 +232,19 @@ export interface ICompilerIcMethod extends ICompilerIcFunction {
 
 
 // CONSTANTS
+=======
+// OPERANDS
+>>>>>>> 25db4a4c979ec0a431e5173f610e6cec19384aae:src/core/icompiler_ic_node.ts
 export interface ICompilerIcOperand extends ICompilerIcNode {
 }
 
-export interface ICompilerIcConstant extends ICompilerIcOperand {
+
+// OPERANDS FROM STACK
+export interface ICompilerIcStackOperand extends ICompilerIcOperand {
+}
+
+
+export interface ICompilerIcConstant extends ICompilerIcStackOperand {
 }
 
 export interface ICompilerIcVariable extends ICompilerIcOperand {
@@ -213,12 +256,13 @@ export interface ICompilerIcOperandAtIndex extends ICompilerIcOperand {
 }
 
 
-export interface ICompilerIcConstantValue extends ICompilerIcConstant {
+export interface ICompilerIcConstantValue extends ICompilerIcStackOperand {
     ic_value:string
 }
 
 
-export interface ICompilerIcOtherOperand extends ICompilerIcOperand {
+// OPERANDS FROM CURRENT FUNCTION
+export interface ICompilerIcFunctionLocalOperand extends ICompilerIcOperand {
     ic_name:string,
     ic_id_accessors:ICompilerIcIdAccessor[],
     ic_id_accessors_str:string

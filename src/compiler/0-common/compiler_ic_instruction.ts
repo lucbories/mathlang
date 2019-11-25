@@ -10,7 +10,7 @@ import {
 
 
 
-export default class CompilerIcNode implements ICompilerIcNode {
+export default class CompilerIcNode implements ICompilerIcInstr {
     constructor(public ic_code: IIcNodeKindOf, public ic_type: ICompilerType) { }
 
     get_node_kindof(): IIcNodeKindOf {

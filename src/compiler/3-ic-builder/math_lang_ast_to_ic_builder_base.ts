@@ -49,6 +49,16 @@ export default abstract class MathLangAstToIcVisitorBase {
 
 
     /**
+     * Get current module.
+     * 
+     * @returns ICompilerModule.
+     */
+    get_current_module():ICompilerModule{
+        return this._current_module;
+    }
+
+
+    /**
      * Get current function.
      * 
      * @returns ICompilerFunction.

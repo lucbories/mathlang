@@ -4,10 +4,8 @@ import ICompilerType from '../../core/icompiler_type';
 import ICompilerScope from '../../core/icompiler_scope';
 import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
 import { ICompilerIcInstrOperand } from '../../core/icompiler_ic_instruction';
-
-import MathLangAstToIcVisitorStatements from './math_lang_ast_to_ic_builder_statements';
-
 import CompilerIcNode from '../0-common/compiler_ic_instruction';
+import MathLangAstToIcVisitorStatements from './math_lang_ast_to_ic_builder_statements';
 
 
 
@@ -117,7 +115,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
      * 
      * @returns IC Operand object
      */
-    visit_preunop_expression(ast_expression:any):ICompilerIcOperand|ICompilerError{
+    visit_preunop_expression(ast_expression:any):ICompilerIcInstrOperand|ICompilerError{
         const ast_rhs = ast_expression.rhs;
 
         const ic_type   = ast_expression.ic_type;
@@ -146,7 +144,7 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
      * 
      * @returns IC Operand object
      */
-    visit_postunop_expression(ast_expression:any):ICompilerIcOperand|ICompilerError{
+    visit_postunop_expression(ast_expression:any):ICompilerIcInstrOperand|ICompilerError{
         const ast_lhs = ast_expression.lhs;
 
         const ic_type   = ast_expression.ic_type;
