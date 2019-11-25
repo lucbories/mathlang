@@ -1,7 +1,8 @@
 
 import ICompilerType from '../../core/icompiler_type';
 import ICompilerAstNode from '../../core/icompiler_ast_node';
-import ICompilerIcNode from '../../core/icompiler_ic_node';
+import { ICompilerIcEbb } from '../../core/icompiler_ic_instruction';
+import ICompilerIcInstr from '../../core/icompiler_ic_instruction';
 import ICompilerSymbol from '../../core/icompiler_symbol';
 import { SymbolsTable, ICompilerFunction } from '../../core/icompiler_function';
 // import { ICompilerModule } from '../../core/icompiler_module';
@@ -11,10 +12,17 @@ export default class CompilerFunction implements ICompilerFunction {
     private _ast_node:ICompilerAstNode;
     private _ast_statements:ICompilerAstNode[];
 
-    private _ic_node:ICompilerIcNode;
-    private _ic_statements:ICompilerIcNode[];
-    private _ic_labels_index:Map<string,number>= new Map();
+    // private _ic_node:ICompilerIcNode;
+    // private _ic_statements:ICompilerIcNode[];
+    // private _ic_labels_index:Map<string,number>= new Map();
 
+    private _ic_registers_count = 0;
+    private _ic_variables_count = 0;
+    private _ic_heap_size = 0;
+    private _ic_stack_length = 0;
+    private _ic_ebb_map:Map<string,ICompilerIcEbb> = new Map();
+    private _ic_ebb_code_map:Map<string,ICompilerIcEbb> = new Map();
+    
     private _symbols_consts_table:SymbolsTable = new Map();
     private _symbols_vars_table:SymbolsTable = new Map();
     private _symbols_opds_table:SymbolsTable = new Map();
@@ -75,49 +83,55 @@ export default class CompilerFunction implements ICompilerFunction {
     }
 
 	
-	// IC STATEMENTS
-    set_ic_node(node:ICompilerIcNode) {
-        this._ic_node = node;
+	// IC 
+    set_ic_register_count(reg_count:number):void {
+        this._ic_registers_count = reg_count;
     }
 
-	get_ic_node():ICompilerIcNode{
-        return this._ic_node;
+    get_ic_register_count():number { return this._ic_registers_count; }
+
+
+    set_ic_heap_size(heap_size:number):void {
+        this._ic_heap_size = heap_size;
     }
 
-    add_ic_statement(ic_node:ICompilerIcNode):void {
-        this._ic_statements.push(ic_node);
+    get_ic_heap_size():number { return this._ic_heap_size; }
+
+
+    set_ic_stack_length(stack_length:number):void {
+        this._ic_stack_length = stack_length;
     }
 
-    set_ic_statements(nodes:ICompilerIcNode[]) {
-        this._ic_statements = nodes;
+    get_ic_stack_length():number { return this._ic_stack_length; }
+    
+
+    add_ic_ebb(ebb:ICompilerIcEbb, code_name:string):void {
+        this._ic_ebb_map.set(ebb.ic_ebb_name, ebb);
+        this._ic_ebb_code_map.set(code_name, ebb);
     }
 
-    get_ic_statements():ICompilerIcNode[] {
-        return this._ic_statements;
+    get_ic_ebb(ebb_name:string):ICompilerIcEbb {
+        if (this._ic_ebb_map.has(ebb_name)) {
+            return this._ic_ebb_map.get(ebb_name);
+        }
+        return this._ic_ebb_code_map.get(ebb_name);
     }
 
-
-	// IC LABELS
-    add_ic_label(label_index:number=undefined):string {
-        const label_name = this._func_name + '_label_' + this._ic_labels_index.size;
-        label_index = label_index ? label_index : this._ic_statements.length;
-		
-        this._ic_labels_index.set(label_name, label_index);
-		
-		return label_name;
+    get_ic_ebb_map():Map<string,ICompilerIcEbb> {
+        return this._ic_ebb_map;
     }
 
-    has_ic_label(label_name:string):boolean {
-        return this._ic_labels_index.has(label_name);
+    get_ic_ebb_count():number {
+        return this._ic_ebb_map.size;
+    }
+    
+
+    get_ic_variable_count():number {
+        return this._ic_variables_count;
     }
 
-    get_ic_label_index(label_name:string):number {
-        return this._ic_labels_index.get(label_name);
-    }
-
-    set_ic_label_index(label_name:string, label_index:number):void {
-        label_index = label_index ? label_index : this._ic_statements.length;
-        this._ic_labels_index.set(label_name, label_index);
+    add_ic_variable():string {
+        return 'v' + this._ic_variables_count++;
     }
 	
     
