@@ -1,6 +1,7 @@
 
 import MathLangCstToAstVisitorExpression from './math_lang_cst_to_ast_visitor_expressions';
 
+import ICompilerType from '../../core/icompiler_type';
 import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
 import CompilerScope from '../0-common/compiler_scope';
 
@@ -27,7 +28,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         // this.dump_ctx('Record', ctx);
         
         const ast_record = {
-            type: AST.EXPR_RECORD,
+            ast_code: AST.EXPR_RECORD,
             ic_type:this.get_record_type(ctx, AST.EXPR_RECORD),
             items:<any> {}
         };
@@ -64,7 +65,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         
         if (!ctx.BinaryExpression) {
             return {
-                type: AST.EXPR_ARGS,
+                ast_code: AST.EXPR_ARGS,
                 ic_type:this.get_array_type(ctx, AST.EXPR_ARGS),
                 ic_subtypes:[],
                 items:[]
@@ -90,7 +91,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         }
         
         return {
-            type: AST.EXPR_ARGS,
+            ast_code: AST.EXPR_ARGS,
             ic_type:this.get_array_type(ctx, AST.EXPR_ARGS),
             ic_subtypes:ic_unique_subtypes.length == 1 ? ic_unique_subtypes : ic_subtypes,
             items: nodes
@@ -111,7 +112,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         // EMPTY LIST OF ARGUMENTS
         if ( ! ctx.ArgumentWithIds) {
             return {
-                type: AST.EXPR_ARGS_IDS,
+                ast_code: AST.EXPR_ARGS_IDS,
                 ic_type:this.get_array_type(ctx, AST.EXPR_ARGS_IDS),
                 ic_subtypes:[],
                 items: []
@@ -119,19 +120,19 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         }
 
         const ids:any = [];
-        const ic_subtypes:string[] = [];
+        const ic_subtypes:ICompilerType[] = [];
 
         let loop_argument_ctx:any;
         let loop_argument:any;
         for(loop_argument_ctx of ctx.ArgumentWithIds) {
             loop_argument = this.visit(loop_argument_ctx);
 
-            ic_subtypes.push(loop_argument.type);
+            ic_subtypes.push(loop_argument.ic_type);
             ids.push(loop_argument.id);
         }
         
         return {
-            type: AST.EXPR_ARGS_IDS,
+            ast_code: AST.EXPR_ARGS_IDS,
             ic_type:this.get_array_type(ctx, AST.EXPR_ARGS_IDS),
             ic_subtypes:ic_subtypes,
             items: ids
@@ -150,7 +151,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         // this.dump_ctx('ArgumentWithIds', ctx);
 
         const arg_type = ctx.arg_type && ctx.arg_type[0] ? this.visit(ctx.arg_type[0]) : this.get_type('INTEGER', ctx, 'ArgumentWithIds');
-        return { id:ctx.arg_id[0].image, type: arg_type };
+        return { id:ctx.arg_id[0].image, ic_type: arg_type };
     }
 
 
@@ -166,7 +167,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
 
         if (!ctx.BinaryExpression) {
             return {
-                type: AST.EXPR_ARRAY,
+                ast_code: AST.EXPR_ARRAY,
                 ic_type:this.get_array_type(ctx, AST.EXPR_ARRAY),
                 ic_subtypes:[this.get_unknow_type(ctx, AST.EXPR_ARRAY)],
                 items:<any>undefined
@@ -195,7 +196,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         }
         
         return {
-            type: AST.EXPR_ARRAY,
+            ast_code: AST.EXPR_ARRAY,
             ic_type:this.get_array_type(ctx, AST.EXPR_ARRAY),
             ic_subtypes:ic_unique_subtypes.length == 1 ? ic_unique_subtypes : ic_subtypes,
             items: nodes
@@ -224,7 +225,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
             default:   ic_func_name = 'unknow'; break;
         }
         return {
-            type: AST.EXPR_BINOP,
+            ast_code: AST.EXPR_BINOP,
             value: cst_operator,
             ic_function: ic_func_name
         }
@@ -242,7 +243,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         // this.dump_ctx('BinaryMultDivOps', ctx);
         const cst_operator = ctx.binop[0].image;
         return {
-            type: AST.EXPR_BINOP,
+            ast_code: AST.EXPR_BINOP,
             value: cst_operator,
             ic_function: cst_operator == '*' ? 'mul' : 'div'
         }
@@ -260,7 +261,7 @@ export default class MathLangCstToAstVisitor extends MathLangCstToAstVisitorExpr
         // this.dump_ctx('BinaryAddSubOps', ctx);
         const cst_operator = ctx.binop[0].image;
         return {
-            type: AST.EXPR_BINOP,
+            ast_code: AST.EXPR_BINOP,
             value: cst_operator,
             ic_function: cst_operator == '+' ? 'add' : 'sub'
         }

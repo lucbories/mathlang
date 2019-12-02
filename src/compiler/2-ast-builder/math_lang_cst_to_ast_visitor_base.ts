@@ -99,7 +99,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * 
      * @returns ICompilerType
      */
-    get_type(type_name:string, cst_context:any, ast_node_type:any){
+    get_type(type_name:string, cst_context:any, ast_node_type:any):ICompilerType{
         const get_type = this._compiler_scope.get_available_lang_type(type_name);
         if (! get_type){
             this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
@@ -381,8 +381,8 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns ICompilerType
      */
 	compute_binop_type(operator:string, left_type:any, right_type:any, cst_context:any, ast_node_type:string):ICompilerType {
-        const key_left:string = left_type ? left_type.ic_type.get_type_name() : 'UNKNOW';
-        const key_right:string = right_type ? right_type.ic_type.get_type_name() : 'UNKNOW';
+        const key_left:string  = left_type  ? left_type.get_type_name()  : 'UNKNOW';
+        const key_right:string = right_type ? right_type.get_type_name() : 'UNKNOW';
         const key:string = operator + key_left + key_right;
 
         // console.log('compute_binop_type.key', key);
@@ -404,7 +404,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns ICompilerType
      */
 	compute_preunop_type(operator:string, right_type:any, cst_context:any, ast_node_type:string):ICompilerType {
-        const key_right:string = right_type ? right_type.ic_type.get_type_name() : 'UNKNOW';
+        const key_right:string = right_type ? right_type.get_type_name() : 'UNKNOW';
         const key:string = operator + key_right;
 
         // console.log('compute_preunop_type.key', key);
@@ -426,7 +426,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns ICompilerType
      */
 	compute_postunop_type(operator:string, left_type:any, cst_context:any, ast_node_type:string):ICompilerType {
-        const key_left:string = left_type ? left_type.ic_type.get_type_name() : 'UNKNOW';
+        const key_left:string = left_type ? left_type.get_type_name() : 'UNKNOW';
         const key:string = operator + key_left;
 
         // console.log('compute_postunop_type.key', key);

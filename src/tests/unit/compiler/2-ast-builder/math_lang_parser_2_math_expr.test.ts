@@ -37,31 +37,31 @@ describe('MathLang math expression parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_BINOP_ADDSUB,
+            ast_code:AST.EXPR_BINOP_ADDSUB,
             ic_type:compiler.TYPE_UNKNOW,
             lhs:{
-                type:AST.EXPR_PRIMARY_INTEGER,
+                ast_code:AST.EXPR_PRIMARY_INTEGER,
                 ic_type:compiler.TYPE_INTEGER,
                 value:'12'
             },
             operator: {
                 ic_function:'add',
-                type:'BINOP',
+                ast_code:'BINOP',
                 value:'+'
             },
             rhs:{
-                type:'PARENTHESIS_EXPRESSION',
+                ast_code:'PARENTHESIS_EXPRESSION',
                 ic_type:compiler.TYPE_UNKNOW,
                 expression: {
-                    type:AST.EXPR_BINOP_MULTDIV,
+                    ast_code:AST.EXPR_BINOP_MULTDIV,
                     ic_type:compiler.TYPE_UNKNOW,
                     lhs:{
-                        type:'PREUNOP_EXPRESSION',
+                        ast_code:'PREUNOP_EXPRESSION',
                         ic_type:compiler.TYPE_UNKNOW,
                         ic_function:'add_one',
                         operator:'++',
                         rhs: {
-                            type:AST.EXPR_MEMBER_ID,
+                            ast_code:AST.EXPR_MEMBER_ID,
                             ic_type:compiler.TYPE_UNKNOW,
                             name:'b',
                             members:EMPTY_ARRAY
@@ -69,11 +69,11 @@ describe('MathLang math expression parser', () => {
                     },
                     operator:{
                         ic_function:'mul',
-                        type:'BINOP',
+                        ast_code:'BINOP',
                         value:'*'
                     },
                     rhs:{
-                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ast_code:AST.EXPR_PRIMARY_INTEGER,
                         ic_type:compiler.TYPE_INTEGER,
                         value:'8'
                     }
@@ -109,21 +109,21 @@ describe('MathLang math expression parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_BINOP_MULTDIV,
+            ast_code:AST.EXPR_BINOP_MULTDIV,
             ic_type:compiler.TYPE_UNKNOW,
             lhs:{
-                type:'PARENTHESIS_EXPRESSION',
+                ast_code:'PARENTHESIS_EXPRESSION',
                 ic_type:compiler.TYPE_UNKNOW,
                 expression: {
-                    type:AST.EXPR_BINOP_MULTDIV,
+                    ast_code:AST.EXPR_BINOP_MULTDIV,
                     ic_type:compiler.TYPE_UNKNOW,
                     lhs:{
-                        type:'PREUNOP_EXPRESSION',
+                        ast_code:'PREUNOP_EXPRESSION',
                         ic_type:compiler.TYPE_UNKNOW,
                         ic_function:'sub_one',
                         operator:'--',
                         rhs: {
-                            type:AST.EXPR_MEMBER_ID,
+                            ast_code:AST.EXPR_MEMBER_ID,
                             ic_type:compiler.TYPE_UNKNOW,
                             name:'b',
                             members:EMPTY_ARRAY
@@ -131,11 +131,11 @@ describe('MathLang math expression parser', () => {
                     },
                     operator:{
                         ic_function:'div',
-                        type:'BINOP',
+                        ast_code:'BINOP',
                         value:'/'
                     },
                     rhs:{
-                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ast_code:AST.EXPR_PRIMARY_INTEGER,
                         ic_type:compiler.TYPE_INTEGER,
                         value:'8'
                     }
@@ -143,11 +143,11 @@ describe('MathLang math expression parser', () => {
             },
             operator: {
                 ic_function:'mul',
-                type:'BINOP',
+                ast_code:'BINOP',
                 value:'*'
             },
             rhs:{
-                type:AST.EXPR_PRIMARY_INTEGER,
+                ast_code:AST.EXPR_PRIMARY_INTEGER,
                 ic_type:compiler.TYPE_INTEGER,
                 value:'56'
             }
@@ -181,28 +181,28 @@ describe('MathLang math expression parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_BINOP_MULTDIV,
+            ast_code:AST.EXPR_BINOP_MULTDIV,
             ic_type:compiler.TYPE_UNKNOW,
             lhs:{
-                type:AST.EXPR_PRIMARY_INTEGER,
+                ast_code:AST.EXPR_PRIMARY_INTEGER,
                 ic_type:compiler.TYPE_INTEGER,
                 value:'12'
             },
             operator: {
                 ic_function:'div',
-                type:'BINOP',
+                ast_code:'BINOP',
                 value:'/'
             },
             rhs:{
-                type:AST.EXPR_BINOP_MULTDIV,
+                ast_code:AST.EXPR_BINOP_MULTDIV,
                 ic_type:compiler.TYPE_UNKNOW,
                 lhs:{
-                    type:'PREUNOP_EXPRESSION',
+                    ast_code:'PREUNOP_EXPRESSION',
                     ic_type:compiler.TYPE_UNKNOW,
                     ic_function:'factorial',
                     operator:'!',
                     rhs: {
-                        type:AST.EXPR_MEMBER_ID,
+                        ast_code:AST.EXPR_MEMBER_ID,
                         ic_type:compiler.TYPE_UNKNOW,
                         name:'b',
                         members:EMPTY_ARRAY
@@ -210,11 +210,11 @@ describe('MathLang math expression parser', () => {
                 },
                 operator:{
                     ic_function:'div',
-                    type:'BINOP',
+                    ast_code:'BINOP',
                     value:'/'
                 },
                 rhs:{
-                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ast_code:AST.EXPR_PRIMARY_INTEGER,
                     ic_type:compiler.TYPE_INTEGER,
                     value:'78e-12'
                 }
@@ -249,37 +249,37 @@ describe('MathLang math expression parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_BINOP_ADDSUB,
+            ast_code:AST.EXPR_BINOP_ADDSUB,
             ic_type:compiler.TYPE_INTEGER,
             lhs:{
-                type:AST.EXPR_BINOP_MULTDIV,
+                ast_code:AST.EXPR_BINOP_MULTDIV,
                 ic_type:compiler.TYPE_INTEGER,
                 lhs:{
-                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ast_code:AST.EXPR_PRIMARY_INTEGER,
                     ic_type:compiler.TYPE_INTEGER,
                     value:'12'
                 },
                 operator:{
                     ic_function:'mul',
-                    type:'BINOP',
+                    ast_code:'BINOP',
                     value:'*'
                 },
                 rhs:{
-                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ast_code:AST.EXPR_PRIMARY_INTEGER,
                     ic_type:compiler.TYPE_INTEGER,
                     value:'56'
                 }
             },
             operator: {
                 ic_function:'add',
-                type:'BINOP',
+                ast_code:'BINOP',
                 value:'+'
             },
             rhs:{
-                type:AST.EXPR_UNOP_POST,
+                ast_code:AST.EXPR_UNOP_POST,
                 ic_type:compiler.TYPE_INTEGER,
                 lhs:{
-                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ast_code:AST.EXPR_PRIMARY_INTEGER,
                     ic_type:compiler.TYPE_INTEGER,
                     value:'78'
                 },
@@ -316,48 +316,48 @@ describe('MathLang math expression parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_BINOP_COMPARE,
+            ast_code:AST.EXPR_BINOP_COMPARE,
             ic_type:compiler.TYPE_BOOLEAN,
             lhs:{
-                type:AST.EXPR_MEMBER_ID,
+                ast_code:AST.EXPR_MEMBER_ID,
                 ic_type:compiler.TYPE_UNKNOW,
                 name:'abc_UI_23',
                 members:EMPTY_ARRAY
             },
             operator:{
                 ic_function:'inf',
-                type:'BINOP',
+                ast_code:'BINOP',
                 value:'<'
             },
             rhs:{
-                type:AST.EXPR_BINOP_ADDSUB,
+                ast_code:AST.EXPR_BINOP_ADDSUB,
                 ic_type:compiler.TYPE_INTEGER,
                 lhs:{
-                    type:AST.EXPR_BINOP_MULTDIV,
+                    ast_code:AST.EXPR_BINOP_MULTDIV,
                     ic_type:compiler.TYPE_INTEGER,
                     lhs:{
-                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ast_code:AST.EXPR_PRIMARY_INTEGER,
                         ic_type:compiler.TYPE_INTEGER,
                         value:'12'
                     },
                     operator:{
                         ic_function:'mul',
-                        type:'BINOP',
+                        ast_code:'BINOP',
                         value:'*'
                     },
                     rhs:{
-                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ast_code:AST.EXPR_PRIMARY_INTEGER,
                         ic_type:compiler.TYPE_INTEGER,
                         value:'56'
                     }
                 },
                 operator: {
                     ic_function:'add',
-                    type:'BINOP',
+                    ast_code:'BINOP',
                     value:'+'
                 },
                 rhs:{
-                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ast_code:AST.EXPR_PRIMARY_INTEGER,
                     ic_type:compiler.TYPE_INTEGER,
                     value:'78'
                 }
@@ -392,48 +392,48 @@ describe('MathLang math expression parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_BINOP_COMPARE,
+            ast_code:AST.EXPR_BINOP_COMPARE,
             ic_type:compiler.TYPE_BOOLEAN,
             rhs:{
-                type:AST.EXPR_MEMBER_ID,
+                ast_code:AST.EXPR_MEMBER_ID,
                 ic_type:compiler.TYPE_UNKNOW,
                 name:'a45Bc',
                 members:EMPTY_ARRAY
             },
             operator:{
                 ic_function:'sup',
-                type:'BINOP',
+                ast_code:'BINOP',
                 value:'>'
             },
             lhs:{
-                type:AST.EXPR_BINOP_ADDSUB,
+                ast_code:AST.EXPR_BINOP_ADDSUB,
                 ic_type:compiler.TYPE_INTEGER,
                 lhs:{
-                    type:AST.EXPR_BINOP_MULTDIV,
+                    ast_code:AST.EXPR_BINOP_MULTDIV,
                     ic_type:compiler.TYPE_INTEGER,
                     lhs:{
-                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ast_code:AST.EXPR_PRIMARY_INTEGER,
                         ic_type:compiler.TYPE_INTEGER,
                         value:'12'
                     },
                     operator:{
                         ic_function:'mul',
-                        type:'BINOP',
+                        ast_code:'BINOP',
                         value:'*'
                     },
                     rhs:{
-                        type:AST.EXPR_PRIMARY_INTEGER,
+                        ast_code:AST.EXPR_PRIMARY_INTEGER,
                         ic_type:compiler.TYPE_INTEGER,
                         value:'56'
                     }
                 },
                 operator: {
                     ic_function:'add',
-                    type:'BINOP',
+                    ast_code:'BINOP',
                     value:'+'
                 },
                 rhs:{
-                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ast_code:AST.EXPR_PRIMARY_INTEGER,
                     ic_type:compiler.TYPE_INTEGER,
                     value:'78'
                 }

@@ -1,19 +1,18 @@
 
 import ICompilerError from '../../core/icompiler_error';
 import ICompilerType from '../../core/icompiler_type';
-import ICompilerScope from '../../core/icompiler_scope';
 import ICompilerFunction from '../../core/icompiler_function';
 import {
-    ICompilerIcInstr, ICompilerIcEbb, IC_OPCODES, ICompilerIcEbbOperand, ICompilerIcInstrOperand,
+    ICompilerIcInstr, ICompilerIcEbb, ICompilerIcOpCode, IC_OPCODES, ICompilerIcEbbOperand, ICompilerIcInstrOperand,
     IC_LABELS, IC_TEXTS
 } from '../../core/icompiler_ic_instruction';
 
 
 
 export default class CompilerIcNode implements ICompilerIcInstr {
-    constructor(public ic_code: IIcNodeKindOf, public ic_type: ICompilerType) { }
+    constructor(public ic_code: ICompilerIcOpCode, public ic_type: ICompilerType, public ic_opds:ICompilerIcInstrOperand[], public ic_var_name:string) { }
 
-    get_node_kindof(): IIcNodeKindOf {
+    get_node_kindof(): ICompilerIcOpCode {
         return this.ic_code;
     }
 

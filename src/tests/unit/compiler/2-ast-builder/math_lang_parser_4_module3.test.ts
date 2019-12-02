@@ -178,7 +178,7 @@ describe('MathLang module parser: EXPORTS', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.PROGRAM,
+            ast_code:AST.PROGRAM,
             block:[
 				{
 					expression: {
@@ -187,20 +187,20 @@ describe('MathLang module parser: EXPORTS', () => {
 						name: 'funcB',
 						operands_expressions: EMPTY_ARRAY,
 						operands_types: EMPTY_ARRAY,
-						type: AST.EXPR_MEMBER_FUNC_CALL
+						ast_code: AST.EXPR_MEMBER_FUNC_CALL
 					},
 					ic_type: compiler.TYPE_INTEGER,
-					type: AST.STAT_RETURN
+					ast_code: AST.STAT_RETURN
 				}
 		  ],
             modules:[
 				{
-					type:AST.STAT_MODULE,
+					ast_code:AST.STAT_MODULE,
 					module_name: 'ModuleA',
 					uses:EMPTY_ARRAY,
 					functions:[
 						{
-							type:AST.STAT_FUNCTION,
+							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
 							name: 'funcA1',
 							is_exported:true,
@@ -208,10 +208,10 @@ describe('MathLang module parser: EXPORTS', () => {
 							operands_names:EMPTY_ARRAY,
 							block: [
 								{
-									type:AST.STAT_RETURN,
+									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
 									expression:{
-										type:AST.EXPR_PRIMARY_INTEGER,
+										ast_code:AST.EXPR_PRIMARY_INTEGER,
 										ic_type:compiler.TYPE_INTEGER,
 										value:'11'
 									}
@@ -219,7 +219,7 @@ describe('MathLang module parser: EXPORTS', () => {
 							]
 						},
 						{
-							type:AST.STAT_FUNCTION,
+							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
 							name: 'funcA2',
 							is_exported:true,
@@ -227,10 +227,10 @@ describe('MathLang module parser: EXPORTS', () => {
 							operands_names:EMPTY_ARRAY,
 							block: [
 								{
-									type:AST.STAT_RETURN,
+									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
 									expression:{
-										type:AST.EXPR_PRIMARY_INTEGER,
+										ast_code:AST.EXPR_PRIMARY_INTEGER,
 										ic_type:compiler.TYPE_INTEGER,
 										value:'12'
 									}
@@ -238,7 +238,7 @@ describe('MathLang module parser: EXPORTS', () => {
 							]
 						},
 						{
-							type:AST.STAT_FUNCTION,
+							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
 							name: 'funcA3',
 							is_exported:false,
@@ -246,10 +246,10 @@ describe('MathLang module parser: EXPORTS', () => {
 							operands_names:EMPTY_ARRAY,
 							block: [
 								{
-									type:AST.STAT_RETURN,
+									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
 									expression:{
-										type:AST.EXPR_PRIMARY_INTEGER,
+										ast_code:AST.EXPR_PRIMARY_INTEGER,
 										ic_type:compiler.TYPE_INTEGER,
 										value:'13'
 									}
@@ -260,12 +260,12 @@ describe('MathLang module parser: EXPORTS', () => {
 					variables:EMPTY_ARRAY
 				},
 				{
-					type:AST.STAT_MODULE,
+					ast_code:AST.STAT_MODULE,
 					module_name: 'ModuleB',
 					uses:[{name:'ModuleA', alias:'MA1', imports:['funcA1']}, {name:'ModuleA', alias:'MA2', imports:['funcA2']}],
 					functions:[
 						{
-							type:AST.STAT_FUNCTION,
+							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
 							name: 'funcB',
 							is_exported:false,
@@ -273,7 +273,7 @@ describe('MathLang module parser: EXPORTS', () => {
 							operands_names:EMPTY_ARRAY,
 							block: [
 								{
-									type:AST.STAT_RETURN,
+									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
 									expression:{
 										lhs: {
@@ -285,28 +285,28 @@ describe('MathLang module parser: EXPORTS', () => {
 														ic_type: compiler.TYPE_INTEGER,
 														operands_expressions: EMPTY_ARRAY,
 														operands_types: EMPTY_ARRAY,
-														type: AST.EXPR_MEMBER_METHOD_CALL
+														ast_code: AST.EXPR_MEMBER_METHOD_CALL
 													}
 												],
 												name: 'MA1',
-												type: AST.EXPR_MEMBER_FUNC_CALL
+												ast_code: AST.EXPR_MEMBER_FUNC_CALL
 											},
 											operator: {
 												ic_function: 'mul',
-												type: AST.EXPR_BINOP,
+												ast_code: AST.EXPR_BINOP,
 												value: "*"
 											},
 											rhs: {
 												ic_type: compiler.TYPE_INTEGER,
-												type: compiler.TYPE_INTEGER,
+												ast_code: compiler.TYPE_INTEGER,
 												value: '2'
 											},
-											type: AST.EXPR_BINOP_MULTDIV,
+											ast_code: AST.EXPR_BINOP_MULTDIV,
 											ic_type:compiler.TYPE_INTEGER
 										},
 										operator: {
 											ic_function: 'add',
-											type: AST.EXPR_BINOP,
+											ast_code: AST.EXPR_BINOP,
 											value: "+"
 										},
 										rhs: {
@@ -317,13 +317,13 @@ describe('MathLang module parser: EXPORTS', () => {
 													ic_type: compiler.TYPE_INTEGER,
 													operands_expressions: EMPTY_ARRAY,
 													operands_types: EMPTY_ARRAY,
-													type: AST.EXPR_MEMBER_METHOD_CALL
+													ast_code: AST.EXPR_MEMBER_METHOD_CALL
 												}
 											],
 											name: 'MA2',
-											type: AST.EXPR_MEMBER_FUNC_CALL
+											ast_code: AST.EXPR_MEMBER_FUNC_CALL
 										},
-										type: AST.EXPR_BINOP_ADDSUB,
+										ast_code: AST.EXPR_BINOP_ADDSUB,
 										ic_type:compiler.TYPE_INTEGER
 									}
 								}

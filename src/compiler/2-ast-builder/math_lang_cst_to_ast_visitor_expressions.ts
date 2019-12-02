@@ -42,7 +42,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             loop_ast_op  = this.visit(ctx.operator[loop_index]);
             loop_ast_rhs = this.visit(ctx.rhs[loop_index]);
             loop_ast = {
-                type:     AST.EXPR_BINOP_COMPARE,
+                ast_code:     AST.EXPR_BINOP_COMPARE,
                 ic_type:  this.get_boolean_type(loop_ast_op, AST.EXPR_BINOP_COMPARE),
                 lhs:      loop_ast_lhs,
                 operator: loop_ast_op,
@@ -73,8 +73,8 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             loop_ast_op  = this.visit(ctx.operator[loop_index]);
             loop_ast_rhs = this.visit(ctx.rhs[loop_index]);
             loop_ast = {
-                type:     AST.EXPR_BINOP_MULTDIV,
-                ic_type:  this.compute_binop_type(loop_ast_op.value, loop_ast_lhs, loop_ast_rhs, ctx, AST.EXPR_BINOP_MULTDIV),
+                ast_code:     AST.EXPR_BINOP_MULTDIV,
+                ic_type:  this.compute_binop_type(loop_ast_op.value, loop_ast_lhs.ic_type, loop_ast_rhs.ic_type, ctx, AST.EXPR_BINOP_MULTDIV),
                 lhs:      loop_ast_lhs,
                 operator: loop_ast_op,
                 rhs:      loop_ast_rhs
@@ -104,8 +104,8 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             loop_ast_op  = this.visit(ctx.operator[loop_index]);
             loop_ast_rhs = this.visit(ctx.rhs[loop_index]);
             loop_ast = {
-                type:     AST.EXPR_BINOP_ADDSUB,
-                ic_type:  this.compute_binop_type(loop_ast_op.value, loop_ast_lhs, loop_ast_rhs, ctx, AST.EXPR_BINOP_ADDSUB),
+                ast_code:     AST.EXPR_BINOP_ADDSUB,
+                ic_type:  this.compute_binop_type(loop_ast_op.value, loop_ast_lhs.ic_type, loop_ast_rhs.ic_type, ctx, AST.EXPR_BINOP_ADDSUB),
                 lhs:      loop_ast_lhs,
                 operator: loop_ast_op,
                 rhs:      loop_ast_rhs
@@ -130,7 +130,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
         if (node_rhs && node_op) {
             return {
                 ast_code: AST.EXPR_UNOP_PREUNOP,
-                ic_type:this.compute_preunop_type(node_op, node_rhs, ctx, AST.EXPR_UNOP_PREUNOP),
+                ic_type:this.compute_preunop_type(node_op, node_rhs.ic_type, ctx, AST.EXPR_UNOP_PREUNOP),
                 rhs: node_rhs,
                 operator: node_op,
                 ic_function: this.get_prefix_operator_function(node_op)
@@ -171,7 +171,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
         if (node_lhs && node_op) {
             return {
                 ast_code: AST.EXPR_UNOP_POST,
-                ic_type:this.compute_postunop_type(node_op, node_lhs, ctx, AST.EXPR_UNOP_POST),
+                ic_type:this.compute_postunop_type(node_op, node_lhs.ic_type, ctx, AST.EXPR_UNOP_POST),
                 lhs: node_lhs,
                 operator: node_op,
                 ic_function: this.get_postfix_operator_function(node_op)
@@ -487,7 +487,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
         // const func_scope = this.get_scopes_map().get(id);
 
         const ast_func_call_node = {
-            type:AST.EXPR_MEMBER_METHOD_CALL,
+            ast_code:AST.EXPR_MEMBER_METHOD_CALL,
             ic_type: this.get_unknow_type(ctx, ast_args_node),
             func_name:id,
             operands_types:ast_args_node.ic_subtypes ? ast_args_node.ic_subtypes : [],

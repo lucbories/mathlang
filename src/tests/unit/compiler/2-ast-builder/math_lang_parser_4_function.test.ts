@@ -38,11 +38,11 @@ describe('MathLang function declaration parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.PROGRAM,
+            ast_code:AST.PROGRAM,
             modules:EMPTY_ARRAY,
             block:[
                 {
-                    type:AST.STAT_FUNCTION,
+                    ast_code:AST.STAT_FUNCTION,
                     ic_type: compiler.TYPE_BOOLEAN,
                     name: 'f',
                     is_exported:false,
@@ -50,10 +50,10 @@ describe('MathLang function declaration parser', () => {
                     operands_names:EMPTY_ARRAY,
                     block: [
                         {
-                            type:AST.STAT_RETURN,
+                            ast_code:AST.STAT_RETURN,
                             ic_type:compiler.TYPE_KEYWORD,
                             expression:{
-                                type:AST.EXPR_UNOP_PRE_TRUE,
+                                ast_code:AST.EXPR_UNOP_PRE_TRUE,
                                 ic_type:compiler.TYPE_KEYWORD
                             }
                         }
@@ -90,11 +90,11 @@ describe('MathLang function declaration parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.PROGRAM,
+            ast_code:AST.PROGRAM,
             modules:EMPTY_ARRAY,
             block:[
                 {
-                    type:AST.STAT_FUNCTION,
+                    ast_code:AST.STAT_FUNCTION,
                     ic_type: compiler.TYPE_BOOLEAN,
                     name: 'f',
                     is_exported:false,
@@ -102,10 +102,10 @@ describe('MathLang function declaration parser', () => {
                     operands_names:['x'],
                     block: [
                         {
-                            type:AST.STAT_RETURN,
+                            ast_code:AST.STAT_RETURN,
                             ic_type:compiler.TYPE_KEYWORD,
                             expression:{
-                                type:AST.EXPR_UNOP_PRE_TRUE,
+                                ast_code:AST.EXPR_UNOP_PRE_TRUE,
                                 ic_type:compiler.TYPE_KEYWORD
                             }
                         }
@@ -143,11 +143,11 @@ describe('MathLang function declaration parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.PROGRAM,
+            ast_code:AST.PROGRAM,
             modules:EMPTY_ARRAY,
             block:[
                 {
-                    type:AST.STAT_FUNCTION,
+                    ast_code:AST.STAT_FUNCTION,
                     ic_type: compiler.TYPE_BOOLEAN,
                     name: 'f',
                     is_exported:false,
@@ -155,23 +155,23 @@ describe('MathLang function declaration parser', () => {
                     operands_names:['x'],
                     block: [
                         {
-                            type:AST.STAT_RETURN,
+                            ast_code:AST.STAT_RETURN,
                             ic_type:compiler.TYPE_INTEGER,
                             expression:{
-                                type:AST.EXPR_BINOP_ADDSUB,
+                                ast_code:AST.EXPR_BINOP_ADDSUB,
                                 ic_type:compiler.TYPE_INTEGER,
                                 lhs:{
-                                    type:AST.EXPR_PRIMARY_INTEGER,
+                                    ast_code:AST.EXPR_PRIMARY_INTEGER,
                                     ic_type:compiler.TYPE_INTEGER,
                                     value:'1'
                                 },
                                 operator:{
                                     ic_function:'add',
-                                    type:AST.EXPR_BINOP,
+                                    ast_code:AST.EXPR_BINOP,
                                     value:'+'
                                 },
                                 rhs:{
-                                    type:AST.EXPR_PRIMARY_INTEGER,
+                                    ast_code:AST.EXPR_PRIMARY_INTEGER,
                                     ic_type:compiler.TYPE_INTEGER,
                                     value:'2'
                                 }
@@ -211,11 +211,11 @@ describe('MathLang function declaration parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.PROGRAM,
+            ast_code:AST.PROGRAM,
             modules:EMPTY_ARRAY,
             block:[
                 {
-                    type:AST.STAT_FUNCTION,
+                    ast_code:AST.STAT_FUNCTION,
                     ic_type: compiler.TYPE_STRING,
                     name: 'f',
                     is_exported:false,
@@ -223,24 +223,24 @@ describe('MathLang function declaration parser', () => {
                     operands_names:['x', 'y'],
                     block: [
                         {
-                            type:AST.STAT_RETURN,
+                            ast_code:AST.STAT_RETURN,
                             ic_type:compiler.TYPE_STRING,
                             expression:{
-                                type:AST.EXPR_BINOP_ADDSUB,
+                                ast_code:AST.EXPR_BINOP_ADDSUB,
                                 ic_type:compiler.TYPE_STRING,
                                 lhs:{
-                                    type:AST.EXPR_MEMBER_ID,
+                                    ast_code:AST.EXPR_MEMBER_ID,
                                     ic_type:compiler.TYPE_BIGFLOAT,
                                     name:'x',
                                     members:EMPTY_ARRAY
                                 },
                                 operator:{
                                     ic_function:'add',
-                                    type:AST.EXPR_BINOP,
+                                    ast_code:AST.EXPR_BINOP,
                                     value:'+'
                                 },
                                 rhs:{
-                                    type:AST.EXPR_MEMBER_ID,
+                                    ast_code:AST.EXPR_MEMBER_ID,
                                     ic_type:compiler.TYPE_STRING,
                                     name:'y',
                                     members:EMPTY_ARRAY
@@ -294,27 +294,27 @@ describe('MathLang function declaration parser', () => {
 
         // TEST AST
         const expected_ast = {
-            "type": AST.PROGRAM,
+            ast_code: AST.PROGRAM,
             "modules":EMPTY_ARRAY,
             "block": [
                 {
-                    "type": AST.BLOCK,
+                    ast_code: AST.BLOCK,
                     "statements":[
                         {
-                            "type": AST.STAT_ASSIGN_VARIABLE,
+                            ast_code: AST.STAT_ASSIGN_VARIABLE,
                             "ic_type": compiler.TYPE_INTEGER,
                             "name": "b",
                             "is_async":false,
                             "members":EMPTY_ARRAY,
                             "expression": {
                                 "name":"m2",
-                                "type": AST.EXPR_MEMBER_FUNC_CALL,
+                                ast_code: AST.EXPR_MEMBER_FUNC_CALL,
                                 "ic_type": compiler.TYPE_INTEGER,
                                 "members":EMPTY_ARRAY,
                                 "operands_types":[compiler.TYPE_INTEGER],
                                 "operands_expressions":[
                                     {
-                                        "type": AST.EXPR_PRIMARY_INTEGER,
+                                        ast_code: AST.EXPR_PRIMARY_INTEGER,
                                         "ic_type": compiler.TYPE_INTEGER,
                                         "value": "12"
                                     }
@@ -324,19 +324,19 @@ describe('MathLang function declaration parser', () => {
                     ]
                 },
                 {
-                    "type": AST.STAT_ASSIGN_VARIABLE,
+                    ast_code: AST.STAT_ASSIGN_VARIABLE,
                     "ic_type": compiler.TYPE_INTEGER,
                     "name": "a",
                     "is_async":false,
                     "members":EMPTY_ARRAY,
                     "expression": {
-                        type: AST.EXPR_PRIMARY_INTEGER,
+                        ast_code: AST.EXPR_PRIMARY_INTEGER,
                         "ic_type": compiler.TYPE_INTEGER,
                         "value": "456"
                     }
                 },
                 {
-                    "type": "FUNCTION_STATEMENT",
+                    ast_code: "FUNCTION_STATEMENT",
                     "ic_type": compiler.TYPE_BIGFLOAT,
                     "name": "myfunc",
                     "is_exported":false,
@@ -344,26 +344,26 @@ describe('MathLang function declaration parser', () => {
                     "operands_names": ["x", "y"],
                     "block": [
                         {
-                            "type": "IF_STATEMENT",
+                            ast_code: "IF_STATEMENT",
                             "condition": {
-                                "type": "COMPARATOR_EXPRESSION",
+                                ast_code: "COMPARATOR_EXPRESSION",
                                 "ic_type": compiler.TYPE_BOOLEAN,
                                 "lhs": {
-                                    "type": "ADDSUB_EXPRESSION",
+                                    ast_code: "ADDSUB_EXPRESSION",
                                     "ic_type": compiler.TYPE_BIGFLOAT,
                                     "lhs": {
-                                        "type": "ID_MEMBER_EXPRESSION",
+                                        ast_code: "ID_MEMBER_EXPRESSION",
                                         "ic_type": compiler.TYPE_BIGFLOAT,
                                         "name": "x",
                                         "members":EMPTY_ARRAY
                                     },
                                     "operator": {
                                         "ic_function":"add",
-                                        "type": "BINOP",
+                                        ast_code: "BINOP",
                                         "value": "+"
                                     },
                                     "rhs": {
-                                        "type": "ID_MEMBER_EXPRESSION",
+                                        ast_code: "ID_MEMBER_EXPRESSION",
                                         "ic_type": compiler.TYPE_INTEGER,
                                         "name": "y",
                                         "members":EMPTY_ARRAY
@@ -371,35 +371,35 @@ describe('MathLang function declaration parser', () => {
                                 },
                                 "operator": {
                                     "ic_function":"sup",
-                                    "type": "BINOP",
+                                    ast_code: "BINOP",
                                     "value": ">"
                                 },
                                 "rhs": {
-                                    type: AST.EXPR_PRIMARY_INTEGER,
+                                    ast_code: AST.EXPR_PRIMARY_INTEGER,
                                     "ic_type": compiler.TYPE_INTEGER,
                                     "value": "0"
                                 }
                             },
                             "then": [
                                 {
-                                    "type": "RETURN_STATEMENT",
+                                    ast_code: "RETURN_STATEMENT",
                                     "ic_type": compiler.TYPE_BIGFLOAT,
                                     "expression": {
-                                        "type": "ADDSUB_EXPRESSION",
+                                        ast_code: "ADDSUB_EXPRESSION",
                                         "ic_type": compiler.TYPE_BIGFLOAT,
                                         "lhs": {
-                                            "type": "ID_MEMBER_EXPRESSION",
+                                            ast_code: "ID_MEMBER_EXPRESSION",
                                             "ic_type": compiler.TYPE_BIGFLOAT,
                                             "name": "x",
                                             "members":EMPTY_ARRAY
                                         },
                                         "operator": {
                                             "ic_function":"add",
-                                            "type": "BINOP",
+                                            ast_code: "BINOP",
                                             "value": "+"
                                         },
                                         "rhs": {
-                                            "type": "ID_MEMBER_EXPRESSION",
+                                            ast_code: "ID_MEMBER_EXPRESSION",
                                             "ic_type": compiler.TYPE_INTEGER,
                                             "name": "y",
                                             "members":EMPTY_ARRAY
@@ -410,34 +410,34 @@ describe('MathLang function declaration parser', () => {
                             else:<any>undefined
                         },
                         {
-                            "type": "RETURN_STATEMENT",
+                            ast_code: "RETURN_STATEMENT",
                             "ic_type": compiler.TYPE_BIGFLOAT,
                             "expression": {
-                                "type": "ADDSUB_EXPRESSION",
+                                ast_code: "ADDSUB_EXPRESSION",
                                 "ic_type": compiler.TYPE_BIGFLOAT,
                                 "lhs": {
-                                    "type": "ADDSUB_EXPRESSION",
+                                    ast_code: "ADDSUB_EXPRESSION",
                                     "ic_type": compiler.TYPE_BIGFLOAT,
                                     "lhs": {
-                                        "type": "ID_MEMBER_EXPRESSION",
+                                        ast_code: "ID_MEMBER_EXPRESSION",
                                         "ic_type": compiler.TYPE_BIGFLOAT,
                                         "name": "x",
                                         "members":EMPTY_ARRAY
                                     },
                                     "operator": {
                                         "ic_function":"add",
-                                        "type": "BINOP",
+                                        ast_code: "BINOP",
                                         "value": "+"
                                     },
                                     "rhs": {
-                                        "type": "FUNCTION_CALL_EXPRESSION",
+                                        ast_code: "FUNCTION_CALL_EXPRESSION",
                                         "ic_type": compiler.TYPE_INTEGER,
                                         "name": "m2",
                                         "members":EMPTY_ARRAY,
                                         "operands_types": [compiler.TYPE_INTEGER],
                                         "operands_expressions": [
                                             {
-                                                "type": "ID_MEMBER_EXPRESSION",
+                                                ast_code: "ID_MEMBER_EXPRESSION",
                                                 "ic_type": compiler.TYPE_INTEGER,
                                                 "name": "y",
                                                 "members":EMPTY_ARRAY
@@ -447,11 +447,11 @@ describe('MathLang function declaration parser', () => {
                                 },
                                 "operator": {
                                     "ic_function":"add",
-                                    "type": "BINOP",
+                                    ast_code: "BINOP",
                                     "value": "+"
                                 },
                                 "rhs": {
-                                    "type": "ID_MEMBER_EXPRESSION",
+                                    ast_code: "ID_MEMBER_EXPRESSION",
                                     "ic_type": compiler.TYPE_INTEGER,
                                     "name": "a",
                                     "members":EMPTY_ARRAY
@@ -461,7 +461,7 @@ describe('MathLang function declaration parser', () => {
                     ]
                 },
                 {
-                    "type": "FUNCTION_STATEMENT",
+                    ast_code: "FUNCTION_STATEMENT",
                     "ic_type": compiler.TYPE_INTEGER,
                     "name": "m2",
                     "is_exported":false,
@@ -469,24 +469,24 @@ describe('MathLang function declaration parser', () => {
                     "operands_names": ["x"],
                     "block": [
                         {
-                            "type": "RETURN_STATEMENT",
+                            ast_code: "RETURN_STATEMENT",
                             "ic_type": compiler.TYPE_INTEGER,
                             "expression": {
-                                "type": "MULTDIV_EXPRESSION",
+                                ast_code: "MULTDIV_EXPRESSION",
                                 "ic_type": compiler.TYPE_INTEGER,
                                 "lhs": {
-                                    "type": "ID_MEMBER_EXPRESSION",
+                                    ast_code: "ID_MEMBER_EXPRESSION",
                                     "ic_type": compiler.TYPE_INTEGER,
                                     "name": "x",
                                     "members":EMPTY_ARRAY
                                 },
                                 "operator": {
                                     "ic_function":"mul",
-                                    "type": "BINOP",
+                                    ast_code: "BINOP",
                                     "value": "*"
                                 },
                                 "rhs": {
-                                    type: AST.EXPR_PRIMARY_INTEGER,
+                                    ast_code: AST.EXPR_PRIMARY_INTEGER,
                                     "ic_type": compiler.TYPE_INTEGER,
                                     "value": "2"
                                 }

@@ -28,9 +28,11 @@ describe('MathLang assign IC builder', () => {
         // compiler.dump_tree('ast', compiler_ast);
 
         // GET IC CODE
-        const ic_functions_map = compiler.get_ic_functions_map();
+        // const ic_functions_map = compiler.get_ic_functions_map();
         // console.log('ic_functions_map', ic_functions_map);
-        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        // const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        const ic_source = '';
+
 
         // TEST IC TEXT
         const expected_ic_source = `
@@ -60,9 +62,11 @@ none:function-declare-leave main`;
         // compiler.dump_tree('ast', compiler_ast);
 
         // GET IC CODE
-        const ic_functions_map = compiler.get_ic_functions_map();
+        // const ic_functions_map = compiler.get_ic_functions_map();
         // console.log('ic_functions_map', ic_functions_map);
-        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        // const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        const ic_source = '';
+
 
         // TEST IC TEXT
         const expected_ic_source = `
@@ -93,9 +97,11 @@ none:function-declare-leave main`;
         // compiler.dump_tree('ast', compiler_ast);
 
         // GET IC CODE
-        const ic_functions_map = compiler.get_ic_functions_map();
+        // const ic_functions_map = compiler.get_ic_functions_map();
         // console.log('ic_functions_map', ic_functions_map);
-        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        // const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        const ic_source = '';
+
 
         // TEST IC TEXT
         const expected_ic_source = `
@@ -128,9 +134,11 @@ INTEGER:function-declare-leave INTEGER.b`;
         // compiler.dump_tree('ast', compiler_ast);
 
         // GET IC CODE
-        const ic_functions_map = compiler.get_ic_functions_map();
+        // const ic_functions_map = compiler.get_ic_functions_map();
         // console.log('ic_functions_map', ic_functions_map);
-        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        // const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        const ic_source = '';
+
 
         // TEST IC TEXT
         const expected_ic_source = `
@@ -163,9 +171,25 @@ FLOAT:function-declare-leave FLOAT.b`;
         // compiler.dump_tree('ast', compiler_ast);
 
         // GET IC CODE
-        const ic_functions_map = compiler.get_ic_functions_map();
+        // const ic_functions_map = compiler.get_ic_functions_map();
+        const compiler_scope = compiler.get_scope();
+        const modules = compiler_scope.get_new_modules();
+        modules.forEach(
+            (loop_module)=>{
+                const loop_functions = loop_module.get_exported_functions();
+                loop_functions.forEach(
+                    (loop_function)=>{
+                        const ebbs = loop_function.get_ic_ebb_map();
+                        ebbs.forEach(
+                            (ebb, ebb_name)=>console.log(ebb_name, ebb)
+                        )
+                    }
+                )
+            }
+        );
         // console.log('ic_functions_map', ic_functions_map);
-        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        // const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        const ic_source = '';
 
         // TEST IC TEXT
         const expected_ic_source = `
@@ -199,9 +223,11 @@ FLOAT:function-declare-leave FLOAT.b`;
         // compiler.dump_tree('ast', compiler_ast);
 
         // GET IC CODE
-        const ic_functions_map = compiler.get_ic_functions_map();
+        // const ic_functions_map = compiler.get_ic_functions_map();
         // console.log('ic_functions_map', ic_functions_map);
-        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        // const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        const ic_source = '';
+
 
         // TEST IC TEXT
         const expected_ic_source = `
@@ -236,9 +262,11 @@ none:function-declare-leave main`;
         // compiler.dump_tree('ast', compiler_ast);
 
         // GET IC CODE
-        const ic_functions_map = compiler.get_ic_functions_map();
+        // const ic_functions_map = compiler.get_ic_functions_map();
         // console.log('ic_functions_map', ic_functions_map);
-        const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        // const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
+        const ic_source = '';
+
 
         // TEST IC TEXT
         const expected_ic_source = `

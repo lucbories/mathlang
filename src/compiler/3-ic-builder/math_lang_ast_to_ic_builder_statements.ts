@@ -4,7 +4,7 @@ import ICompilerType from '../../core/icompiler_type';
 import ICompilerScope from '../../core/icompiler_scope';
 import ICompilerModule from '../../core/icompiler_module';
 import ICompilerFunction from '../../core/icompiler_function';
-import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
+import { IAstNodeKindOf as AST, ICompilerAstBlockNode, ICompilerAstExpressionNode, ICompilerAstFunctionNode, ICompilerAstTypedNode, ICompilerAstNode } from '../../core/icompiler_ast_node';
 import { ICompilerIcInstr, ICompilerIcInstrOperand } from '../../core/icompiler_ic_instruction';
 import CompilerIcNode from '../0-common/compiler_ic_instruction'
 import MathLangAstToIcVisitorBase from './math_lang_ast_to_ic_builder_base';
@@ -66,7 +66,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         const operands_map = func.get_symbols_opds_table();
         const operands_names:string[] = func.get_symbols_opds_ordered_list();
         const operands_types:ICompilerType[] = operands_names.map( (name)=>operands_map.get(name).type );
-        const ebb = CompilerIcNode.create_ebb(this.get_current_function(), operands_types, operands_names);
+        this.create_ebb(operands_types, operands_names);
 
         // LOOP ON FUNCTION STATEMENTS
         const ast_statements = func.get_ast_statements();
@@ -99,12 +99,18 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
     visit_statement(ast_statement:any) {
          switch(ast_statement.type){
             case AST.BLOCK:{
+                const previous_ebb = this.get_current_ebb();
+                this.create_ebb([], []);
+                const current_ebb = this.get_current_ebb();
+                previous_ebb.ic_instructions.push( CompilerIcNode.create_jump(current_ebb.ic_ebb_name) );
+
                 // LOOP ON FUNCTION STATEMENTS
                 const func_node:ICompilerAstBlockNode = <ICompilerAstBlockNode>ast_statement;
                 let loop_ast_statement;
                 for(loop_ast_statement of ast_statement.statements){
                     this.visit_statement(loop_ast_statement);
                 }
+
                 return;
             }
 

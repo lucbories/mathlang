@@ -55,7 +55,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             for(cst_statement of ctx.blockStatement){
                 ast_statement = this.visit(cst_statement);
                 statements.push(ast_statement);
-                this._current_function.set_ic_statements(ast_statement);
+                this._current_function.set_ast_statements(ast_statement);
             }
         }
 

@@ -40,7 +40,7 @@ describe('MathLang number parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:'INTEGER',
+            ast_code:'INTEGER',
             ic_type:type_integer,
             value:text
         }
@@ -74,7 +74,7 @@ describe('MathLang number parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:'BIGINTEGER',
+            ast_code:'BIGINTEGER',
             ic_type:type_biginteger,
             value:text
         }
@@ -107,12 +107,12 @@ describe('MathLang number parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:'PREUNOP_EXPRESSION',
+            ast_code:'PREUNOP_EXPRESSION',
             ic_type:type_integer,
             ic_function:'negate',
             operator:'-',
             rhs:{
-                type:'INTEGER',
+                ast_code:'INTEGER',
                 ic_type:type_integer,
                 value:text.substr(1)
             }
@@ -147,12 +147,12 @@ describe('MathLang number parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:'PREUNOP_EXPRESSION',
+            ast_code:'PREUNOP_EXPRESSION',
             ic_type:type_integer,
             ic_function:'negate',
             operator:'-',
             rhs:{
-                type:'INTEGER',
+                ast_code:'INTEGER',
                 ic_type:type_integer,
                 value:text.substr(1)
             }
@@ -187,7 +187,7 @@ describe('MathLang number parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:'FLOAT',
+            ast_code:'FLOAT',
             ic_type:type_float,
             value:text
         }
@@ -221,7 +221,7 @@ describe('MathLang number parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:'BIGFLOAT',
+            ast_code:'BIGFLOAT',
             ic_type:type_bigfloat,
             value:text
         }
@@ -255,7 +255,7 @@ describe('MathLang number parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:'BIGFLOAT',
+            ast_code:'BIGFLOAT',
             ic_type:type_bigfloat,
             value:text
         }
@@ -289,12 +289,12 @@ describe('MathLang number parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:'PREUNOP_EXPRESSION',
+            ast_code:'PREUNOP_EXPRESSION',
             ic_type:type_float,
             ic_function:'negate',
             operator:'-',
             rhs:{
-                type:'FLOAT',
+                ast_code:'FLOAT',
                 ic_type:type_float,
                 value:text.substr(1)
             }
@@ -329,12 +329,12 @@ describe('MathLang number parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:'PREUNOP_EXPRESSION',
+            ast_code:'PREUNOP_EXPRESSION',
             ic_type:type_bigfloat,
             ic_function:'negate',
             operator:'-',
             rhs:{
-                type:'BIGFLOAT',
+                ast_code:'BIGFLOAT',
                 ic_type:type_bigfloat,
                 value:text.substr(1)
             }
@@ -369,12 +369,12 @@ describe('MathLang number parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:'PREUNOP_EXPRESSION',
+            ast_code:'PREUNOP_EXPRESSION',
             ic_type:type_bigfloat,
             ic_function:'negate',
             operator:'-',
             rhs:{
-                type:'BIGFLOAT',
+                ast_code:'BIGFLOAT',
                 ic_type:type_bigfloat,
                 value:text.substr(1)
             }

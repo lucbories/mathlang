@@ -45,7 +45,7 @@ describe('MathLang call parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_FUNC_CALL,
+            ast_code:AST.EXPR_MEMBER_FUNC_CALL,
             ic_type: type_unknow,
             name:'f',
             members:EMPTY_ARRAY,
@@ -82,13 +82,13 @@ describe('MathLang call parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_FUNC_CALL,
+            ast_code:AST.EXPR_MEMBER_FUNC_CALL,
             ic_type: type_unknow,
             name:'fx',
             members:EMPTY_ARRAY,
             operands_expressions:[
                 {
-                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ast_code:AST.EXPR_PRIMARY_INTEGER,
                     ic_type:type_integer,
                     value:'23'
                 }
@@ -185,18 +185,18 @@ describe('MathLang call parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_MEMBER_FUNC_CALL,
+            ast_code:AST.EXPR_MEMBER_FUNC_CALL,
             ic_type: type_unknow,
             name:'fx',
             members:EMPTY_ARRAY,
             operands_expressions:[
                 {
-                    type:AST.EXPR_PRIMARY_INTEGER,
+                    ast_code:AST.EXPR_PRIMARY_INTEGER,
                     ic_type:type_integer,
                     value:'23'
                 },
                 {
-                    type:AST.EXPR_MEMBER_ID,
+                    ast_code:AST.EXPR_MEMBER_ID,
                     ic_type:type_unknow,
                     name:'efg',
                     members:EMPTY_ARRAY

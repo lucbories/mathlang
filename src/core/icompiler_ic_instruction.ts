@@ -95,15 +95,9 @@ export enum IIcNodeKindOf {
     CONSTANT_LABEL           ='constant-label',
     
     OPERAND_FROM_STACK          ='operand-from-stack',
-<<<<<<< HEAD:src/core/icompiler_ic_instruction.ts
     OPERAND_FROM_ID             ='operand-from-id',
     OPERAND_FROM_ATTRIBUTE      ='operand-from-attribute',
     OPERAND_FROM_INDEX          ='operand-from-index',
-=======
-    OPERAND_FROM_FUNC_LOCAL     ='operand-from-function-local',
-    OPERAND_FROM_MODULE_CONST   ='operand-from-module-const',
-    OPERAND_FROM_MODULE_FUNC    ='operand-from-module-func',
->>>>>>> 25db4a4c979ec0a431e5173f610e6cec19384aae:src/core/icompiler_ic_node.ts
 	
     FUNCTION_DECLARE            ='function-declare',
     FUNCTION_DECLARE_ENTER      ='function-declare-enter',
@@ -142,7 +136,6 @@ export enum IIcNodeKindOf {
 }
 
 
-<<<<<<< HEAD:src/core/icompiler_ic_instruction.ts
 export type ICompilerIcIdAccessor = {
     id:string,
     ic_type:string,
@@ -155,28 +148,6 @@ export type ICompilerIcIdAccessor = {
     is_indexed:boolean,
     indexed_args_count:number
 }
-=======
-// export enum ICompilerIcOperandSource {
-    // FROM_STACK       = 'FROM_STACK',
-    // FROM_REGISTER    = 'FROM_REGISTER',
-    // FROM_ID          = 'FROM_ID',
-    // FROM_INLINE      = 'FROM_INLINE'
-// }
-
-
-// export type ICompilerIcIdAccessor = {
-    // id:string,
-    // ic_type:string,
-    // operands_types:[],
-    // operands_names:[],
-    // operands_expressions:[],
-    // is_attribute:boolean,
-    // is_method_call:boolean,
-    // is_method_decl:boolean,
-    // is_indexed:boolean,
-    // indexed_args_count:number
-// }
->>>>>>> 25db4a4c979ec0a431e5173f610e6cec19384aae:src/core/icompiler_ic_node.ts
 
 
 
@@ -224,7 +195,6 @@ export interface ICompilerIcFunctionLeave extends ICompilerIcNode {
 }
 
 
-<<<<<<< HEAD:src/core/icompiler_ic_instruction.ts
 export interface ICompilerIcMethod extends ICompilerIcFunction {
     object_name:string,
     object_type:ICompilerType,
@@ -232,9 +202,6 @@ export interface ICompilerIcMethod extends ICompilerIcFunction {
 
 
 // CONSTANTS
-=======
-// OPERANDS
->>>>>>> 25db4a4c979ec0a431e5173f610e6cec19384aae:src/core/icompiler_ic_node.ts
 export interface ICompilerIcOperand extends ICompilerIcNode {
 }
 

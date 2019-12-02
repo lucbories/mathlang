@@ -9,7 +9,7 @@ import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visito
 
 // import { ModuleScope, FunctionScope } from './3-ic-builder/math_lang_function_scope';
 // import { ICModule } from './3-ic-builder/math_lang_ast_to_ic_builder_base';
-// import MathLangAstToIcVisitor from './3-ic-builder/math_lang_ast_to_ic_builder';
+import MathLangAstToIcBuilder from './3-ic-builder/math_lang_ast_to_ic_builder';
 // import {ICLabel} from './3-ic-builder/math_lang_ast_to_ic_builder_base';
 
 // import MathLangIcToMcVisitor from './4-mc-builder/math_lang_ic_to_mc_builder';
@@ -445,10 +445,10 @@ export default class MathLangCompiler {
      * @returns boolean (true:success, false:error occures).
      */
     build_ic():boolean{
-        // const modules_map:Map<string, ModuleScope> = this._ast_builder.get_compiler_scope().get_available_modules();
+        const modules_map:Map<string, ICompilerModule> = this.get_scope().get_available_modules();
 
-        // const ic_builder = new MathLangAstToIcVisitor(this._compiler_scope);
-        // ic_builder.visit();
+        const ic_builder = new MathLangAstToIcBuilder(this._compiler_scope);
+        ic_builder.visit();
         // // this._ic_modules = ic_builder.get_ic_modules_map();
 
         // if (ic_builder.has_error()){

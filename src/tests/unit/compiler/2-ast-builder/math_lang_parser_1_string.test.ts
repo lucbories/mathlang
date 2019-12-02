@@ -38,7 +38,7 @@ describe('MathLang string parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_PRIMARY_STRING,
+            ast_code:AST.EXPR_PRIMARY_STRING,
             ic_type: type_string,
             value:'\'\''
         }
@@ -72,7 +72,7 @@ describe('MathLang string parser', () => {
 
         // TEST AST
         const expected_ast = {
-            type:AST.EXPR_PRIMARY_STRING,
+            ast_code:AST.EXPR_PRIMARY_STRING,
             ic_type: type_string,
             value:'\'hello\''
         }

@@ -158,6 +158,10 @@ export default abstract class MathLangAstToIcVisitorBase {
     //     return CompilerIcNode.create_method(this._compiler_scope, this._current_module.get_module_name(), object_type, object_name, method_name, return_type, opds_records, ic_statements);
 	// }
 
+    create_ebb(operands_types: ICompilerType[], operands_names: string[]): void {
+        this._current_ebb = CompilerIcNode.create_ebb(this.get_current_function(), operands_types, operands_names);
+    }
+
     add_ic_ebb_instruction(instr:ICompilerIcInstr):void {
         if (! this._current_ebb) {
             this.add_error(instr, 'add ebb instr: No current ebb');

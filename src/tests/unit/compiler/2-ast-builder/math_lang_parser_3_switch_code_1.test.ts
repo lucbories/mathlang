@@ -14,55 +14,55 @@ end
 export const AST_SWITCH_JSON_1 = function (compiler:MathLangCompiler) {
     const EMPTY_ARRAY = <any>[];
     return {
-        "type": "BLOCK",
+        ast_code: "BLOCK",
         "statements": [
             {
-                "type": "ASSIGN_STATEMENT_VARIABLE",
+                ast_code: "ASSIGN_STATEMENT_VARIABLE",
                 "ic_type": compiler.TYPE_INTEGER,
                 "name": "a",
                 "is_async": false,
                 "members":EMPTY_ARRAY,
                 "expression": {
-                    "type": "INTEGER",
+                    ast_code: "INTEGER",
                     "ic_type": compiler.TYPE_INTEGER,
                     "value": "12"
                 }
             },
             {
-                "type": "ASSIGN_STATEMENT_VARIABLE",
+                ast_code: "ASSIGN_STATEMENT_VARIABLE",
                 "ic_type": compiler.TYPE_INTEGER,
                 "name": "b",
                 "is_async": false,
                 "members":EMPTY_ARRAY,
                 "expression": {
-                    "type": "INTEGER",
+                    ast_code: "INTEGER",
                     "ic_type": compiler.TYPE_INTEGER,
                     "value": "0"
                 }
             },
             {
-                "type": "SWITCH_STATEMENT",
+                ast_code: "SWITCH_STATEMENT",
                 "var": "a",
                 "ic_type": compiler.TYPE_INTEGER,
                 "items": [
                     {
                         "item_expression": {
-                            "type": "INTEGER",
+                            ast_code: "INTEGER",
                             "ic_type": compiler.TYPE_INTEGER,
                             "value": "12"
                         },
                         "item_block": [
                             {
-                                "type": "BLOCK",
+                                ast_code: "BLOCK",
                                 "statements": [
                                     {
-                                        "type": "ASSIGN_STATEMENT_VARIABLE",
+                                        ast_code: "ASSIGN_STATEMENT_VARIABLE",
                                         "ic_type": compiler.TYPE_INTEGER,
                                         "name": "b",
                                         "is_async": false,
                                         "members":EMPTY_ARRAY,
                                         "expression": {
-                                            "type": "INTEGER",
+                                            ast_code: "INTEGER",
                                             "ic_type": compiler.TYPE_INTEGER,
                                             "value": "1"
                                         }
@@ -73,50 +73,50 @@ export const AST_SWITCH_JSON_1 = function (compiler:MathLangCompiler) {
                     },
                     {
                         "item_expression": {
-                            "type": "ADDSUB_EXPRESSION",
+                            ast_code: "ADDSUB_EXPRESSION",
                             "ic_type": compiler.TYPE_INTEGER,
                             "lhs": {
-                                "type": "MULTDIV_EXPRESSION",
+                                ast_code: "MULTDIV_EXPRESSION",
                                 "ic_type": compiler.TYPE_INTEGER,
                                 "lhs": {
-                                    "type": "INTEGER",
+                                    ast_code: "INTEGER",
                                     "ic_type": compiler.TYPE_INTEGER,
                                     "value": "2"
                                 },
                                 "operator": {
-                                    "type": "BINOP",
+                                    ast_code: "BINOP",
                                     "value": "*",
                                     "ic_function": "mul"
                                 },
                                 "rhs": {
-                                    "type": "INTEGER",
+                                    ast_code: "INTEGER",
                                     "ic_type": compiler.TYPE_INTEGER,
                                     "value": "3"
                                 }
                             },
                             "operator": {
-                                "type": "BINOP",
+                                ast_code: "BINOP",
                                 "value": "+",
                                 "ic_function": "add"
                             },
                             "rhs": {
-                                "type": "INTEGER",
+                                ast_code: "INTEGER",
                                 "ic_type": compiler.TYPE_INTEGER,
                                 "value": "1"
                             }
                         },
                         "item_block": [
                             {
-                                "type": "BLOCK",
+                                ast_code: "BLOCK",
                                 "statements": [
                                     {
-                                        "type": "ASSIGN_STATEMENT_VARIABLE",
+                                        ast_code: "ASSIGN_STATEMENT_VARIABLE",
                                         "ic_type": compiler.TYPE_INTEGER,
                                         "name": "b",
                                         "is_async": false,
                                         "members":EMPTY_ARRAY,
                                         "expression": {
-                                            "type": "INTEGER",
+                                            ast_code: "INTEGER",
                                             "ic_type": compiler.TYPE_INTEGER,
                                             "value": "2"
                                         }
