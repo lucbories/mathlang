@@ -115,10 +115,10 @@ describe('MathLang assign parser', () => {
         expect(compiler_ast).eql(expected_ast);
     });
 
-    it('Parse assign [b=5 a=456 + (++b*8)] statement' , () => {
+    it('Parse assign [begin b=5 a=456 + (++b*8) end] statement' , () => {
         compiler.reset();
-        const text = 'b=5 a=456 + (++b*8)';
-        const result = compiler.compile_ast(text, 'program');
+        const text = 'begin b=5 a=456 + (++b*8) end';
+        const result = compiler.compile_ast(text, 'blockStatement');
 
         // ERRORS
         const expected_errors = 0;
@@ -136,9 +136,8 @@ describe('MathLang assign parser', () => {
 
         // TEST AST
         const expected_ast = {
-            ast_code:AST.PROGRAM,
-            modules:EMPTY_ARRAY,
-            block:[
+            ast_code:AST.BLOCK,
+            statements:[
                 {
                     ast_code:AST.STAT_ASSIGN_VARIABLE,
                     ic_type: compiler.TYPE_INTEGER,

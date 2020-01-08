@@ -4,8 +4,9 @@ import ICompilerType from '../../core/icompiler_type';
 import ICompilerScope from '../../core/icompiler_scope';
 import ICompilerModule from '../../core/icompiler_module';
 import ICompilerFunction from '../../core/icompiler_function';
+import ICompilerSymbol from '../../core/icompiler_symbol';
 import { IAstNodeKindOf as AST, ICompilerAstBlockNode, ICompilerAstExpressionNode, ICompilerAstFunctionNode, ICompilerAstTypedNode, ICompilerAstNode } from '../../core/icompiler_ast_node';
-import { ICompilerIcInstr, ICompilerIcInstrOperand } from '../../core/icompiler_ic_instruction';
+import { ICompilerIcInstr, ICompilerIcInstrOperand, ICompilerIcEbb } from '../../core/icompiler_ic_instruction';
 import CompilerIcNode from '../0-common/compiler_ic_instruction'
 import MathLangAstToIcVisitorBase from './math_lang_ast_to_ic_builder_base';
 
@@ -30,14 +31,26 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
 
 
     /**
-     * Visit the AST entry point.
+     * Visit the new modules.
+     *  module MyModule
+     *  export a = 12
+     *  export b = 12 * 2 + a
+     *  c = 56
+     *  d = a + b
+     *  function f(...) begin ... end
+     *  export function g(...) begin ... end
      */
     visit() {
         const new_modules:Map<string,ICompilerModule> = this.get_compiler_scope().get_new_modules();
         new_modules.forEach(
             (loop_module, loop_module_name)=>{
                 // PROCESS MODULE CONSTANTS
-                const modules_constants = loop_module.get_module_constants(); // TODO
+                const modules_constants = loop_module.get_module_constants();
+                modules_constants.forEach(
+                    (loop_constant:ICompilerSymbol)=>{
+                        this.visit_constant(loop_constant);
+                    }
+                );
                 
                 // PROCESS MODULE FUNCTIONS
                 const modules_functions = loop_module.get_module_functions();
@@ -45,9 +58,46 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
                     (loop_function, loop_function_name)=>{
                         this.visit_function(loop_function);
                     }
-                )
+                );
             }
         )
+    }
+
+
+    /**
+     * Visit module constant.
+     *  module MyModule
+     *  export cstA = 12
+     *  export cstB = cstA*2
+     *  cstC = 55
+     *  cstD = cstA+cstB+cstC
+     * 
+     * @param constant Module constant.
+     */
+    visit_constant(constant:ICompilerSymbol) {
+        
+        let value_str:string = '';
+        
+        switch(constant.type.get_type_name()){
+            case 'INTEGER':
+                value_str = CompilerIcNode.create_const_integer(constant.init_value, 10);
+                break;
+            case 'FLOAT':
+                value_str = CompilerIcNode.create_const_float(constant.init_value, 10);
+                break;
+            case 'STRING':
+                value_str = CompilerIcNode.create_const_string(constant.init_value);
+                break;
+            case 'BOOLEAN':
+                if (constant.init_value == 'TRUE') {
+                    value_str = CompilerIcNode.create_const_true();
+                    break;
+                }
+                value_str = CompilerIcNode.create_const_false();
+                break;
+        }
+
+        this.get_current_module().get_module_constant(constant.name).init_value = value_str;
     }
 
 
@@ -69,9 +119,9 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         this.create_ebb(operands_types, operands_names);
 
         // LOOP ON FUNCTION STATEMENTS
-        const ast_statements = func.get_ast_statements();
+        const ast_statements:ICompilerAstNode[] = func.get_ast_statements();
         let loop_ast_statement;
-        for(loop_ast_statement of ast_statements){
+        for(loop_ast_statement in ast_statements){
             this.visit_statement(loop_ast_statement);
         }
 
@@ -164,6 +214,12 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
     /**
      * Visit AST Return statement.
      * 
+     * IN:
+     *  return expr1
+     * 
+     * OUT:
+     *  RETURN vExpr1
+     * 
      * @param ast_statement AST statement
      */
     visit_return_statement(ast_statement:any){
@@ -181,63 +237,61 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
     /**
      * Visit AST If statement.
      * 
+     * IN:
+     *  if (expr1) then bloc1 else bloc2
+     *  bloc3
+     * 
+     * OUT:
+     *  vExpr1=...
+     *  IF_TRUE vExpr1 ebbBloc1
+     *  JUMP ebbBloc2
+     *  
+     *  ebbBloc1:
+     *  ...
+     *  JUMP ebbBloc3
+     *  
+     *  ebbBloc2:
+     *  ...
+     *  JUMP ebbBloc3
+     *  
+     *  ebbBloc3:
+     *  ...
+     * 
      * @param ast_statement AST statement
      */
     visit_if_statement(ast_statement:any){
-        // BUILD THEN LABEL
-        const then_label = this.get_current_function().add_ic_label(undefined);
-		const then_label_opd:ICompilerIcNode = CompilerIcNode.create_label(this.get_compiler_scope(), then_label);
-
-        // BUILD ELSE LABEL
-        const else_label = this.get_current_function().add_ic_label(undefined);
-		const else_label_opd:ICompilerIcNode = CompilerIcNode.create_label(this.get_compiler_scope(), else_label);
-
-        // BUILD END IF LABEL
-        const endif_label = this.get_current_function().add_ic_label(undefined);
-		const endif_label_opd:ICompilerIcNode = CompilerIcNode.create_label(this.get_compiler_scope(), endif_label);
-
         // BUILD CONDITION IC OPERAND
-        const ic_condition_opd = this.visit_expression(ast_statement.condition);
-        if (this.test_if_error(ic_condition_opd)){
+        const condition_var_name:ICompilerIcInstrOperand|ICompilerError = this.visit_expression(ast_statement.condition);
+        if (this.is_error(condition_var_name)){
             this.add_error(ast_statement.condition, 'Error in if condition:not a valid expression');
             return;
         }
 
-        // ADD TEST IC STATEMENT
-		const ic_condition_test:ICompilerIcNode = CompilerIcNode.create_test_true(this.get_compiler_scope(), ic_condition_opd);
-		this.add_current_function_statement(ic_condition_test);
-		
-		// ADD IF THEN ELSE IC STATEMENT
-        if (ast_statement.else){
-			const ic_if_then_else_statement:ICompilerIcNode = CompilerIcNode.create_if_then_else(this.get_compiler_scope(), :[then_label_opd, else_label_opd, endif_label_opd]);
-			this.add_current_function_statement(ic_if_then_else_statement);
-        }
+        const previous_ebb = this.get_current_ebb();
 
-        // ADD IF THEN IC STATEMENT
-        else {
-			const ic_if_then_statement:ICompilerIcNode = CompilerIcNode.create_if_then(this.get_compiler_scope(), :[then_label_opd, endif_label_opd]);
-			this.add_current_function_statement(ic_if_then_statement);
-        }
+        // CREATE NEXT EBB
+        const next_ebb:ICompilerIcEbb = this.create_ebb([], []);
 
-        // ADD IF THEN IC STATEMENTS
+        // BUILD THEN EBB
+        const then_ebb:ICompilerIcEbb = this.create_ebb([], []);
         this.visit_statements(ast_statement.then);
-        
-        // ADD GOTO END IF IC STATEMENT
-		const ic_if_end_goto_statement:ICompilerIcNode = CompilerIcNode.create_goto_label(this.get_compiler_scope(), endif_label);
-		this.add_current_function_statement(ic_if_end_goto_statement);
-        
-        // ADD ELSE IC STATEMENTS
-        this.get_current_function().set_ic_label_index(else_label, undefined);
-        if (ast_statement.else) {
-            // ADD ELSE IC STATEMENTS
-            this.visit_statements(ast_statement.else);
+        this.create_ic_ebb_instruction(CompilerIcNode.create_jump, [next_ebb.ic_ebb_name]);
 
-            // ADD GOTO END IF IC STATEMENT
-			const ic_if_end_goto_statement:ICompilerIcNode = CompilerIcNode.create_goto_label(this.get_compiler_scope(), endif_label);
-			this.add_current_function_statement(ic_if_end_goto_statement);
+        // ADD IF TRUE
+        this.create_ic_ebb_instruction(CompilerIcNode.create_if_true, [condition_var_name, then_ebb.ic_ebb_name]);
+
+        // BUILD ELSE EBB
+        if (ast_statement.else){
+            const else_ebb:ICompilerIcEbb = this.create_ebb([], []);
+            this.set_current_ebb(previous_ebb);
+            this.create_ic_ebb_instruction(CompilerIcNode.create_jump, [else_ebb.ic_ebb_name]);
+            this.set_current_ebb(else_ebb);
+            this.visit_statements(ast_statement.else);
+            this.create_ic_ebb_instruction(CompilerIcNode.create_jump, [next_ebb.ic_ebb_name]);
+            
         }
 
-        this.get_current_function().set_ic_label_index(endif_label, undefined);
+        this.set_current_ebb(next_ebb);
     }
 
 
@@ -248,7 +302,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      */
     visit_switch_statement(ast_statement:ICompilerAstNode){
         // BUILD THEN LABEL
-        const switch_var = ast_statement.var;
+        /*const switch_var = ast_statement.var;
         const switch_var_type = this.get_symbol_type(ast_func_scope.module_name, switch_var);
         const switch_items = ast_statement.items;
 
@@ -314,7 +368,61 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         const endswitch_index= ic_function.statements.length;
         for(loop_endif_label of all_endif_labels){
             this.update_function_label_index(loop_endif_label,  ic_function, endswitch_index);
+        }*/
+    }
+
+
+    /**
+     * Visit AST Assign statement.
+     * 
+     * IN:
+     *  leftValue = rightValue
+     * 
+     * OUT:
+     *  vLeft=...
+     *  vRight=...
+     *  REGISTER_SET
+     * 
+     * @param ast_statement AST statement
+     */
+    visit_assign_variable_statement(ast_statement:ICompilerAstExpressionNode){
+        // GET LEFT
+        const left_var_name = this.visit_value_id(ast_statement);
+        const left_type = ast_statement.ic_type;
+
+        // CHECK RETURN TYPE
+        if (! left_type){
+            this.add_error(ast_statement, 'Type [' + left_type + '] not found.');
+            return;
         }
+        
+        // CHECK LEFT EXPRESSION
+        if (this.is_error(left_var_name)){
+            this.add_error(ast_statement, 'Error in assign statement:left side is not a valid id expression');
+            return;
+        }
+
+
+        // GET RIGHT
+        const right_var_name = this.visit_expression(ast_statement.expression);
+        const right_type = ast_statement.expression.ic_type;
+
+        // CHECK RETURN TYPE
+        if (! right_type) {
+            this.add_error(ast_statement.expression, 'Type [' + right_type + '] not found.');
+            return;
+        }
+
+        // CHECK RIGHT EXPRESSION
+        if (this.is_error(right_var_name)){
+            this.add_error(ast_statement, 'Error in assign statement:right side is not a valid expression');
+            return;
+        }
+
+
+        // TODO: add conversion if left_type != right_type
+
+        this.create_ic_ebb_instruction(CompilerIcNode.create_assign, [left_var_name, right_var_name, right_type]);
     }
 
 
@@ -323,110 +431,44 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * 
      * @param ast_statement AST statement
      */
-    visit_assign_variable_statement(ast_statement:ICompilerAstNode){
+    visit_assign_attribute_statement(ast_statement:ICompilerAstExpressionNode){
         // GET LEFT
-        const ic_left = this.visit_value_id(ast_statement);
-        const ic_left_type = ast_statement.ic_type;
+        const left_var_name = this.visit_value_id(ast_statement);
+        const left_type = ast_statement.ic_type;
 
         // CHECK RETURN TYPE
-        if (! this.has_type(ic_left_type) ){
-            return this.add_error(ast_statement, 'Type [' + ic_left_type + '] not found.')
+        if (! left_type){
+            this.add_error(ast_statement, 'Type [' + left_type + '] not found.');
+            return;
         }
         
         // CHECK LEFT EXPRESSION
-        if (this.test_if_error(ic_left)){
+        if (this.is_error(left_var_name)){
             this.add_error(ast_statement, 'Error in assign statement:left side is not a valid id expression');
             return;
         }
 
 
         // GET RIGHT
-        const ic_right = this.visit_expression(ast_statement.expression);
-        const ic_right_type = ast_statement.expression.ic_type;
+        const right_var_name = this.visit_expression(ast_statement.expression);
+        const right_type = ast_statement.expression.ic_type;
 
         // CHECK RETURN TYPE
-        if (! this.has_type(ic_right_type) ){
-            return this.add_error(ast_statement.expression, 'Type [' + ic_right_type + '] not found.')
+        if (! right_type) {
+            this.add_error(ast_statement.expression, 'Type [' + right_type + '] not found.');
+            return;
         }
 
         // CHECK RIGHT EXPRESSION
-        if (this.test_if_error(ic_right)){
+        if (this.is_error(right_var_name)){
             this.add_error(ast_statement, 'Error in assign statement:right side is not a valid expression');
             return;
         }
 
 
-        // BUILD IC
-        let ic_right_str:string = this.get_operand_source_str(ic_right);
-        
-        const ic_opd_1 = ic_left_type  + ':@' + ic_left.ic_name + ic_left.ic_id_accessors_str;
-        const ic_opd_2 = ic_right_type + ':' + ic_right_str;
+        // TODO: add conversion if left_type != right_type
 
-        const ic_code = IC.REGISTER_SET;
-        const right_statement = {
-            ic_type:ic_left_type,
-            ic_code:ic_code,
-            operands:[ic_left, ic_right],
-            text:ic_left_type + ':' + ic_code + ' ' + ic_opd_1 + ' ' + ic_opd_2
-        };
-        
-        ic_function.statements.push(right_statement);
-    }
-
-
-    /**
-     * Visit AST Assign statement.
-     * 
-     * @param ast_statement AST statement
-     */
-    visit_assign_attribute_statement(ast_statement:ICompilerAstNode){
-        // GET LEFT
-        const ic_left = this.visit_value_id(ast_statement);
-        const ic_left_type = ast_statement.ic_type;
-
-        // CHECK RETURN TYPE
-        if (! this.has_type(ic_left_type) ){
-            return this.add_error(ast_statement, 'Type [' + ic_left_type + '] not found.')
-        }
-        
-        // CHECK LEFT EXPRESSION
-        if (this.test_if_error(ic_left)){
-            this.add_error(ast_statement, 'Error in assign statement:left side is not a valid id expression');
-            return;
-        }
-
-
-        // GET RIGHT
-        const ic_right = this.visit_expression(ast_statement.expression);
-        const ic_right_type = ast_statement.expression.ic_type;
-
-        // CHECK RETURN TYPE
-        if (! this.has_type(ic_right_type) ){
-            return this.add_error(ast_statement.expression, 'Type [' + ic_right_type + '] not found.')
-        }
-
-        // CHECK RIGHT EXPRESSION
-        if (this.test_if_error(ic_right)){
-            this.add_error(ast_statement, 'Error in assign statement:right side is not a valid expression');
-            return;
-        }
-
-
-        // BUILD IC
-        let ic_right_str:string = this.get_operand_source_str(ic_right);
-        
-        const ic_opd_1 = ic_left_type  + ':@' + ic_left.ic_name + ic_left.ic_id_accessors_str;
-        const ic_opd_2 = ic_right_type + ':' + ic_right_str;
-
-        const ic_code = IC.REGISTER_SET;
-        const right_statement = {
-            ic_type:ic_left_type,
-            ic_code:ic_code,
-            operands:[ic_left, ic_right],
-            text:ic_left_type + ':' + ic_code + ' ' + ic_opd_1 + ' ' + ic_opd_2
-        };
-        
-        ic_function.statements.push(right_statement);
+        this.create_ic_ebb_instruction(CompilerIcNode.create_assign, [left_var_name, right_var_name, right_type]);
     }
 
 
@@ -435,22 +477,42 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * 
      * @param ast_statement AST statement
      */
-    visit_assign_function_or_method_statement(ast_statement:ICompilerAstNode){
+    visit_assign_function_or_method_statement(ast_statement:ICompilerAstExpressionNode){ // TODO
         // GET LEFT
-        const ic_left = this.visit_value_id(ast_statement);
-        const ic_left_type = ast_statement.ic_type;
+    /*    const left_var_name = this.visit_value_id(ast_statement);
+        const left_type = ast_statement.ic_type;
 
         // CHECK RETURN TYPE
-        if (! this.has_type(ic_left_type) ){
-            return this.add_error(ast_statement, 'Type [' + ic_left_type + '] not found.')
+        if (! left_type){
+            this.add_error(ast_statement, 'Type [' + left_type + '] not found.');
+            return;
         }
-
+        
         // CHECK LEFT EXPRESSION
-        if (this.test_if_error(ic_left)){
+        if (this.is_error(left_var_name)){
             this.add_error(ast_statement, 'Error in assign statement:left side is not a valid id expression');
             return;
         }
-        const assign_function_name = ic_left.ic_id_accessors_str;
+
+
+        // GET RIGHT
+        const right_var_name = this.visit_expression(ast_statement.expression);
+        const right_type = ast_statement.expression.ic_type;
+
+        // CHECK RETURN TYPE
+        if (! right_type) {
+            this.add_error(ast_statement.expression, 'Type [' + right_type + '] not found.');
+            return;
+        }
+
+        // CHECK RIGHT EXPRESSION
+        if (this.is_error(right_var_name)){
+            this.add_error(ast_statement, 'Error in assign statement:right side is not a valid expression');
+            return;
+        }
+
+
+        this.create_ic_ebb_instruction(CompilerIcNode.create_assign, [left_var_name, right_var_name, right_type]);
 
 
         // LOOP ON FUNCTION OPERANDS
@@ -474,21 +536,6 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         const assign_function = this._ic_modules.get(ast_func_scope.module_name).module_functions.get(assign_function_name);
 
 
-        // GET RIGHT
-        const ic_right = this.visit_expression(ast_statement.expression);
-        const ic_right_type = ast_statement.expression.ic_type;
-
-        // CHECK RETURN TYPE
-        if (! this.has_type(ic_right_type) ){
-            return this.add_error(ast_statement.expression, 'Type [' + ic_right_type + '] not found.')
-        }
-
-        // CHECK RIGHT EXPRESSION
-        if (this.test_if_error(ic_right)){
-            this.add_error(ast_statement, 'Error in assign statement:right side is not a valid expression');
-            return;
-        }
-
 
         // BUILD IC STATEMENT
         let ic_right_str:string = this.get_operand_source_str(ic_right);
@@ -507,6 +554,6 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
 
 
         // DECLARE METHOD
-        this.leave_function_declaration(ast_func_scope.module_name, assign_function_name);
+        this.leave_function_declaration(ast_func_scope.module_name, assign_function_name);*/
     }
 }

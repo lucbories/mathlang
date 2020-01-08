@@ -79,6 +79,16 @@ export default class CompilerModule implements ICompilerModule {
     get_exported_functions():Map<string,ICompilerFunction> {
         return this._exported_functions;
     }
+
+
+    // MAIN FUNCTION
+    has_main_function():boolean {
+        return this._module_functions.has('main');
+    }
+    
+    get_main_function():ICompilerFunction {
+        return this._module_functions.get('main');
+    }
     
     
     // MODULE CONSTANTS

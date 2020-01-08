@@ -9,6 +9,7 @@ import CompilerModule from '../0-common/compiler_module'; // TODO replace by int
 
 import { math_lang_parser } from '../1-cst-builder/math_lang_parser';
 import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES } from '../math_lang_types';
+import ICompilerModule from '../../core/icompiler_module';
 
 
 
@@ -385,10 +386,12 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
         const key_right:string = right_type ? right_type.get_type_name() : 'UNKNOW';
         const key:string = operator + key_left + key_right;
 
-        // console.log('compute_binop_type.key', key);
         const get_type_name = BINOP_TYPES.get(key);
         const type_name = get_type_name ? get_type_name : 'UNKNOW';
 
+        // if (type_name == 'UNKNOW') {
+        //     console.log('compute_binop_type.key', key, ' result:', type_name);
+        // }
         this.check_type(type_name, cst_context, ast_node_type);
 
         return this.get_type(type_name, cst_context, ast_node_type);
@@ -445,7 +448,18 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns ICompilerType
      */
 	get_symbol_type(name:string):ICompilerType {
-        let loop_scope;
+        // LOOP ON CURRENT MODULE CONSTANTS
+        const has_exported_const = this._current_module.has_exported_constant(name);
+        if (has_exported_const){
+            return this._current_module.get_exported_constant(name).type;
+        }
+        const has_module_const = this._current_module.has_module_constant(name);
+        if (has_module_const){
+            return this._current_module.get_module_constant(name).type;
+        }
+
+        // LOOP ON FUNCTIONS STACK SYMBOLS
+        let loop_scope:ICompilerFunction;
         for(loop_scope of this._scopes_stack) {
             if (loop_scope.has_symbol_const(name)) {
                 return loop_scope.get_symbol_const(name).type;
@@ -494,6 +508,56 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
         } else {
             this._current_function.add_symbol_var(name, ic_type, init_value);
         }
+    }
+
+    
+    /**
+     * Register a symbol declaration.
+     * @param name          symbol name.
+     * @param ic_type       symbol value type.
+     * @param is_constant   symbol is a constant ?
+     * @param init_value    symbol initialization value.
+     * @param cst_context   CST context for error log.
+     * @param ast_node_type AST node type for error log.
+     * @returns true for success or false for failure
+     */
+    register_module_constant_declaration(symbol_name:string, symbol_type:ICompilerType, is_constant:boolean, symbol_value:string, cst_context:any, ast_node_type:string) {
+        // this.check_type(ic_type, cst_context, ast_node_type);
+        const smb = {
+            name:symbol_name,
+            // path:string,
+            type:symbol_type,
+            is_constant:is_constant,
+            init_value: symbol_value,
+            uses_count:0
+        };
+
+        this._current_module.add_module_constant(smb);
+    }
+
+    
+    /**
+     * Register a symbol declaration.
+     * @param name          symbol name.
+     * @param ic_type       symbol value type.
+     * @param is_constant   symbol is a constant ?
+     * @param init_value    symbol initialization value.
+     * @param cst_context   CST context for error log.
+     * @param ast_node_type AST node type for error log.
+     * @returns true for success or false for failure
+     */
+    register_exported_module_constant_declaration(symbol_name:string, symbol_type:ICompilerType, is_constant:boolean, symbol_value:string, cst_context:any, ast_node_type:string) {
+        // this.check_type(ic_type, cst_context, ast_node_type);
+        const smb = {
+            name:symbol_name,
+            // path:string,
+            type:symbol_type,
+            is_constant:is_constant,
+            init_value: symbol_value,
+            uses_count:0
+        };
+
+        this._current_module.add_exported_constant(smb);
     }
 
     /**

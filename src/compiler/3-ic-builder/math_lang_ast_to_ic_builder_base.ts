@@ -19,6 +19,7 @@ import CompilerModule from '../0-common/compiler_module';
  */
 export default abstract class MathLangAstToIcVisitorBase {
     private _errors:ICompilerError[] = [];
+	private _default_module:ICompilerModule = undefined;
 	private _current_module:ICompilerModule = undefined;
 	private _current_function:ICompilerFunction = undefined;
 	private _current_functions_stack:ICompilerFunction[] = new Array();
@@ -31,6 +32,13 @@ export default abstract class MathLangAstToIcVisitorBase {
      * @param _ast_functions AST functions scopes
      */
     constructor(private _compiler_scope:ICompilerScope ) {
+        
+        this._default_module = this._compiler_scope.get_new_module('default');
+        if (! this._default_module) {
+            this._default_module = new CompilerModule(this._compiler_scope, 'default');
+        }
+        this._current_module = this._default_module;
+        this._current_function = this._current_module.get_main_function();
     }
 
 
@@ -69,12 +77,33 @@ export default abstract class MathLangAstToIcVisitorBase {
 
 
     /**
+     * Has current function ebb.
+     * 
+     * @returns boolean.
+     */
+    has_current_ebb():boolean{
+        return this._current_ebb != undefined;
+    }
+
+
+    /**
      * Get current function ebb.
      * 
      * @returns ICompilerIcEbb.
      */
     get_current_ebb():ICompilerIcEbb{
         return this._current_ebb;
+    }
+
+
+
+    /**
+     * Get current function ebb.
+     * 
+     * @returns ICompilerIcEbb.
+     */
+    set_current_ebb(ebb:ICompilerIcEbb):void{
+        this._current_ebb = ebb;
     }
 
 
@@ -154,12 +183,9 @@ export default abstract class MathLangAstToIcVisitorBase {
     }
 
 
-    // declare_method(object_type:ICompilerType, object_name:string, method_name:string, return_type:ICompilerType, opds_records:ICompilerIcOperand[], ic_statements:ICompilerIcInstruction[]=[]):ICompilerIcMethod{
-    //     return CompilerIcNode.create_method(this._compiler_scope, this._current_module.get_module_name(), object_type, object_name, method_name, return_type, opds_records, ic_statements);
-	// }
-
-    create_ebb(operands_types: ICompilerType[], operands_names: string[]): void {
+    create_ebb(operands_types: ICompilerType[], operands_names: string[]): ICompilerIcEbb {
         this._current_ebb = CompilerIcNode.create_ebb(this.get_current_function(), operands_types, operands_names);
+        return this._current_ebb ;
     }
 
     add_ic_ebb_instruction(instr:ICompilerIcInstr):void {

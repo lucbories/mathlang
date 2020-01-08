@@ -53,6 +53,9 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
             case AST.EXPR_PRIMARY_FLOAT:        return CompilerIcNode.create_const_float(ast_expression.value);
             case AST.EXPR_PRIMARY_BIGFLOAT:     return CompilerIcNode.create_const_bigfloat(ast_expression.value);
             case AST.EXPR_PRIMARY_STRING:       return CompilerIcNode.create_const_string(ast_expression.value);
+            case AST.EXPR_PRIMARY_FALSE:        return CompilerIcNode.create_const_false();
+            case AST.EXPR_PRIMARY_NULL:         return CompilerIcNode.create_const_null();
+            case AST.EXPR_PRIMARY_TRUE:         return CompilerIcNode.create_const_true();
 
             // BINARY OPERATOR EXPRESSION
             case AST.EXPR_BINOP_ADDSUB:         return this.visit_binop_expression(ast_expression);
@@ -60,9 +63,6 @@ export default class MathLangAstToIcVisitorExpressions extends MathLangAstToIcVi
             case AST.EXPR_BINOP_MULTDIV:        return this.visit_binop_expression(ast_expression);
 
             // UNARY OPERATOR EXPRESSION
-            case AST.EXPR_UNOP_PRE_FALSE:       return CompilerIcNode.create_const_false();
-            case AST.EXPR_UNOP_PRE_NULL:        return CompilerIcNode.create_const_null();
-            case AST.EXPR_UNOP_PRE_TRUE:        return CompilerIcNode.create_const_true();
             case AST.EXPR_UNOP_POST:            return this.visit_postunop_expression(ast_expression);
             case AST.EXPR_UNOP_PREUNOP:         return this.visit_preunop_expression(ast_expression);
         }

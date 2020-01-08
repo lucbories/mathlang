@@ -3,6 +3,7 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import MathLangCompiler from '../../../../compiler/math_lang_compiler';
+import { constants } from 'crypto';
 
 
 
@@ -11,7 +12,7 @@ describe('MathLang assign IC builder', () => {
 
     it('Parse assign a=456 statement' , () => {
         compiler.reset();
-        const text = 'a=456';
+        const text = 'module default a=456';
         const result = compiler.compile(text, 'program');
 
         // ERRORS
@@ -22,23 +23,60 @@ describe('MathLang assign IC builder', () => {
             expect(errors.length).equals(0);
             return;
         }
-        
-        // GET AST
-        // const compiler_ast = compiler.get_ast();
-        // compiler.dump_tree('ast', compiler_ast);
 
         // GET IC CODE
-        // const ic_functions_map = compiler.get_ic_functions_map();
-        // console.log('ic_functions_map', ic_functions_map);
-        // const ic_source:string = compiler.dump_ic_functions_source(ic_functions_map, false);
-        const ic_source = '';
+        const compiler_scope = compiler.get_scope();
+        const modules = compiler_scope.get_new_modules();
+        expect(modules.size).equals(1);
+        let ic_source:string = '';
 
+        modules.forEach(
+            (loop_module)=>{
+                const loop_constants = loop_module.get_module_constants();
+                expect(loop_constants.size).equals(1);
+                loop_constants.forEach(
+                    (loop_constant)=>{
+                        const ic_text = 'module const ' + loop_constant.name + ':' + loop_constant.type.get_type_name() + ' = ' + loop_constant.init_value;
+                        console.log('constant source->', ic_text);
+                        if (ic_source.length > 0) { ic_source += '\n'; }
+                        ic_source += ic_text;
+                    }
+                );
+
+                const loop_exp_constants = loop_module.get_exported_constants();
+                expect(loop_exp_constants.size).equals(0);
+                loop_exp_constants.forEach(
+                    (loop_constant)=>{
+                        const ic_text = 'exported const ' + loop_constant.name + ':' + loop_constant.type.get_type_name() + ' = ' + loop_constant.init_value;
+                        console.log('exported constant source->', ic_text);
+                        if (ic_source.length > 0) { ic_source += '\n'; }
+                        ic_source += ic_text;
+                    }
+                );
+
+                const loop_functions = loop_module.get_exported_functions();
+                expect(loop_functions.size).equals(0);
+                loop_functions.forEach(
+                    (loop_function)=>{
+                        const ebbs = loop_function.get_ic_ebb_map();
+                        ebbs.forEach(
+                            (ebb, ebb_name)=>console.log(ebb_name, ebb)
+                        );
+                    }
+                );
+
+                const main_function = loop_module.get_main_function();
+                if (main_function){
+                    const ebbs = main_function.get_ic_ebb_map();
+                    ebbs.forEach(
+                        (ebb, ebb_name)=>console.log(ebb_name, ebb)
+                    );
+                }
+            }
+        );
 
         // TEST IC TEXT
-        const expected_ic_source = `
-none:function-declare-enter main
-INTEGER:register-set INTEGER:@main/a INTEGER:[456]
-none:function-declare-leave main`;
+        const expected_ic_source = `module const a:INTEGER = f_inline(456)`;
         expect(ic_source).equals(expected_ic_source);
     });
 

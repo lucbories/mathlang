@@ -99,6 +99,16 @@ export default class CompilerIcNode implements ICompilerIcInstr {
     }
 
 
+    static create_assign(var_name_left: string, var_name_right: string, right_type:ICompilerType): ICompilerIcInstr {
+        return {
+            ic_code: IC_OPCODES.REGISTER_SET,
+            ic_type: right_type,
+            ic_opds: [var_name_left, var_name_right],
+            ic_var_name: undefined
+        };
+    }
+
+
     static create_const_true(): ICompilerIcInstrOperand {
         return 'b_inline(1)';
     }
@@ -131,6 +141,7 @@ export default class CompilerIcNode implements ICompilerIcInstr {
         return 's_inline(' + value + ')';
     }
 
+
     static create_operand_from_stack(operand_type: ICompilerType): ICompilerIcInstrOperand {
         return 'pop';
     }
@@ -160,4 +171,44 @@ export default class CompilerIcNode implements ICompilerIcInstr {
             ic_var_name: var_name
         };
     }
+
+
+    // CONTROL FLOW TESTS
+    static create_if_true(var_name: string, bool_type: ICompilerType, opd_name: string, jump_then_ebb_name:string): ICompilerIcInstr {
+        return {
+            ic_code: IC_OPCODES.IF_TRUE,
+            ic_type: bool_type,
+            ic_opds: [opd_name, jump_then_ebb_name],
+            ic_var_name: var_name
+        };
+    }
+
+    static create_if_false(var_name: string, bool_type: ICompilerType, opd_name: string, jump_then_ebb_name:string): ICompilerIcInstr {
+        return {
+            ic_code: IC_OPCODES.IF_FALSE,
+            ic_type: bool_type,
+            ic_opds: [opd_name, jump_then_ebb_name],
+            ic_var_name: var_name
+        };
+    }
+
+    static create_if_positive(var_name: string, bool_type: ICompilerType, opd_name: string, jump_then_ebb_name:string): ICompilerIcInstr {
+        return {
+            ic_code: IC_OPCODES.IF_POSITIVE,
+            ic_type: bool_type,
+            ic_opds: [opd_name, jump_then_ebb_name],
+            ic_var_name: var_name
+        };
+    }
+
+    static create_if_negative(var_name: string, bool_type: ICompilerType, opd_name: string, jump_then_ebb_name:string): ICompilerIcInstr {
+        return {
+            ic_code: IC_OPCODES.IF_NEGATIVE,
+            ic_type: bool_type,
+            ic_opds: [opd_name, jump_then_ebb_name],
+            ic_var_name: var_name
+        };
+    }
+
+    // static to_ic_text()
 }

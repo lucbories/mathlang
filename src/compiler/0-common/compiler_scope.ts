@@ -132,6 +132,84 @@ export default class CompilerScope implements ICompilerScope {
     }
 
     
+    // NON EXPORTED FUNCTIONS
+    // has_function(func_name:string) {
+    //     let found:boolean = false;
+    //     this._new_modules.forEach(
+    //         (module:ICompilerModule)=>{
+    //             if (found) {
+    //                 return;
+    //             }
+    //             const module_name = module.get_module_name();
+    //             if (this._modules_imports.has(module_name)) {
+    //                 const module_imports = this._modules_imports.get(module_name);
+    //                 found = module_imports.has(func_name);
+    //                 return;
+    //             }
+    //             if (module.has_function(func_name) ) {
+    //                 return;
+    //             }
+    //         }
+    //     );
+    //     if (found) {
+    //         return true;
+    //     }
+    //     this._available_modules.forEach(
+    //         (module:ICompilerModule)=>{
+    //             if (found) {
+    //                 return;
+    //             }
+    //             const module_name = module.get_module_name();
+    //             if (this._modules_imports.has(module_name)) {
+    //                 const module_imports = this._modules_imports.get(module_name);
+    //                 found = module_imports.has(func_name);
+    //                 return;
+    //             }
+    //             if (module.has_function(func_name) ) {
+    //                 return;
+    //             }
+    //         }
+    //     );
+    //     return found;
+    // }
+
+    // get_function(func_name:string):ICompilerFunction {
+    //     let found:ICompilerFunction = undefined;
+    //     this._new_modules.forEach(
+    //         (module:ICompilerModule)=>{
+    //             if (found) return;
+    //             const module_name = module.get_module_name();
+    //             if (this._modules_imports.has(module_name)) {
+    //                 const module_imports = this._modules_imports.get(module_name);
+    //                 if (module_imports.has(func_name)) {
+    //                     found = module.get_exported_function(func_name);
+    //                 }
+    //                 return;
+    //             }
+    //             found = module.get_function(func_name);
+    //         }
+    //     );
+    //     if (found) {
+    //         return found;
+    //     }
+    //     this._available_modules.forEach(
+    //         (module:ICompilerModule)=>{
+    //             if (found) return;
+    //             const module_name = module.get_module_name();
+    //             if (this._modules_imports.has(module_name)) {
+    //                 const module_imports = this._modules_imports.get(module_name);
+    //                 if (module_imports.has(func_name)) {
+    //                     found = module.get_exported_function(func_name);
+    //                 }
+    //                 return;
+    //             }
+    //             found = module.get_function(func_name);
+    //         }
+    //     );
+    //     return found;
+    // }
+
+    
     // EXPORTED FUNCTIONS
     has_exported_function(func_name:string) {
         let found:boolean = false;

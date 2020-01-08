@@ -245,7 +245,7 @@ export default class MathLangCompiler {
      * @returns boolean: true if no error else false.
      */
     compile_ast(text:string, parser_rule:string=undefined):boolean {
-        this._text = text;
+        this._text = (parser_rule == undefined || parser_rule == 'program' ? 'module default ' : '') + text;
         this._errors = [];
 
         // BUID LEXEMES
@@ -274,7 +274,7 @@ export default class MathLangCompiler {
      * @returns boolean: true if no error else false.
      */
     compile(text:string, parser_rule:string=undefined):boolean {
-        this._text = text;
+        this._text = (parser_rule == undefined || parser_rule == 'program' ? 'module default ' : '') + text;
         this._errors = [];
 
         // BUID LEXEMES
@@ -445,9 +445,11 @@ export default class MathLangCompiler {
      * @returns boolean (true:success, false:error occures).
      */
     build_ic():boolean{
-        const modules_map:Map<string, ICompilerModule> = this.get_scope().get_available_modules();
+        // const modules_map:Map<string, ICompilerModule> = this.get_scope().get_available_modules(); // TODO
+        
+        const modules_map:Map<string, ICompilerModule> = this.get_scope().get_new_modules();
 
-        const ic_builder = new MathLangAstToIcBuilder(this._compiler_scope);
+        const ic_builder = new MathLangAstToIcBuilder(this.get_scope());
         ic_builder.visit();
         // // this._ic_modules = ic_builder.get_ic_modules_map();
 

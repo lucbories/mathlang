@@ -66,7 +66,7 @@ describe('MathLang if parser', () => {
     it('Parse [if 12+2 then a=456 b=89 end if] statement' , () => {
         compiler.reset();
         const text = 'if 12+2 then a=456 b=89 end if';
-        const result = compiler.compile_ast(text, 'program');
+        const result = compiler.compile_ast(text, 'statement');
 
         // ERRORS
         const expected_errors = 0;
@@ -89,59 +89,53 @@ describe('MathLang if parser', () => {
 
         // TEST AST
         const expected_ast = {
-            ast_code:AST.PROGRAM,
-            modules:EMPTY_ARRAY,
-            "block": [
-                {
-                    ast_code: AST.STAT_IF,
-                    "condition": {
-                        ast_code: AST.EXPR_BINOP_ADDSUB,
-                        "ic_type": compiler.TYPE_INTEGER,
-                        "lhs": {
-                            ast_code:AST.EXPR_PRIMARY_INTEGER,
-                            "ic_type": compiler.TYPE_INTEGER,
-                            "value": "12"
-                        },
-                        "operator": {
-                            "ic_function":"add",
-                            ast_code: "BINOP",
-                            "value": "+"
-                        },
-                        "rhs": {
-                            ast_code:AST.EXPR_PRIMARY_INTEGER,
-                            "ic_type":compiler.TYPE_INTEGER,
-                            "value": "2"
-                        }
-                    },
-                    "then": [
-                        {
-                            ast_code:AST.STAT_ASSIGN_VARIABLE,
-                            "ic_type":compiler.TYPE_INTEGER,
-                            "name": "a",
-                            "is_async":false,
-                            "members":EMPTY_ARRAY,
-                            "expression": {
-                                ast_code:AST.EXPR_PRIMARY_INTEGER,
-                                "ic_type": compiler.TYPE_INTEGER,
-                                "value": "456"
-                            }
-                        },
-                        {
-                            ast_code: AST.STAT_ASSIGN_VARIABLE,
-                            "ic_type": compiler.TYPE_INTEGER,
-                            "name": "b",
-                            "is_async":false,
-                            "members": EMPTY_ARRAY,
-                            "expression": {
-                                ast_code:AST.EXPR_PRIMARY_INTEGER,
-                                "ic_type": compiler.TYPE_INTEGER,
-                                "value": "89"
-                            }
-                        }
-                    ],
-                    else:<any>undefined
+            ast_code: AST.STAT_IF,
+            "condition": {
+                ast_code: AST.EXPR_BINOP_ADDSUB,
+                "ic_type": compiler.TYPE_INTEGER,
+                "lhs": {
+                    ast_code:AST.EXPR_PRIMARY_INTEGER,
+                    "ic_type": compiler.TYPE_INTEGER,
+                    "value": "12"
+                },
+                "operator": {
+                    "ic_function":"add",
+                    ast_code: "BINOP",
+                    "value": "+"
+                },
+                "rhs": {
+                    ast_code:AST.EXPR_PRIMARY_INTEGER,
+                    "ic_type":compiler.TYPE_INTEGER,
+                    "value": "2"
                 }
-            ]
+            },
+            "then": [
+                {
+                    ast_code:AST.STAT_ASSIGN_VARIABLE,
+                    "ic_type":compiler.TYPE_INTEGER,
+                    "name": "a",
+                    "is_async":false,
+                    "members":EMPTY_ARRAY,
+                    "expression": {
+                        ast_code:AST.EXPR_PRIMARY_INTEGER,
+                        "ic_type": compiler.TYPE_INTEGER,
+                        "value": "456"
+                    }
+                },
+                {
+                    ast_code: AST.STAT_ASSIGN_VARIABLE,
+                    "ic_type": compiler.TYPE_INTEGER,
+                    "name": "b",
+                    "is_async":false,
+                    "members": EMPTY_ARRAY,
+                    "expression": {
+                        ast_code:AST.EXPR_PRIMARY_INTEGER,
+                        "ic_type": compiler.TYPE_INTEGER,
+                        "value": "89"
+                    }
+                }
+            ],
+            else:<any>undefined
         };
         expect(compiler_ast).eql(expected_ast);
     });

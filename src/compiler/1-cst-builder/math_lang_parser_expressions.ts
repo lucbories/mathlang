@@ -70,16 +70,14 @@ export class MathLangParserExpressions extends MathLangParserStatements {
                     )
                     this.SUBRULE(this.UnaryExpression,              { LABEL:"rhs" } )
                 }
-            },
-            { ALT: () => this.CONSUME(t.True) },
-            { ALT: () => this.CONSUME(t.False) },
-            { ALT: () => this.CONSUME(t.Null) }
+            }
         ]);
     });
 
     private PostfixExpression = this.RULE("PostfixExpression", () => {
         this.OR( [
             { ALT: () => this.SUBRULE(this.idRight, { LABEL:"lhs" } ) },
+            { ALT: () => this.SUBRULE(this.ParenthesisExpression, { LABEL:"lhs" } ) },
             { ALT: () => this.SUBRULE(this.PrimaryExpression, { LABEL:"lhs" } ) }
         ]);
 
@@ -236,7 +234,7 @@ export class MathLangParserExpressions extends MathLangParserStatements {
     });
 
 
-    private PrimaryExpression = this.RULE("PrimaryExpression", () => {
+    PrimaryExpression = this.RULE("PrimaryExpression", () => {
         this.OR(
             this.c5 ||
                 (this.c5 = [
@@ -254,7 +252,10 @@ export class MathLangParserExpressions extends MathLangParserStatements {
                     { ALT: () => this.CONSUME(t.BigFloat3Literal) },
 
                     { ALT: () => this.SUBRULE(this.ArrayLiteral) },
-                    { ALT: () => this.SUBRULE(this.ParenthesisExpression) }
+                    
+                    { ALT: () => this.CONSUME(t.True) },
+                    { ALT: () => this.CONSUME(t.False) },
+                    { ALT: () => this.CONSUME(t.Null) }
                 ])
         )
     });

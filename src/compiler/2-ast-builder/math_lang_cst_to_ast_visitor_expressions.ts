@@ -136,27 +136,6 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
                 ic_function: this.get_prefix_operator_function(node_op)
             }
         }
-
-        if (ctx.True) {
-            return {
-                ast_code: AST.EXPR_UNOP_PRE_TRUE,
-                ic_type:this.get_keyword_type('KEYWORD', AST.EXPR_UNOP_PRE_TRUE)
-            }
-        }
-
-        if (ctx.False) {
-            return {
-                ast_code: AST.EXPR_UNOP_PRE_FALSE,
-                ic_type:this.get_keyword_type('KEYWORD', AST.EXPR_UNOP_PRE_FALSE)
-            }
-        }
-
-        if (ctx.Null) {
-            return {
-                ast_code: AST.EXPR_UNOP_PRE_NULL,
-                ic_type:this.get_keyword_type('NULL', AST.EXPR_UNOP_PRE_NULL)
-            }
-        }
         
         return this.add_error(ctx, AST.EXPR_UNOP_PRE_UNKNOW, 'Unknow prefix unary operator node');
     }
@@ -582,9 +561,33 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
             return this.visit(ctx.NumberLiteral);
         }
 
-        if (ctx.ParenthesisExpression) {
-            return this.visit(ctx.ParenthesisExpression);
+        if (ctx.True) {
+            return {
+                ast_code: AST.EXPR_PRIMARY_TRUE,
+                ic_type:this.get_boolean_type('BOOLEAN', AST.EXPR_PRIMARY_TRUE),
+                value:'TRUE'
+            }
         }
+
+        if (ctx.False) {
+            return {
+                ast_code: AST.EXPR_PRIMARY_FALSE,
+                ic_type:this.get_boolean_type('BOOLEAN', AST.EXPR_PRIMARY_FALSE),
+                value:'FALSE'
+            }
+        }
+
+        if (ctx.Null) {
+            return {
+                ast_code: AST.EXPR_PRIMARY_NULL,
+                ic_type:this.get_keyword_type('NULL', AST.EXPR_PRIMARY_NULL),
+                value:'NULL'
+            }
+        }
+
+        // if (ctx.ParenthesisExpression) {
+        //     return this.visit(ctx.ParenthesisExpression);
+        // }
 
         return {
             ast_code: AST.EXPR_PRIMARY_UNKNOW,

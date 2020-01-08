@@ -38,21 +38,28 @@ describe('MathLang module parser', () => {
         // TEST AST
         const expected_ast = {
             ast_code:AST.PROGRAM,
-            block:<any>[],
             modules:[
+                {
+                    ast_code:AST.STAT_MODULE,
+                    module_name:'default',
+                    uses:EMPTY_ARRAY,
+                    variables:EMPTY_ARRAY,
+					functions:EMPTY_ARRAY
+				},
 				{
 					ast_code:AST.STAT_MODULE,
 					module_name: 'ModuleA',
 					uses:EMPTY_ARRAY,
+                    variables:EMPTY_ARRAY,
 					functions:[
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcA',
+							func_name: 'funcA',
 							is_exported:false,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -64,8 +71,7 @@ describe('MathLang module parser', () => {
 								}
 							]
 						}
-					],
-					variables:EMPTY_ARRAY
+					]
 				}
             ]
         }
@@ -118,8 +124,14 @@ describe('MathLang module parser: USE', () => {
         // TEST AST
         const expected_ast = {
             ast_code:AST.PROGRAM,
-            block:<any>[],
             modules:[
+                {
+                    ast_code:AST.STAT_MODULE,
+                    module_name:'default',
+                    uses:EMPTY_ARRAY,
+                    variables:EMPTY_ARRAY,
+					functions:EMPTY_ARRAY
+				},
 				{
 					ast_code:AST.STAT_MODULE,
 					module_name: 'ModuleA',
@@ -128,11 +140,11 @@ describe('MathLang module parser: USE', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcA',
+							func_name: 'funcA',
 							is_exported:true,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -155,11 +167,11 @@ describe('MathLang module parser: USE', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcB',
+							func_name: 'funcB',
 							is_exported:false,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -241,8 +253,14 @@ describe('MathLang module parser: USE', () => {
         // TEST AST
         const expected_ast = {
             ast_code:AST.PROGRAM,
-            block:<any>[],
             modules:[
+                {
+                    ast_code:AST.STAT_MODULE,
+                    module_name:'default',
+                    uses:EMPTY_ARRAY,
+                    variables:EMPTY_ARRAY,
+					functions:EMPTY_ARRAY
+				},
 				{
 					ast_code:AST.STAT_MODULE,
 					module_name: 'ModuleA',
@@ -251,11 +269,11 @@ describe('MathLang module parser: USE', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcA',
+							func_name: 'funcA',
 							is_exported:true,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -278,11 +296,11 @@ describe('MathLang module parser: USE', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcB',
+							func_name: 'funcB',
 							is_exported:false,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -370,8 +388,14 @@ describe('MathLang module parser: USE', () => {
         // TEST AST
         const expected_ast = {
             ast_code:AST.PROGRAM,
-            block:<any>[],
             modules:[
+                {
+                    ast_code:AST.STAT_MODULE,
+                    module_name:'default',
+                    uses:EMPTY_ARRAY,
+                    variables:EMPTY_ARRAY,
+					functions:EMPTY_ARRAY
+				},
 				{
 					ast_code:AST.STAT_MODULE,
 					module_name: 'ModuleA',
@@ -380,11 +404,11 @@ describe('MathLang module parser: USE', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcA1',
+							func_name: 'funcA1',
 							is_exported:true,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -399,11 +423,11 @@ describe('MathLang module parser: USE', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcA2',
+							func_name: 'funcA2',
 							is_exported:false,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -418,11 +442,11 @@ describe('MathLang module parser: USE', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcA3',
+							func_name: 'funcA3',
 							is_exported:false,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -445,11 +469,11 @@ describe('MathLang module parser: USE', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcB',
+							func_name: 'funcB',
 							is_exported:false,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,

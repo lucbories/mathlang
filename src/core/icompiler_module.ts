@@ -1,5 +1,6 @@
 
-import { SymbolDeclaration, ICompilerFunction } from './icompiler_function';
+import ICompilerSymbol  from './icompiler_symbol';
+import { ICompilerFunction } from './icompiler_function';
 
 
 export default ICompilerModule;
@@ -21,15 +22,18 @@ export interface ICompilerModule {
     get_exported_function(func_name:string):ICompilerFunction;
     get_exported_functions():Map<string,ICompilerFunction>;
 
-    add_module_constant(smb:SymbolDeclaration):void;
+    has_main_function():boolean;
+    get_main_function():ICompilerFunction;
+
+    add_module_constant(smb:ICompilerSymbol):void;
     del_module_constant(const_name:string):void;
     has_module_constant(const_name:string):boolean;
-    get_module_constant(const_name:string):SymbolDeclaration;
-    get_module_constants():Map<string,SymbolDeclaration>;
+    get_module_constant(const_name:string):ICompilerSymbol;
+    get_module_constants():Map<string,ICompilerSymbol>;
 
-    add_exported_constant(smb:SymbolDeclaration):void;
+    add_exported_constant(smb:ICompilerSymbol):void;
     del_exported_constant(const_name:string):void;
     has_exported_constant(const_name:string):boolean;
-    get_exported_constant(const_name:string):SymbolDeclaration;
-    get_exported_constants():Map<string,SymbolDeclaration>;
+    get_exported_constant(const_name:string):ICompilerSymbol;
+    get_exported_constants():Map<string,ICompilerSymbol>;
 }

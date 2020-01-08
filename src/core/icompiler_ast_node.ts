@@ -30,9 +30,6 @@ export enum IAstNodeKindOf {
     EXPR_BINOP_MULTDIV      ='MULTDIV_EXPRESSION',
 
     EXPR_UNOP_PREUNOP       ='PREUNOP_EXPRESSION',
-    EXPR_UNOP_PRE_TRUE      ='TRUE',
-    EXPR_UNOP_PRE_FALSE     ='FALSE',
-    EXPR_UNOP_PRE_NULL      ='NULL',
     EXPR_UNOP_PRE_UNKNOW    ='UNKNOW_UNARY_EXPRESSION',
     EXPR_UNOP_POST          ='POSTUNOP_EXPRESSION',
     EXPR_UNOP_POST_UNKNOW   ='UNKNOW_POSTFIX_EXPRESSION',
@@ -46,6 +43,9 @@ export enum IAstNodeKindOf {
     EXPR_MEMBER_FUNC_CALL   ='FUNCTION_CALL_EXPRESSION',
     EXPR_MEMBER_ATTRIBUTE   ='ATTRIBUTE_EXPRESSION',
 
+    EXPR_PRIMARY_NULL       ='NULL',
+    EXPR_PRIMARY_TRUE       ='TRUE',
+    EXPR_PRIMARY_FALSE      ='FALSE',
     EXPR_PRIMARY_STRING     ='STRING',
     EXPR_PRIMARY_INTEGER    ='INTEGER',
     EXPR_PRIMARY_FLOAT      ='FLOAT',
@@ -74,6 +74,20 @@ export interface ICompilerAstTypedNode extends ICompilerAstNode {
 
 export interface ICompilerAstExpressionNode extends ICompilerAstTypedNode {
     expression:ICompilerAstTypedNode
+}
+
+export interface ICompilerAstIndexedMemberNode extends ICompilerAstTypedNode {
+    indices_expressions:[]
+}
+
+export interface ICompilerAstAttributeMemberNode extends ICompilerAstTypedNode {
+    attribute_name:string
+}
+
+export interface ICompilerAstAssignNode extends ICompilerAstExpressionNode {
+    is_async:boolean,
+    name:string,
+    members:ICompilerAstIndexedMemberNode|ICompilerAstAttributeMemberNode[]
 }
 
 export interface ICompilerAstBlockNode extends ICompilerAstTypedNode {

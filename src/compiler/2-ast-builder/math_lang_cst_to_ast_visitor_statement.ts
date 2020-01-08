@@ -1,7 +1,7 @@
 
 import MathLangCstToAstVisitorBase from './math_lang_cst_to_ast_visitor_base';
 
-import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
+import { IAstNodeKindOf as AST, ICompilerAstAssignNode, ICompilerAstFunctionNode } from '../../core/icompiler_ast_node';
 
 import CompilerScope from '../0-common/compiler_scope';
 import CompilerModule from '../0-common/compiler_module';
@@ -25,7 +25,6 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
     program(ctx:any) {
         // console.log('program', ctx)
 
-        const statements = [];
         const modules = [];
         let cst_statement;
         let ast_statement;
@@ -38,43 +37,8 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             }
         }
 
-        // LOOP ON FUNCTIONS DECLARATIONS STATEMENTS HEADERS
-        let ast_function_header_nodes:any = {};
-        if (ctx.functionStatement){
-            for(cst_statement of ctx.functionStatement){
-                cst_statement.children.visit_header = true;
-                cst_statement.children.visit_body = false;
-
-                ast_statement = this.visit(cst_statement);
-                ast_function_header_nodes[ast_statement.name] = ast_statement;
-            }
-        }
-
-        // LOOP ON OTHER STATEMENTS
-        if (ctx.blockStatement){
-            for(cst_statement of ctx.blockStatement){
-                ast_statement = this.visit(cst_statement);
-                statements.push(ast_statement);
-                this._current_function.set_ast_statements(ast_statement);
-            }
-        }
-
-        // LOOP ON FUNCTIONS DECLARATIONS STATEMENTS BODY
-        if (ctx.functionStatement){
-            for(cst_statement of ctx.functionStatement){
-                cst_statement.children.visit_header = false;
-                cst_statement.children.visit_body = true;
-
-                ast_statement = this.visit(cst_statement);
-                ast_statement.operands_types = ast_function_header_nodes[ast_statement.name].operands_types;
-                ast_statement.operands_names = ast_function_header_nodes[ast_statement.name].operands_names;
-                statements.push(ast_statement);
-            }
-        }
-
         return {
             ast_code: AST.PROGRAM,
-            block: statements,
             modules:modules
         }
     }
@@ -95,7 +59,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         let cst_statement;
         let ast_statement;
         let functions:any[] = [];
-        let variables:any[] = [];
+        let constants:any[] = [];
         let uses:any[] = [];
 
         this._current_module = new CompilerModule(this._compiler_scope, module_name);
@@ -109,23 +73,42 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             }
         }
 
-        // LOOP ON FUNCTIONS DECLARATIONS STATEMENTS BODY
+        // LOOP ON FUNCTIONS DECLARATIONS STATEMENTS HEADER
+        let ast_function_header_nodes:any = {};
         if (ctx.functionStatement){
             for(cst_statement of ctx.functionStatement){
                 cst_statement.children.visit_header = true;
-                cst_statement.children.visit_body = true;
+                cst_statement.children.visit_body = false;
 
                 ast_statement = this.visit(cst_statement);
-                functions.push(ast_statement);
+                ast_function_header_nodes[ast_statement.func_name] = ast_statement;
             }
         }
 
-        // LOOP ON VARIABLES DECLARATIONS STATEMENTS
-        if (ctx.exportableAssignStatement){
-            for(cst_statement of ctx.exportableAssignStatement){
+        // LOOP ON CONSTANTS DECLARATIONS STATEMENTS
+        if (ctx.exportedConstantStatement){
+            for(cst_statement of ctx.exportedConstantStatement){
+                ast_statement = this.visit(cst_statement);
+                constants.push(ast_statement);
+            }
+        }
+        if (ctx.constantStatement){
+            for(cst_statement of ctx.constantStatement){
+                ast_statement = this.visit(cst_statement);
+                constants.push(ast_statement);
+            }
+        }
+
+        // LOOP ON FUNCTIONS DECLARATIONS STATEMENTS BODY
+        if (ctx.functionStatement){
+            for(cst_statement of ctx.functionStatement){
+                cst_statement.children.visit_header = false;
+                cst_statement.children.visit_body = true;
 
                 ast_statement = this.visit(cst_statement);
-                variables.push(ast_statement);
+                ast_statement.operands_types = ast_function_header_nodes[ast_statement.func_name].operands_types;
+                ast_statement.operands_names = ast_function_header_nodes[ast_statement.func_name].operands_names;
+                functions.push(ast_statement);
             }
         }
 
@@ -134,7 +117,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             module_name: module_name,
             uses:uses,
             functions:functions,
-            variables:variables
+            variables:constants
         }
     }
 
@@ -454,25 +437,62 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
     
 
     /**
-     * Visit CST Assign node.
+     * Visit CST Exported constant node.
      * 
      * @param ctx CST nodes
      * 
      * @returns AST node
      */
-    exportableAssignStatement(ctx:any) {
-        // console.log('exportableAssignStatement', ctx)
+    exportedConstantStatement(ctx:any) {
+        // console.log('exportedConstantStatement', ctx)
 
-        const is_exported:boolean = ctx.Export && ctx.Export[0].image
-        
-        ctx.assignStatement.is_exported = is_exported;
-        let ast_assign = this.visit(ctx.assignStatement);
-        ast_assign.is_exported = is_exported;
+        const constant_name = ctx.ID[0].image;
+        const constant_value = this.visit(ctx.PrimaryExpression);
+        const constant_ast = {
+            ast_code: AST.STAT_ASSIGN_VARIABLE,
+            ic_type: constant_value.ic_type,
+            name: constant_name,
+            is_async:ctx.Async ? true : false,
+            members:<any>[],
+            expression:constant_value.value,
+            is_exported: true
+        };
 
-        return ast_assign
+        // DECLARE A NEW VARIABLE OR UPDATE AN EXISTING VARIABLE
+        this.register_exported_module_constant_declaration(constant_name, constant_ast.ic_type, true, constant_value.value, ctx, AST.STAT_ASSIGN_VARIABLE);
+        return constant_ast;
     }
 
 
+    /**
+     * Visit CST Constant node.
+     * 
+     * @param ctx CST nodes
+     * @param ctx is exported
+     * 
+     * @returns AST node
+     */
+    constantStatement(ctx:any) {
+        // console.log('constantStatement', ctx)
+
+        const constant_name = ctx.ID[0].image;
+        const constant_value = this.visit(ctx.PrimaryExpression);
+        const constant_ast = {
+            ast_code: AST.STAT_ASSIGN_VARIABLE,
+            ic_type: constant_value.ic_type,
+            name: constant_name,
+            is_async:ctx.Async ? true : false,
+            members:<any>[],
+            expression:constant_value.value,
+            is_exported: false
+        };
+
+        // DECLARE A NEW VARIABLE OR UPDATE AN EXISTING VARIABLE
+        this.register_module_constant_declaration(constant_name, constant_ast.ic_type, true, constant_value.value, ctx, AST.STAT_ASSIGN_VARIABLE);
+        return constant_ast;
+    }
+
+    
     /**
      * Visit CST Assign node.
      * 
@@ -480,7 +500,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
      * 
      * @returns AST node
      */
-    assignStatement(ctx:any) {
+    assignStatement(ctx:any):ICompilerAstAssignNode {
         // console.log('assignStatement', ctx)
 
         const cst_id_left_node = ctx.idLeft[0];
@@ -504,7 +524,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             };
 
             // DECLARE A NEW VARIABLE OR UPDATE AN EXISTING VARIABLE
-            this.register_symbol_declaration(assign_name, assign_ast.ic_type, false, '', ctx, AST.STAT_ASSIGN_VARIABLE);
+            this.register_symbol_declaration(assign_name, assign_ast.ic_type, true, '', ctx, AST.STAT_ASSIGN_VARIABLE);
 
             return assign_ast;
         }
@@ -658,7 +678,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
      * 
      * @returns AST node
      */
-    functionStatement(ctx:any) {
+    functionStatement(ctx:any):ICompilerAstFunctionNode {
         // console.log('functionStatement', ctx)
 
         const function_name = ctx.functionName[0].image ? ctx.functionName[0].image : this._type_unknow;
@@ -697,11 +717,11 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
         return {
             ast_code: AST.STAT_FUNCTION,
             ic_type:returned_type,
-            name:function_name,
+            func_name:function_name,
             is_exported: function_is_exported,
             operands_types:operands_decl && operands_decl.ic_subtypes ? operands_decl.ic_subtypes : [],
             operands_names:operands_decl && operands_decl.items ? operands_decl.items : [],
-            block:statements
+            statements:statements
         }
     }
     

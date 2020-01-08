@@ -54,8 +54,14 @@ describe('MathLang module parser: ALIASES', () => {
         // TEST AST
         const expected_ast = {
             ast_code:AST.PROGRAM,
-            block:<any>[],
             modules:[
+                {
+                    ast_code:AST.STAT_MODULE,
+                    module_name:'default',
+                    uses:EMPTY_ARRAY,
+                    variables:EMPTY_ARRAY,
+					functions:EMPTY_ARRAY
+				},
 				{
 					ast_code:AST.STAT_MODULE,
 					module_name: 'ModuleA',
@@ -64,11 +70,11 @@ describe('MathLang module parser: ALIASES', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcA1',
+							func_name: 'funcA1',
 							is_exported:true,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -83,11 +89,11 @@ describe('MathLang module parser: ALIASES', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcA2',
+							func_name: 'funcA2',
 							is_exported:true,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -102,11 +108,11 @@ describe('MathLang module parser: ALIASES', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcA3',
+							func_name: 'funcA3',
 							is_exported:false,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -129,11 +135,11 @@ describe('MathLang module parser: ALIASES', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcB',
+							func_name: 'funcB',
 							is_exported:false,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -201,7 +207,8 @@ describe('MathLang module parser: ALIASES', () => {
 	
 	
 	it('Parse define modules ModuleA and ModuleB which use only funcA1 from ModuleA as MA1 and funcA2 from ModuleA as MA2' , () => {
-        const text = `module ModuleA
+		const text = `
+			module ModuleA
 			export function funcA1() return INTEGER
 				return 11
 			end function
@@ -215,11 +222,15 @@ describe('MathLang module parser: ALIASES', () => {
 			module ModuleB
 			use ModuleA(funcA1) as MA1
 			use ModuleA(funcA2) as MA2
-			function funcB() return INTEGER
+			export function funcB() return INTEGER
 				return MA1.funcA1() * 2 + MA2.funcA2()
 			end function
-			
-			return funcB()
+
+			module default
+			use ModuleB
+			function main() return UNKNOW
+				return ModuleB.funcB()
+			end function
 		`;
 		
         const result = compiler.compile_ast(text, 'program');
@@ -246,21 +257,14 @@ describe('MathLang module parser: ALIASES', () => {
         // TEST AST
         const expected_ast = {
             ast_code:AST.PROGRAM,
-            block:[
-				{
-					expression: {
-						ic_type: compiler.TYPE_INTEGER,
-						members: EMPTY_ARRAY,
-						name: 'funcB',
-						operands_expressions: EMPTY_ARRAY,
-						operands_types: EMPTY_ARRAY,
-						ast_code: AST.EXPR_MEMBER_FUNC_CALL
-					},
-					ic_type: compiler.TYPE_INTEGER,
-					ast_code: AST.STAT_RETURN
-				}
-		  ],
             modules:[
+                {
+                    ast_code:AST.STAT_MODULE,
+                    module_name:'default',
+                    uses:EMPTY_ARRAY,
+                    variables:EMPTY_ARRAY,
+					functions:[]
+				},
 				{
 					ast_code:AST.STAT_MODULE,
 					module_name: 'ModuleA',
@@ -269,11 +273,11 @@ describe('MathLang module parser: ALIASES', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcA1',
+							func_name: 'funcA1',
 							is_exported:true,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -288,11 +292,11 @@ describe('MathLang module parser: ALIASES', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcA2',
+							func_name: 'funcA2',
 							is_exported:true,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -307,11 +311,11 @@ describe('MathLang module parser: ALIASES', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcA3',
+							func_name: 'funcA3',
 							is_exported:false,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -334,11 +338,11 @@ describe('MathLang module parser: ALIASES', () => {
 						{
 							ast_code:AST.STAT_FUNCTION,
 							ic_type: compiler.TYPE_INTEGER,
-							name: 'funcB',
-							is_exported:false,
+							func_name: 'funcB',
+							is_exported:true,
 							operands_types:EMPTY_ARRAY,
 							operands_names:EMPTY_ARRAY,
-							block: [
+							statements: [
 								{
 									ast_code:AST.STAT_RETURN,
 									ic_type:compiler.TYPE_INTEGER,
@@ -398,6 +402,48 @@ describe('MathLang module parser: ALIASES', () => {
 						}
 					],
 					variables:EMPTY_ARRAY
+				},
+                {
+                    ast_code:AST.STAT_MODULE,
+                    module_name:'default',
+                    uses:[
+						{
+							alias:"ModuleB",
+							imports:EMPTY_ARRAY,
+							name:'ModuleB'
+						}
+					],
+                    variables:EMPTY_ARRAY,
+					functions:[
+						{
+							ast_code:AST.STAT_FUNCTION,
+							ic_type: compiler.TYPE_UNKNOW,
+							func_name: 'main',
+							is_exported:false,
+							operands_types:EMPTY_ARRAY,
+							operands_names:EMPTY_ARRAY,
+							statements: [
+								{
+									expression: {
+										ic_type: compiler.TYPE_INTEGER,
+										members: [
+											{
+												"ast_code": "METHOD_CALL_EXPRESSION",
+												"func_name": "funcB",
+												"ic_type": compiler.TYPE_INTEGER,
+												operands_expressions: EMPTY_ARRAY,
+												operands_types: EMPTY_ARRAY
+											}
+									  	],
+										name: 'ModuleB',
+										ast_code: AST.EXPR_MEMBER_FUNC_CALL
+									},
+									ic_type: compiler.TYPE_INTEGER,
+									ast_code: AST.STAT_RETURN
+								}
+							]
+						}
+					]
 				}
             ]
         }

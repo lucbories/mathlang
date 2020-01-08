@@ -17,7 +17,8 @@ export class MathLangParserStatements extends Parser {
         this.AT_LEAST_ONE( () => {
             this.OR( [
                 { ALT: () => this.SUBRULE(this.moduleStatement, { LABEL:"moduleStatement" }) },
-                { ALT: () => this.SUBRULE(this.statement, { LABEL:"blockStatement" }) },
+                { ALT: () => this.SUBRULE(this.constantStatement, { LABEL:"constantStatement" }) },
+                { ALT: () => this.SUBRULE(this.exportedConstantStatement, { LABEL:"exportedConstantStatement" }) },
                 { ALT: () => this.SUBRULE(this.functionStatement) }
             ] );
         });
@@ -33,10 +34,11 @@ export class MathLangParserStatements extends Parser {
             this.SUBRULE(this.useStatement, { LABEL:"useStatement" })
         });
 
-        this.AT_LEAST_ONE(() => {
+        this.MANY2(() => {
             this.OR( [
                 { ALT: () => this.SUBRULE(this.functionStatement, { LABEL:'functionStatement' } ) },
-                { ALT: () => this.SUBRULE(this.exportableAssignStatement, { LABEL:'exportableAssignStatement' } ) }
+                { ALT: () => this.SUBRULE(this.exportedConstantStatement, { LABEL:'exportedConstantStatement' } ) },
+                { ALT: () => this.SUBRULE(this.constantStatement, { LABEL:'constantStatement' } ) }
             ]);
         });
     });
@@ -167,14 +169,21 @@ export class MathLangParserStatements extends Parser {
     });
 
 
-    // ASSIGN
-    private exportableAssignStatement = this.RULE("exportableAssignStatement", () => {
-        this.OPTION(
-            ()=>{ this.CONSUME(t.Export); }
-        );
-        this.SUBRULE(this.assignStatement);
+    // EXPORTED CONSTANT
+    private exportedConstantStatement = this.RULE("exportedConstantStatement", () => {
+        this.CONSUME(t.Export);
+        this.SUBRULE(this.constantStatement);
     });
 
+
+    // CONSTANT
+    private constantStatement = this.RULE("constantStatement", () => {
+        this.CONSUME(t.ID);
+        this.CONSUME(t.Assign);
+        this.SUBRULE(this.PrimaryExpression, { LABEL:"PrimaryExpression" });
+    });
+
+   // VARIABLE ASSIGN
     private assignStatement = this.RULE("assignStatement", () => {
         this.SUBRULE(this.idLeft);
         this.CONSUME(t.Assign);
@@ -251,4 +260,5 @@ export class MathLangParserStatements extends Parser {
     protected ArgumentsWithIds:any = undefined;
     protected AssignMemberOptionExpression:any = undefined;
     protected Record:any = undefined;
+    protected PrimaryExpression:any = undefined;
 }
