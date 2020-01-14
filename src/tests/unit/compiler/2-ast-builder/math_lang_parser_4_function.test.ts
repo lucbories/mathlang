@@ -12,9 +12,9 @@ const EMPTY_ARRAY = <any>[];
 describe('MathLang function declaration parser', () => {
     const compiler = new MathLangCompiler();
 
-    it('Parse [function f() return BOOLEAN return true end function] statement' , () => {
+    it('Parse [function f() as BOOLEAN return true end function] statement' , () => {
         compiler.reset();
-        const text = 'function f() return BOOLEAN return true end function';
+        const text = 'function f() as BOOLEAN return true end function';
         const result = compiler.compile_ast(text, 'program');
 
         // ERRORS
@@ -72,9 +72,9 @@ describe('MathLang function declaration parser', () => {
         expect(compiler_ast).eql(expected_ast);
     });
 
-    it('Parse [function f(x) return BOOLEAN return true end function] statement' , () => {
+    it('Parse [function f(x) as BOOLEAN return true end function] statement' , () => {
         compiler.reset();
-        const text = 'function f(x) return BOOLEAN return true end function';
+        const text = 'function f(x) as BOOLEAN return true end function';
         const result = compiler.compile_ast(text, 'program');
 
         // ERRORS
@@ -133,9 +133,9 @@ describe('MathLang function declaration parser', () => {
     });
 
 
-    it('Parse [function f(x is BIGFLOAT) return BOOLEAN return 1+2 end function] statement' , () => {
+    it('Parse [function f(x is BIGFLOAT) as BOOLEAN return 1+2 end function] statement' , () => {
         compiler.reset();
-        const text = 'function f(x is BIGFLOAT) return BOOLEAN return 1+2 end function';
+        const text = 'function f(x is BIGFLOAT) as BOOLEAN return 1+2 end function';
         const result = compiler.compile_ast(text, 'program');
 
         // ERRORS
@@ -208,9 +208,9 @@ describe('MathLang function declaration parser', () => {
     });
 
 
-    it('Parse [a=456 function f(x is BIGFLOAT) return BOOLEAN return a+2 end function] statement' , () => {
+    it('Parse [a=456 function f(x is BIGFLOAT) as BOOLEAN return a+2 end function] statement' , () => {
         compiler.reset();
-        const text = 'a=456 function f(x is BIGFLOAT) return BOOLEAN return a+2 end function';
+        const text = 'a=456 function f(x is BIGFLOAT) as BOOLEAN return a+2 end function';
         const result = compiler.compile_ast(text, 'program');
 
         // ERRORS
@@ -294,9 +294,9 @@ describe('MathLang function declaration parser', () => {
     });
 
 
-    it('Parse [function f(x is BIGFLOAT, y is STRING) return STRING return x+y end function] statement' , () => {
+    it('Parse [function f(x is BIGFLOAT, y is STRING) as STRING return x+y end function] statement' , () => {
         compiler.reset();
-        const text = 'function f(x is BIGFLOAT, y is STRING) return STRING return x+y end function';
+        const text = 'function f(x is BIGFLOAT, y is STRING) as STRING return x+y end function';
         const result = compiler.compile_ast(text, 'program');
 
         // ERRORS
@@ -374,17 +374,17 @@ describe('MathLang function declaration parser', () => {
     it('Parse complex functions program (cross unordered references of variables and functions' , () => {
         compiler.reset();
         const text = `
-        function main() return UNKNOW
+        function main() as UNKNOW
             b=m2(12)
         end function
-        function myfunc(x is BIGFLOAT, y is INTEGER) return BIGFLOAT
+        function myfunc(x is BIGFLOAT, y is INTEGER) as BIGFLOAT
             if x + y > 0 then
                 return x + y
             end if
 
             return x + m2(y) + a
         end function
-        function m2(x is INTEGER) return INTEGER return x*2 end function
+        function m2(x is INTEGER) as INTEGER return x*2 end function
         a = 456
         `;
         const result = compiler.compile_ast(text, 'program');

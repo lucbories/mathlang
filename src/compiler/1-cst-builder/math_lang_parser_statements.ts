@@ -201,7 +201,7 @@ export class MathLangParserStatements extends Parser {
         this.CONSUME(t.Function);
         this.CONSUME2(t.ID, { LABEL:"functionName" } );
         this.SUBRULE(this.ArgumentsWithIds);
-        this.CONSUME3(t.Return);
+        this.CONSUME3(t.As);
         this.SUBRULE2(this.idType, { LABEL:"returnedType" });
         this.AT_LEAST_ONE( () => {
             this.SUBRULE(this.statement, { LABEL:"blockStatement" });

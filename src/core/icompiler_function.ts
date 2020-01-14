@@ -13,6 +13,10 @@ export default ICompilerFunction;
 export interface ICompilerFunction {
 	// COMMON
     get_func_name():string;
+    is_exported():boolean;
+    set_exported(is_exported:boolean):void;
+    get_module_name():string;
+    set_module_name(module_name:string):void;
     
     set_returned_type(returned_type:ICompilerType):void;
 	get_returned_type():ICompilerType;
@@ -43,6 +47,14 @@ export interface ICompilerFunction {
 
     get_ic_variable_count():number;
     add_ic_variable():string;
+
+
+    // LOCAL FUNCTIONS
+    has_local_function(func_name:string):boolean;
+    get_local_function(func_name:string):ICompilerFunction;
+    del_local_function(func_name:string):void;
+    add_local_function(func:ICompilerFunction):void;
+    get_local_functions():Map<string,ICompilerFunction>;
 
     
     // SYMBOLS

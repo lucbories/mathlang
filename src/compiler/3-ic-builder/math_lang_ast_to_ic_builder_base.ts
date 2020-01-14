@@ -7,7 +7,7 @@ import ICompilerModule from '../../core/icompiler_module';
 import ICompilerScope from '../../core/icompiler_scope';
 import { ICompilerIcInstr, ICompilerIcInstrOperand, ICompilerIcEbb } from '../../core/icompiler_ic_instruction';
 
-import CompilerIcNode from '../0-common/compiler_ic_instruction';
+import CompilerIcBuilder from '../0-common/compiler_ic_builder';
 import CompilerModule from '../0-common/compiler_module';
 
 
@@ -63,6 +63,16 @@ export default abstract class MathLangAstToIcVisitorBase {
      */
     get_current_module():ICompilerModule{
         return this._current_module;
+    }
+
+
+    /**
+     * Set current module.
+     * 
+     * @param module_instance ICompilerModule.
+     */
+    set_current_module(module_instance:ICompilerModule):void{
+        this._current_module = module_instance;
     }
 
 
@@ -155,7 +165,7 @@ export default abstract class MathLangAstToIcVisitorBase {
      * @returns Error ICOperand node.
      */
     add_error(ast_expression:any, message?:string):ICompilerError{
-		const error = CompilerIcNode.create_error(ast_expression, message);
+		const error = CompilerIcBuilder.create_error(ast_expression, message);
         this._errors.push(error);
         return error;
     }
@@ -184,7 +194,7 @@ export default abstract class MathLangAstToIcVisitorBase {
 
 
     create_ebb(operands_types: ICompilerType[], operands_names: string[]): ICompilerIcEbb {
-        this._current_ebb = CompilerIcNode.create_ebb(this.get_current_function(), operands_types, operands_names);
+        this._current_ebb = CompilerIcBuilder.create_ebb(this.get_current_function(), operands_types, operands_names);
         return this._current_ebb ;
     }
 
@@ -262,16 +272,16 @@ export default abstract class MathLangAstToIcVisitorBase {
     //     let ic_name:ICompilerIcInstrOperand = undefined;
 
     //     // SEARCH IN CURRENT EBB
-    //     if (this._current_ebb.ic_opderands_map.has(code_name)) {
-    //         return this._current_ebb.ic_opderands_map.get(code_name);
+    //     if (this._current_ebb.ic_operands_map.has(code_name)) {
+    //         return this._current_ebb.ic_operands_map.get(code_name);
     //     }
 
     //     // SEARCH IN CURRENT FUNCTION
     //     const ebbs_map = this._current_function.get_ic_ebb_map();
     //     ebbs_map.forEach(
     //         (ebb)=>{
-    //             if (ebb.ic_opderands_map.has(code_name)) {
-    //                 ic_name = ebb.ic_opderands_map.get(code_name);
+    //             if (ebb.ic_operands_map.has(code_name)) {
+    //                 ic_name = ebb.ic_operands_map.get(code_name);
     //             }
     //         }
     //     );
@@ -291,8 +301,8 @@ export default abstract class MathLangAstToIcVisitorBase {
     //         const ebbs_map = this._current_function.get_ic_ebb_map();
     //         ebbs_map.forEach(
     //             (ebb)=>{
-    //                 if (ebb.ic_opderands_map.has(code_name)) {
-    //                     ic_name = ebb.ic_opderands_map.get(code_name);
+    //                 if (ebb.ic_operands_map.has(code_name)) {
+    //                     ic_name = ebb.ic_operands_map.get(code_name);
     //                 }
     //             }
     //         );

@@ -22,8 +22,8 @@ use_declaration
    ;
 
 function_declaration
-   : 'function' function_header_declaration 'return' ID statement+ 'end function'
-   | 'exported' 'function' function_header_declaration 'return' ID statement+ 'end function'
+   : 'function' function_header_declaration 'as' ID statement+ 'end function'
+   | 'exported' 'function' function_header_declaration 'as' ID statement+ 'end function'
    ;
 
 function_header_declaration
@@ -44,7 +44,7 @@ primary_id
 
 // MODULE EXPORTED FUNCTION OR CONSTANT
 module_id
-   : primary_id '.' ID
+   : primary_id '@' ID
    ;
 
 attribute_id

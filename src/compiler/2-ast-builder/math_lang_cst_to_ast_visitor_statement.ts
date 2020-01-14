@@ -509,7 +509,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
         
         // *** ASSIGN A VARIABLE: NO ACCESSORS, NOT A FUNCTION DECLARATION ***
-        if (ast_id_left_node.members.length == 0 && ast_id_left_node.ast_code == AST.EXPR_MEMBER_ID){
+        if (ast_id_left_node.members.length == 0 && ast_id_left_node.ast_code == AST.EXPR_FUNCTION_LOCAL){
             // EVALUATE RIGHT EXPRESSION
             const cst_expr_node = ctx.AssignExpr;
             const ast_expr_node = this.visit(cst_expr_node);
@@ -531,7 +531,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
 
         // *** ASSIGN A FUNCTION DECLARATION: NO ACCESSORS ***
-        if (ast_id_left_node.members.length == 0 && ast_id_left_node.ast_code == AST.EXPR_MEMBER_FUNC_DECL){
+        if (ast_id_left_node.members.length == 0 && ast_id_left_node.ast_code == AST.EXPR_FUNCTION_DECL){
             let assign_ast = {
                 ast_code: AST.STAT_ASSIGN_FUNCTION,
                 ic_type: this._type_unknow,
@@ -558,25 +558,25 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
                 operands.push( { opd_name:loop_name, opd_type:loop_type } )
             }
             
-            this.register_function_declaration(assign_name, this.get_unknow_type(ctx, ast_id_left_node), ctx.is_exported, operands, [], ctx, AST.STAT_ASSIGN_FUNCTION);
+            this.register_local_function_declaration(assign_name, this.get_unknow_type(ctx, ast_id_left_node), operands, [], ctx, AST.STAT_ASSIGN_FUNCTION);
             
             // EVALUATE RIGHT EXPRESSION
-            this.enter_function_declaration(assign_name);
+            this.enter_local_function_declaration(assign_name);
             const cst_expr_node = ctx.AssignExpr;
             const ast_expr_node = this.visit(cst_expr_node);
-            this.leave_function_declaration();
+            this.leave_local_function_declaration();
     
             // UPDATE RIGHT TYPE
             assign_ast.ic_type = ast_expr_node.ic_type;
             assign_ast.expression = ast_expr_node;
     
             // UPDATE FUNCTION DECLARATION
-            this.set_function_declaration_statements(assign_name, ast_expr_node);
-            this.set_function_declaration_type(assign_name, ast_expr_node.ic_type);
+            this.set_local_function_declaration_statements(assign_name, ast_expr_node);
+            this.set_local_function_declaration_type(assign_name, ast_expr_node.ic_type);
                 
             // CHECK LEFT TYPE == RIGHT TYPE
             if (ast_id_left_node.ic_type != this._type_unknow && assign_ast.ic_type != ast_id_left_node.ic_type){
-                this.add_error(ctx.ArgumentsWithIds, AST.EXPR_MEMBER_FUNC_DECL, 'Error:left type [' + assign_ast.ic_type + '] and right type [' + ast_id_left_node.ic_type + '] are different for function declaration.')
+                this.add_error(ctx.ArgumentsWithIds, AST.EXPR_FUNCTION_DECL, 'Error:left type [' + assign_ast.ic_type + '] and right type [' + ast_id_left_node.ic_type + '] are different for function declaration.')
             }
 
             return assign_ast;
@@ -584,7 +584,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
 
         // *** ASSIGN AN ATTRIBUTE ***
-        if (ast_id_left_node.members.length > 0 && ast_id_left_node.ast_code == AST.EXPR_MEMBER_ATTRIBUTE){
+        if (ast_id_left_node.members.length > 0 && ast_id_left_node.ast_code == AST.EXPR_ID_OPTION_ATTRIBUTE){
             // EVALUATE RIGHT EXPRESSION
             const cst_expr_node = ctx.AssignExpr;
             const ast_expr_node = this.visit(cst_expr_node);
@@ -607,7 +607,7 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
 
         // *** METHOD DECLARATION ***
-        if (ast_id_left_node.members.length > 0 && ast_id_left_node.ast_code == AST.EXPR_MEMBER_METHOD_DECL){
+        if (ast_id_left_node.members.length > 0 && ast_id_left_node.ast_code == AST.EXPR_ID_OPTION_METHOD_DECL){
             const last_member = ast_id_left_node.members[ast_id_left_node.members.length - 1];
             const operands_types = last_member.operands_types;
             const operands_names = last_member.operands_names;

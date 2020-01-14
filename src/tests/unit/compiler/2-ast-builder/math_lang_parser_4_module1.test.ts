@@ -12,7 +12,7 @@ describe('MathLang module parser', () => {
     const compiler = new MathLangCompiler();
 
     it('Parse define module ModuleA' , () => {
-        const text = 'module ModuleA function funcA() return INTEGER return 12 end function';
+        const text = 'module ModuleA function funcA() as INTEGER return 12 end function';
 
         const result = compiler.compile_ast(text, 'program');
 
@@ -79,7 +79,7 @@ describe('MathLang module parser', () => {
     });
 	
     // it('Parse define modules ModuleA and ModuleB' , () => {
-    //     const text = 'module ModuleA function funcA() return INTEGER begin return 12 end module ModuleB function funcB() return INTEGER begin return 12 end';
+    //     const text = 'module ModuleA function funcA() as INTEGER begin return 12 end module ModuleB function funcB() as INTEGER begin return 12 end';
     // });
 });
 	
@@ -89,13 +89,13 @@ describe('MathLang module parser: USE', () => {
 	
     it('Parse define modules ModuleA and ModuleB which use ModuleA' , () => {
         const text = `module ModuleA
-			export function funcA() return INTEGER
+			export function funcA() as INTEGER
 				return 12
 			end function
 			
 			module ModuleB
 			use ModuleA
-			function funcB() return INTEGER
+			function funcB() as INTEGER
 				return ModuleA.funcA() * 2
 			end function
 		`;
@@ -217,13 +217,13 @@ describe('MathLang module parser: USE', () => {
 	
 	it('Parse define modules ModuleA and ModuleB which use ModuleA as MA' , () => {
         const text = `module ModuleA
-			export function funcA() return INTEGER
+			export function funcA() as INTEGER
 				return 12
 			end function
 			
 			module ModuleB
 			use ModuleA as MA
-			function funcB() return INTEGER
+			function funcB() as INTEGER
 				return MA.funcA() * 2
 			end function
 		`;
@@ -346,19 +346,19 @@ describe('MathLang module parser: USE', () => {
 	
 	it('Parse define modules ModuleA and ModuleB which use only exported funcA1 from ModuleA as MA' , () => {
         const text = `module ModuleA
-			export function funcA1() return INTEGER
+			export function funcA1() as INTEGER
 				return 11
 			end function
-			function funcA2() return INTEGER
+			function funcA2() as INTEGER
 				return 12
 			end function
-			function funcA3() return INTEGER
+			function funcA3() as INTEGER
 				return 13
 			end function
 			
 			module ModuleB
 			use ModuleA(funcA1) as MA
-			function funcB() return INTEGER
+			function funcB() as INTEGER
 				return MA.funcA1() * 2
 			end function
 		`;

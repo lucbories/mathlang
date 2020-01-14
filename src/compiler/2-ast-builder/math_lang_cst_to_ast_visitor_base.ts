@@ -482,11 +482,15 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * @returns return type
      */
 	get_function_type(module_instance:CompilerModule, func_name:string):ICompilerType {
-        const func_scope = module_instance.get_module_function(func_name);
-        if (! func_scope) {
-            return this._type_unknow;
+        const module_func = module_instance.get_module_function(func_name);
+        if (! module_func) {
+            if (! this._current_function){
+                return this._type_unknow;
+            }
+            const local_func = this._current_function.get_local_function(func_name);
+            return local_func.get_returned_type();
         }
-        return func_scope.get_returned_type();
+        return module_func.get_returned_type();
     }
 
     
@@ -576,6 +580,9 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
         const func = new CompilerFunction(func_name, return_type);
         func.set_ast_statements(instructions);
 
+        func.set_exported(is_exported);
+        func.set_module_name(this._current_module.get_module_name());
+        
         if (is_exported) {
             this._current_module.add_exported_function(func);
         } else {
@@ -628,13 +635,83 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
         this._scopes_stack.pop();
     }
 
+
+    /**
+     * Register a local function declaration.
+     * @param func_name             function name.
+     * @param return_type           returned value type.
+     * @param operands_declarations function operands declaration.
+     * @param instructions          function instruction block.
+     * @param cst_context           CST context for error log.
+     * @param ast_node_type         AST node type for error log.
+     */
+    register_local_function_declaration(func_name:string, return_type:ICompilerType, operands_declarations:any[], instructions:any[], cst_context:any, ast_node_type:string) {
+        // this.check_type(return_type, cst_context, ast_node_type);
+
+        const func = new CompilerFunction(func_name, return_type);
+        func.set_ast_statements(instructions);
+
+        func.set_exported(false);
+        func.set_module_name(this._current_module.get_module_name());
+        
+        this._current_function.add_local_function(func);
+
+        // PROCESS OPERANDS
+        let opd_decl:any;
+        for(opd_decl of operands_declarations){
+            func.add_symbol_operand(opd_decl.opd_name, opd_decl.opd_type, undefined);
+        }
+    }
+
+    /**
+     * Unregister a function declaration.
+     * @param func_name             function name.
+     */
+    unregister_local_function_declaration(func_name:string) {
+        this._current_function.del_local_function(func_name);
+    }
+
+    set_local_function_declaration_statements(func_name:string, instructions:any[]){
+        const func = this._current_function.get_local_function(func_name);
+        if (! func) {
+            this.add_error({}, 'set_local_function_declaration_statements', 'function [' + func_name + '] not found');
+            return;
+        }
+        func.set_ast_statements(instructions);
+    }
+
+    set_local_function_declaration_type(func_name:string, return_type:ICompilerType){
+        const func = this._current_function.get_local_function(func_name);
+        if (! func) {
+            this.add_error({}, 'set_local_function_declaration_type', 'function [' + func_name + '] not found');
+            return;
+        }
+        func.set_returned_type(return_type);
+    }
+
+    enter_local_function_declaration(func_name:string){
+        const func_scope = this._current_function.get_local_function(func_name);
+        if (! func_scope) {
+            this.add_error({}, 'enter_local_function_declaration', 'function [' + func_name + '] not found');
+            return;
+        }
+        this._scopes_stack.push(func_scope);
+    }
+
+    leave_local_function_declaration(){
+        this._scopes_stack.pop();
+    }
+
+
     /**
      * Test if a symbol is already declared for a function.
      * @param name symbol name
      * @returns true:symbol is a declared, false: symbol is not a declared
      */
     has_declared_func_symbol(func_name:string):boolean {
-        return this._compiler_scope.has_exported_function(func_name) || this._current_module.has_module_function(func_name);
+        return this._compiler_scope.has_exported_function(func_name)
+         || this._current_module.has_module_function(func_name)
+         || (this._current_function && this._current_function.has_local_function(func_name));
     }
 
     /**

@@ -133,6 +133,14 @@ export default class MathLangCompiler {
      * @param features Language features.
      */
     constructor() {
+        this.init_scope();
+    }
+
+    get_scope() {
+        return this._compiler_scope;
+    }
+
+    init_scope(){
         this._compiler_scope = new CompilerScope(AVAILABLE_MODULES, AVAILABLE_TYPES, AVAILABLE_RUNTIMES);
 
         // INIT STANDARD TYPES
@@ -163,10 +171,6 @@ export default class MathLangCompiler {
         this._ast_builder = new MathLangCstToAstVisitor(this._compiler_scope);
     }
 
-    get_scope() {
-        return this._compiler_scope;
-    }
-
 
     /**
      * Reset compiler state.
@@ -177,6 +181,8 @@ export default class MathLangCompiler {
         this._lexemes = undefined;
         this._cst = undefined;
         this._ast = undefined;
+        delete this._compiler_scope;
+        this.init_scope();
     }
 
 

@@ -7,8 +7,9 @@ import ICompilerFunction from '../../core/icompiler_function';
 import ICompilerSymbol from '../../core/icompiler_symbol';
 import { IAstNodeKindOf as AST, ICompilerAstBlockNode, ICompilerAstExpressionNode, ICompilerAstFunctionNode, ICompilerAstTypedNode, ICompilerAstNode } from '../../core/icompiler_ast_node';
 import { ICompilerIcInstr, ICompilerIcInstrOperand, ICompilerIcEbb } from '../../core/icompiler_ic_instruction';
-import CompilerIcNode from '../0-common/compiler_ic_instruction'
+import CompilerIcBuilder from '../0-common/compiler_ic_builder'
 import MathLangAstToIcVisitorBase from './math_lang_ast_to_ic_builder_base';
+import { IC_OPCODES } from '../../core/icompiler_ic_instruction';
 
 
 
@@ -44,6 +45,9 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         const new_modules:Map<string,ICompilerModule> = this.get_compiler_scope().get_new_modules();
         new_modules.forEach(
             (loop_module, loop_module_name)=>{
+                // SET CURRENT MODULE
+                this.set_current_module(loop_module);
+                
                 // PROCESS MODULE CONSTANTS
                 const modules_constants = loop_module.get_module_constants();
                 modules_constants.forEach(
@@ -80,20 +84,20 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         
         switch(constant.type.get_type_name()){
             case 'INTEGER':
-                value_str = CompilerIcNode.create_const_integer(constant.init_value, 10);
+                value_str = CompilerIcBuilder.create_const_integer(constant.init_value, 10);
                 break;
             case 'FLOAT':
-                value_str = CompilerIcNode.create_const_float(constant.init_value, 10);
+                value_str = CompilerIcBuilder.create_const_float(constant.init_value, 10);
                 break;
             case 'STRING':
-                value_str = CompilerIcNode.create_const_string(constant.init_value);
+                value_str = CompilerIcBuilder.create_const_string(constant.init_value);
                 break;
             case 'BOOLEAN':
                 if (constant.init_value == 'TRUE') {
-                    value_str = CompilerIcNode.create_const_true();
+                    value_str = CompilerIcBuilder.create_const_true();
                     break;
                 }
-                value_str = CompilerIcNode.create_const_false();
+                value_str = CompilerIcBuilder.create_const_false();
                 break;
         }
 
@@ -121,7 +125,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         // LOOP ON FUNCTION STATEMENTS
         const ast_statements:ICompilerAstNode[] = func.get_ast_statements();
         let loop_ast_statement;
-        for(loop_ast_statement in ast_statements){
+        for(loop_ast_statement of ast_statements){
             this.visit_statement(loop_ast_statement);
         }
 
@@ -147,12 +151,14 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * @param ast_statement AST statement to convert
      */
     visit_statement(ast_statement:any) {
-         switch(ast_statement.type){
+         switch(ast_statement.ast_code){
             case AST.BLOCK:{
                 const previous_ebb = this.get_current_ebb();
                 this.create_ebb([], []);
                 const current_ebb = this.get_current_ebb();
-                previous_ebb.ic_instructions.push( CompilerIcNode.create_jump(current_ebb.ic_ebb_name) );
+                if ( ! CompilerIcBuilder.is_ebb_last_instruction_final(previous_ebb) ) {
+                    previous_ebb.ic_instructions.push( CompilerIcBuilder.create_jump(current_ebb.ic_ebb_name) );
+                }
 
                 // LOOP ON FUNCTION STATEMENTS
                 const func_node:ICompilerAstBlockNode = <ICompilerAstBlockNode>ast_statement;
@@ -195,19 +201,89 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
                 return;
             }
 
-            // case AST.STAT_FOR:{
-            //     this.visit_for_statement(ast_statement);
-            //     return;
-            // }
-            // case AST.STAT_LOOP:{
-            //     this.visit_loop_statement(ast_statement);
-            //     return;
-            // }
-            // case AST.STAT_WHILE:{
-            //     this.visit_while_statement(ast_statement);
-            //     return;
-            // }
+            case AST.STAT_FOR:{
+                this.visit_for_statement(ast_statement);
+                return;
+            }
+
+            case AST.STAT_LOOP:{
+                this.visit_loop_statement(ast_statement);
+                return;
+            }
+
+            case AST.STAT_WHILE:{
+                this.visit_while_statement(ast_statement);
+                return;
+            }
+            default: // DISPOSE, EMIT, ON
+                return this.add_error(ast_statement, 'Error Unknow statement not implemented.');
         }
+    }
+
+
+    /**
+     * Visit AST For statement.
+     * 
+     * IN:
+     *  return expr1
+     * 
+     * OUT:
+     *  RETURN vExpr1
+     * 
+     * @param ast_statement AST statement
+     */
+    visit_for_statement(ast_statement:any){
+        const ast_for_var = ast_statement.var_name;
+        const ast_for_in= ast_statement.in;
+        const ast_for_block= ast_statement.block;
+
+        const ic_for_var_name:ICompilerIcInstrOperand = this.get_current_function().add_ic_variable();
+
+        return this.add_error(ast_statement, 'Error For statement not yet implemented.');
+    }
+
+
+    /**
+     * Visit AST Loop statement.
+     * 
+     * IN:
+     *  return expr1
+     * 
+     * OUT:
+     *  RETURN vExpr1
+     * 
+     * @param ast_statement AST statement
+     */
+    visit_loop_statement(ast_statement:any){
+        // const ast_for_var = ast_statement.var_name;
+        // const ast_for_in= ast_statement.in;
+        // const ast_for_block= ast_statement.block;
+
+        // const ic_for_var_name:ICompilerIcInstrOperand = this.get_current_function().add_ic_variable();
+
+        return this.add_error(ast_statement, 'Error Loop statement not yet implemented.');
+    }
+
+
+    /**
+     * Visit AST While statement.
+     * 
+     * IN:
+     *  return expr1
+     * 
+     * OUT:
+     *  RETURN vExpr1
+     * 
+     * @param ast_statement AST statement
+     */
+    visit_while_statement(ast_statement:any){
+        // const ast_for_var = ast_statement.var_name;
+        // const ast_for_in= ast_statement.in;
+        // const ast_for_block= ast_statement.block;
+
+        // const ic_for_var_name:ICompilerIcInstrOperand = this.get_current_function().add_ic_variable();
+
+        return this.add_error(ast_statement, 'Error While statement not yet implemented.');
     }
 
 
@@ -224,13 +300,14 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      */
     visit_return_statement(ast_statement:any){
         const ast_expression = ast_statement.expression;
-        const ic_var_name:ICompilerIcInstrOperand|ICompilerError = this.visit_expression(ast_expression);
+        const ic_opd_var_name:ICompilerIcInstrOperand|ICompilerError = this.visit_expression(ast_expression);
 
-        if (this.is_error(ic_var_name)){
+        if (this.is_error(ic_opd_var_name)){
             return this.add_error(ast_expression, 'Error in return expression:not a valid expression');
         }
-
-        this.create_ic_ebb_instruction(CompilerIcNode.create_return, [ic_var_name]);
+        
+        const instr:ICompilerIcInstr = CompilerIcBuilder.create_return(ic_opd_var_name);
+        this.add_ic_ebb_instruction(instr);
     }
 
 
@@ -275,20 +352,35 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         // BUILD THEN EBB
         const then_ebb:ICompilerIcEbb = this.create_ebb([], []);
         this.visit_statements(ast_statement.then);
-        this.create_ic_ebb_instruction(CompilerIcNode.create_jump, [next_ebb.ic_ebb_name]);
-
+        if ( ! CompilerIcBuilder.is_ebb_last_instruction_final(then_ebb) ) {
+            const instr0:ICompilerIcInstr = CompilerIcBuilder.create_jump(next_ebb.ic_ebb_name);
+            this.add_ic_ebb_instruction(instr0);
+        }
+        
         // ADD IF TRUE
-        this.create_ic_ebb_instruction(CompilerIcNode.create_if_true, [condition_var_name, then_ebb.ic_ebb_name]);
+        this.set_current_ebb(previous_ebb);
+        this.create_ic_ebb_instruction(CompilerIcBuilder.create_if_true, [this.get_compiler_scope().get_available_lang_type('BOOLEAN'), condition_var_name, then_ebb.ic_ebb_name]);
 
         // BUILD ELSE EBB
         if (ast_statement.else){
             const else_ebb:ICompilerIcEbb = this.create_ebb([], []);
+
             this.set_current_ebb(previous_ebb);
-            this.create_ic_ebb_instruction(CompilerIcNode.create_jump, [else_ebb.ic_ebb_name]);
+            
+            const instr1:ICompilerIcInstr = CompilerIcBuilder.create_jump(else_ebb.ic_ebb_name);
+            this.add_ic_ebb_instruction(instr1);
+            
             this.set_current_ebb(else_ebb);
             this.visit_statements(ast_statement.else);
-            this.create_ic_ebb_instruction(CompilerIcNode.create_jump, [next_ebb.ic_ebb_name]);
+
+            if ( ! CompilerIcBuilder.is_ebb_last_instruction_final(else_ebb) ) {
+                const instr2:ICompilerIcInstr = CompilerIcBuilder.create_jump(next_ebb.ic_ebb_name);
+                this.add_ic_ebb_instruction(instr2);
+            }
             
+        } else {
+            const instr3:ICompilerIcInstr = CompilerIcBuilder.create_jump(next_ebb.ic_ebb_name);
+            this.add_ic_ebb_instruction(instr3);
         }
 
         this.set_current_ebb(next_ebb);
@@ -301,6 +393,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
      * @param ast_statement AST statement
      */
     visit_switch_statement(ast_statement:ICompilerAstNode){
+        return this.add_error(ast_statement, 'Error While statement not yet implemented.');
         // BUILD THEN LABEL
         /*const switch_var = ast_statement.var;
         const switch_var_type = this.get_symbol_type(ast_func_scope.module_name, switch_var);
@@ -422,7 +515,8 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
 
         // TODO: add conversion if left_type != right_type
 
-        this.create_ic_ebb_instruction(CompilerIcNode.create_assign, [left_var_name, right_var_name, right_type]);
+        const instr:ICompilerIcInstr = CompilerIcBuilder.create_local_var_set(left_var_name, right_var_name, right_type);
+        this.add_ic_ebb_instruction(instr);
     }
 
 
@@ -468,7 +562,7 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
 
         // TODO: add conversion if left_type != right_type
 
-        this.create_ic_ebb_instruction(CompilerIcNode.create_assign, [left_var_name, right_var_name, right_type]);
+        this.create_ic_ebb_instruction(CompilerIcBuilder.create_local_var_set, [left_var_name, right_var_name, right_type]); // TODO
     }
 
 

@@ -36,6 +36,7 @@ export const Comma             = createToken({ name: "Comma",              patte
 export const Colon             = createToken({ name: "Colon",              pattern: /:/ });
 export const Dot               = createToken({ name: "Dot",                pattern: /\./ });
 export const Dash              = createToken({ name: "Dash",               pattern: /#/ });
+export const At                = createToken({ name: "At",                 pattern: /@/ });
 
 // OPERATORS
 export const Incr              = createToken({ name: "Incr",               pattern: /\+\+/ });

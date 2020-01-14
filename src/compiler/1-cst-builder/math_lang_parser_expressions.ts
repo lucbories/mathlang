@@ -148,47 +148,62 @@ export class MathLangParserExpressions extends MathLangParserStatements {
      *          .id(expr list)
      */
     idRight = this.RULE("idRight", () => {
-        // MAIN ID:VAR OR MODULE
-        this.CONSUME(t.ID);
+        this.OR( [
+            { ALT: ()=>this.SUBRULE(this.idModuleRight,                { LABEL:'idModuleRight' } ) },
+            { ALT: ()=>this.SUBRULE(this.idLocalOrFunctionCallRight,   { LABEL:'idLocalOrFunctionCallRight' } ) }
+        ] );
+    } );
 
-        // OPTION 1
-        this.MANY( () => 
-            this.OR( [
-				// VAR#ATTRIBUTE
-                { ALT: () => this.SUBRULE(this.dashIdExpression, { LABEL:'attributeOrIndexed' } ) },
-				
-				// VAR INDEXED ACCESS
-                { ALT: () => this.SUBRULE(this.indexedBracketsExpression, { LABEL:'attributeOrIndexed' } ) },
-				
-				// MODULE.VAR#ATTRIBUTE
-                { ALT: () => {
-					this.CONSUME2(t.Dot);
-					this.CONSUME2(t.ID);
-					this.SUBRULE2(this.dashIdExpression);
-					}
-				}
-            ])
+
+    /**
+     * Rule for an id expression of a right part expression.
+     *  id
+     *      #id
+     *      #id#id...
+     *      #id[expr list]
+     *      [expr list]
+     *      [expr list]#id...
+     *      [expr list] [expr list]#id...
+     *          .id(expr list)
+     */
+    idModuleRight = this.RULE("idModuleRight", () => {
+        this.CONSUME1(t.ID,     { LABEL:'moduleName' } );
+        this.CONSUME2(t.At);
+        this.CONSUME3(t.ID,     { LABEL:'constantOrFunctionName' } );
+        this.OPTION(
+            ()=>this.SUBRULE1(this.Arguments)
         );
+        this.SUBRULE2(this.idRightOptions);
+    } );
 
-        // OPTION 2
-        this.OPTION( ()=>{
-            this.OR2( [
-				// FUNCTION CALL
-                { ALT: () => this.SUBRULE(this.Arguments) },
-				
-				// MODULE.FUNCTION CALL OR VAR.METHOD CALL
-                { ALT: () => this.SUBRULE(this.dotIdArgsCallExpression) },
-				
-				// MODULE.VAR.METHOD CALL
-                { ALT: () => {
-					this.CONSUME3(t.Dot);
-					this.CONSUME3(t.ID);
-					this.SUBRULE3(this.dotIdArgsCallExpression);
-					}
-				}
-            ])
-        });
-    });
+
+    /**
+     * 
+     */
+    idLocalOrFunctionCallRight = this.RULE("idLocalOrFunctionCallRight", () => {
+        this.CONSUME(t.ID,      { LABEL:'localOrFunctionName' } );
+        this.OPTION(
+            ()=>this.SUBRULE1(this.Arguments)
+        );
+        this.SUBRULE(this.idRightOptions);
+    } );
+
+
+    /**
+     * 
+     */
+    idRightOptions = this.RULE("idRightOptions", () => {
+            this.MANY(
+                ()=>{
+                    this.OR( [
+                        { ALT: () => this.SUBRULE(this.indexedBracketsExpression) },
+                        { ALT: () => this.SUBRULE(this.dotIdArgsCallExpression) },
+                        { ALT: () => this.SUBRULE(this.dashIdExpression) }
+                    ] )
+                }
+            );
+        }
+    );
 
 
     /**
@@ -219,6 +234,13 @@ export class MathLangParserExpressions extends MathLangParserStatements {
         this.CONSUME(t.ID);
         this.SUBRULE(this.ArgumentsWithIds);
     });
+
+
+    // private atIdArgsCallExpression = this.RULE("atIdArgsCallExpression", () => {
+    //     this.CONSUME(t.At);
+    //     this.CONSUME(t.ID);
+    //     this.SUBRULE(this.Arguments);
+    // });
 
 
     private dotIdArgsCallExpression = this.RULE("dotIdArgsCallExpression", () => {

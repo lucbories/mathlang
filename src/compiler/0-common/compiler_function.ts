@@ -9,6 +9,9 @@ import { SymbolsTable, ICompilerFunction } from '../../core/icompiler_function';
 
 
 export default class CompilerFunction implements ICompilerFunction {
+    private _is_exported:boolean = false;
+    private _module_name:string = undefined;
+
     private _ast_node:ICompilerAstNode;
     private _ast_statements:ICompilerAstNode[];
 
@@ -23,6 +26,8 @@ export default class CompilerFunction implements ICompilerFunction {
     private _ic_ebb_map:Map<string,ICompilerIcEbb> = new Map();
     private _ic_ebb_code_map:Map<string,ICompilerIcEbb> = new Map();
     
+    private _local_functions:Map<string,ICompilerFunction> = new Map();
+
     private _symbols_consts_table:SymbolsTable = new Map();
     private _symbols_vars_table:SymbolsTable = new Map();
     private _symbols_opds_table:SymbolsTable = new Map();
@@ -53,6 +58,22 @@ export default class CompilerFunction implements ICompilerFunction {
 
 	get_func_name():string {
         return this._func_name;
+    }
+
+    is_exported():boolean {
+        return this._is_exported;
+    }
+
+    set_exported(is_exported:boolean):void {
+        this._is_exported = is_exported;
+    }
+
+    get_module_name():string {
+        return this._module_name;
+    }
+
+    set_module_name(module_name:string):void {
+        this._module_name = module_name;
     }
 
 
@@ -132,6 +153,28 @@ export default class CompilerFunction implements ICompilerFunction {
 
     add_ic_variable():string {
         return 'v' + this._ic_variables_count++;
+    }
+
+
+    // LOCAL FUNCTIONS
+    has_local_function(func_name:string):boolean {
+        return this._local_functions.has(func_name);
+    }
+
+    get_local_function(func_name:string):ICompilerFunction {
+        return this._local_functions.get(func_name);
+    }
+
+    del_local_function(func_name:string):void {
+        this._local_functions.delete(func_name);
+    }
+
+    add_local_function(func:ICompilerFunction):void {
+        this._local_functions.set(func.get_func_name(), func);
+    }
+
+    get_local_functions():Map<string,ICompilerFunction> {
+        return this._local_functions;
     }
 	
     

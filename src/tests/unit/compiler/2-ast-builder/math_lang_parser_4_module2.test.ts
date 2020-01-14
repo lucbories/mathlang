@@ -13,19 +13,19 @@ describe('MathLang module parser: ALIASES', () => {
 
     it('Parse define modules ModuleA and ModuleB which use only funcA1, funcA2 from ModuleA as MA' , () => {
         const text = `module ModuleA
-			export function funcA1() return INTEGER
+			export function funcA1() as INTEGER
 				return 11
 			end function
-			export function funcA2() return INTEGER
+			export function funcA2() as INTEGER
 				return 12
 			end function
-			function funcA3() return INTEGER
+			function funcA3() as INTEGER
 				return 13
 			end function
 			
 			module ModuleB
 			use ModuleA(funcA1,funcA2) as MA
-			function funcB() return INTEGER
+			function funcB() as INTEGER
 				return MA.funcA1() * 2 + MA.funcA2()
 			end function
 		`;
@@ -209,26 +209,26 @@ describe('MathLang module parser: ALIASES', () => {
 	it('Parse define modules ModuleA and ModuleB which use only funcA1 from ModuleA as MA1 and funcA2 from ModuleA as MA2' , () => {
 		const text = `
 			module ModuleA
-			export function funcA1() return INTEGER
+			export function funcA1() as INTEGER
 				return 11
 			end function
-			export function funcA2() return INTEGER
+			export function funcA2() as INTEGER
 				return 12
 			end function
-			function funcA3() return INTEGER
+			function funcA3() as INTEGER
 				return 13
 			end function
 			
 			module ModuleB
 			use ModuleA(funcA1) as MA1
 			use ModuleA(funcA2) as MA2
-			export function funcB() return INTEGER
+			export function funcB() as INTEGER
 				return MA1.funcA1() * 2 + MA2.funcA2()
 			end function
 
 			module default
 			use ModuleB
-			function main() return UNKNOW
+			function main() as UNKNOW
 				return ModuleB.funcB()
 			end function
 		`;

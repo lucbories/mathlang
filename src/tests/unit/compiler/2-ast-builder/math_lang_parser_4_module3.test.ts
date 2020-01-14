@@ -13,19 +13,19 @@ describe('MathLang module parser: EXPORTS', () => {
 	/*
 	it('Parse define modules ModuleA which exports only funcA1 but ModuleB use funcA1 and funcA2 from ModuleA as MA1' , () => {
         const text = `module ModuleA exports funcA1
-			export function funcA1() return INTEGER
+			export function funcA1() as INTEGER
 				return 11
 			end function
-			function funcA2() return INTEGER
+			function funcA2() as INTEGER
 				return 12
 			end function
-			function funcA3() return INTEGER
+			function funcA3() as INTEGER
 				return 13
 			end function
 			
 			module ModuleB
 			use ModuleA as MA1
-			function funcB() return INTEGER
+			function funcB() as INTEGER
 				return MA1.funcA1() * 2 + MA1.funcA2()
 			end function
 			
@@ -53,20 +53,20 @@ describe('MathLang module parser: EXPORTS', () => {
 	
 	it('Parse define modules ModuleA which exports only funcA1 but ModuleB use funcA1 and funcA2 from ModuleA as MA1 and MA2' , () => {
         const text = `module ModuleA
-			export function funcA1() return INTEGER
+			export function funcA1() as INTEGER
 				return 11
 			end function
-			function funcA2() return INTEGER
+			function funcA2() as INTEGER
 				return 12
 			end function
-			function funcA3() return INTEGER
+			function funcA3() as INTEGER
 				return 13
 			end function
 			
 			module ModuleB
 			use ModuleA as MA1
 			use ModuleA as MA2
-			function funcB() return INTEGER
+			function funcB() as INTEGER
 				return MA1.funcA1() * 2 + MA2.funcA2()
 			end function
 			
@@ -94,20 +94,20 @@ describe('MathLang module parser: EXPORTS', () => {
 	
 	it('Parse define modules ModuleA and ModuleB which use funcA1 (exported) from ModuleA as MA1 and var2 (NOT exported) from ModuleA as MA1' , () => {
         const text = `module ModuleA
-			export function funcA1() return INTEGER
+			export function funcA1() as INTEGER
 				return 11
 			end function
-			export function funcA2() return INTEGER
+			export function funcA2() as INTEGER
 				return 12
 			end function
-			function funcA3() return INTEGER
+			function funcA3() as INTEGER
 				return 13
 			end function
 			var2=12
 			
 			module ModuleB
 			use ModuleA(funcA1) as MA1
-			function funcB() return INTEGER
+			function funcB() as INTEGER
 				return MA1.funcA1() * 2 + MA1.var2()
 			end function
 			
@@ -135,20 +135,20 @@ describe('MathLang module parser: EXPORTS', () => {
 	/*
 	it('Parse define modules ModuleA and ModuleB which use funcA1 (exported) from ModuleA as MA1 and funcA2 (exported) from ModuleA as MA2' , () => {
         const text = `module ModuleA exports funcA1, funcA2
-			export function funcA1() return INTEGER
+			export function funcA1() as INTEGER
 				return 11
 			end function
-			export function funcA2() return INTEGER
+			export function funcA2() as INTEGER
 				return 12
 			end function
-			function funcA3() return INTEGER
+			function funcA3() as INTEGER
 				return 13
 			end function
 			
 			module ModuleB
 			use ModuleA(funcA1) as MA1
 			use ModuleA(funcA2) as MA2
-			function funcB() return INTEGER
+			function funcB() as INTEGER
 				return MA1.funcA1() * 2 + MA2.funcA2()
 			end function
 			
