@@ -211,6 +211,12 @@ export class MathLangParserExpressions extends MathLangParserStatements {
      */
     idType = this.RULE("idType", () => {
         this.CONSUME(t.ID);
+        this.OPTION(
+            ()=>{
+                this.CONSUME(t.At);
+                this.CONSUME2(t.ID, { LABEL:'opt_type_name' } );
+            }
+        );
     });
 
 

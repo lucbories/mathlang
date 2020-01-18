@@ -8,18 +8,22 @@ program
    ;
 
 module_declaration
-   : 'module' + ID
+   : 'module' ID
    | use_declaration
+   | type_declaration
    | function_declaration
    | exportable_assign_statement
    ;
 
 use_declaration
-   : 'use' + ID
-   | 'use' + ID + 'as' + ID
-   | 'use' + ID + '(' + ID + (',' + ID)* + ')'
-   | 'use' + ID + '(' + ID + (',' + ID)* + ')' + 'as' + ID
+   : 'use' ID
+   | 'use' ID 'as' ID
+   | 'use' ID '(' ID (',' ID)* ')'
+   | 'use' ID '(' ID (',' ID)* ')' 'as' ID
    ;
+
+type_declaration
+   : 'type' ID 'extends' ID 
 
 function_declaration
    : 'function' function_header_declaration 'as' ID statement+ 'end function'
@@ -217,24 +221,24 @@ program         = 1+statement
 blockStatement  = 0+statement
 statement       = ifStatement | whileStatement | forStatement | loopStatement | assignStatement
 
-ifStatement     = Keyword(if)    + expression + Keyword(then) + blockStatement + ? (Keyword(else) + blockStatement) + Keyword(end if)
-whileStatement  = Keyword(while) + expression + Keyword(do) + blockStatement + Keyword(end while)
-forStatement    = Keyword(for)   + ID + Keyword(in) + expression + Keyword(do) + blockStatement + Keyword(end for)
-loopStatement   = Keyword(loop)  + ID + Keyword(from) + expression + Keyword(to) + expression + Keyword(step) + expression + Keyword(do) + blockStatement + Keyword(end loop)
-switchStatement   = Keyword(switch) + ID + Keyword(in) + 1+(Symbol(on) expression + Symbol(do) blockStatement + Keyword(end do)) + Keyword(end switch)
+ifStatement     = Keyword(if)    expression Keyword(then) blockStatement ? (Keyword(else) blockStatement) Keyword(end if)
+whileStatement  = Keyword(while) expression Keyword(do) blockStatement Keyword(end while)
+forStatement    = Keyword(for)   ID Keyword(in) expression Keyword(do) blockStatement Keyword(end for)
+loopStatement   = Keyword(loop)  ID Keyword(from) expression Keyword(to) expression Keyword(step) expression Keyword(do) blockStatement Keyword(end loop)
+switchStatement   = Keyword(switch) ID Keyword(in) 1+(Symbol(on) expression Symbol(do) blockStatement Keyword(end do)) Keyword(end switch)
 
-assignStatement = ID + 0+AssignMemberOptionExpression + Symbol(=) + expression
+assignStatement = ID 0+AssignMemberOptionExpression Symbol(=) expression
 
-functionStatement = Keyword(function) + functionArguments + Keyword(return) + ID + blockStatement + Keyword(end function)
-functionArguments = Symbol('(') + 0+(ID + Symbol(:) + ID) + Symbol(')')
-returnStatement   = Keyword(return) + expression
+functionStatement = Keyword(function) functionArguments Keyword(return) ID blockStatement Keyword(end function)
+functionArguments = Symbol('(') 0+(ID Symbol(:) ID) Symbol(')')
+returnStatement   = Keyword(return) expression
 
-asyncStatement    = ?(ID + Symbol(=)) + Keyword(async) + expression
+asyncStatement    = ?(ID Symbol(=)) Keyword(async) expression
 ou
-asyncExpression   = Keyword(async) + expression
-waitStatement     = Keyword(wait) + ID + Keyword(do) + blockStatement + Keyword(end wait)
+asyncExpression   = Keyword(async) expression
+waitStatement     = Keyword(wait) ID Keyword(do) blockStatement Keyword(end wait)
 
-onErrorStatement  = Keyword(on error) + Keyword(do) +  blockStatement + Keyword(end on error)
+onErrorStatement  = Keyword(on error) Keyword(do)  blockStatement Keyword(end on error)
 
 expression
 

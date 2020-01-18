@@ -26,11 +26,12 @@ describe('MathLang IC test: module functions part 2 (function operands and varia
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
+        expect(modules.size).equals(2);
         const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `local function f():INTEGER
+ebb0()
 v0:INTEGER = i_inline(12)
 v2:INTEGER = call mul v0 i_inline(45)
 v1:INTEGER = v2
@@ -58,11 +59,12 @@ return v4
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
+        expect(modules.size).equals(2);
         const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0(v0:INTEGER)
+        const expected_ic_source = `local function f(x:INTEGER):INTEGER
+ebb0(v0:INTEGER)
 v2:INTEGER = call mul i_inline(88) v0
 v1:INTEGER = v2
 v3:INTEGER = call mul v1 v1
@@ -74,7 +76,7 @@ return v4
 
     it('Function returns 2 opds expression: f(x is INTEGER, y is FLOAT)=>return x/y' , () => {
         compiler.reset();
-        const text = 'function f(x is INTEGER, y is FLOAT) as INTEGER return x/y end function';
+        const text = 'function f(x is INTEGER, y is FLOAT) as FLOAT return x/y end function';
         const result = compiler.compile(text, 'program');
 
         // ERRORS
@@ -89,11 +91,13 @@ return v4
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
+        expect(modules.size).equals(2);
         const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0(v0:INTEGER,v1:FLOAT)
+        // TODO: INT/FLOAT should return FLOAT
+        const expected_ic_source = `local function f(x:INTEGER,y:FLOAT):FLOAT
+ebb0(v0:INTEGER,v1:FLOAT)
 v2:FLOAT = call div v0 v1
 return v2
 `;

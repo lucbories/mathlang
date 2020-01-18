@@ -343,7 +343,14 @@ with name=[{error.ic_name}] index=[{error.ic_index}] type=[{error.ic_type.get_ty
         const loop_functions = module.get_module_functions();
         loop_functions.forEach(
             (loop_function:ICompilerFunction)=>{
+                if (loop_function.is_internal()) return;
+                if (loop_function.is_external()) return;
+                
                 if (trace_to_console) { console.log('--- ' + (loop_function.is_exported() ? 'exported' : 'module') + ' function:' + loop_function.get_func_name() + ' ---'); }
+                ic_source += (loop_function.is_exported() ? 'exported' : 'local') + ' function ' + loop_function.get_func_name();
+                ic_source += '(' + loop_function.get_symbols_opds_ordered_list().map(opd=>opd + ':' + loop_function.get_symbols_opds_table().get(opd).type.get_type_name()).join(',') + ')';
+                ic_source += ':' + loop_function.get_returned_type().get_type_name() + '\n';
+
                 const ebbs = loop_function.get_ic_ebb_map();
                 ebbs.forEach(
                     (ebb)=>{
@@ -370,17 +377,17 @@ with name=[{error.ic_name}] index=[{error.ic_index}] type=[{error.ic_type.get_ty
         //     }
         // );
     
-        const main_function = module.get_main_function();
-        if (main_function){
-            const ebbs = main_function.get_ic_ebb_map();
-            ebbs.forEach(
-                (ebb:ICompilerIcEbb)=>{
-                    const ic_text:string = CompilerIcBuilder.to_ic_text(ebb);
-                    if (trace_to_console) console.log('main function ebb->', ic_text);
-                    ic_source += ic_text;
-                }
-            );
-        }
+        // const main_function = module.get_main_function();
+        // if (main_function){
+        //     const ebbs = main_function.get_ic_ebb_map();
+        //     ebbs.forEach(
+        //         (ebb:ICompilerIcEbb)=>{
+        //             const ic_text:string = CompilerIcBuilder.to_ic_text(ebb);
+        //             if (trace_to_console) console.log('main function ebb->', ic_text);
+        //             ic_source += ic_text;
+        //         }
+        //     );
+        // }
     
         return ic_source;
     }

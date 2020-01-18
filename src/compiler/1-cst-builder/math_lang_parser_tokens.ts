@@ -22,6 +22,13 @@ function createToken(options?:ITokenConfig, alt_id?:boolean) {
 }
 
 
+export const Comments = createToken({
+    name: "Comments",
+    pattern: /\/\/.+/,
+    group: Lexer.SKIPPED
+});
+
+
 // SYMBOLS
 export const LCurly            = createToken({ name: "LCurly",             pattern: /{/ });
 export const RCurly            = createToken({ name: "RCurly",             pattern: /}/ });
@@ -128,6 +135,9 @@ export const Use       = createToken({ name: "Use",        pattern: /use/ }, tru
 export const All       = createToken({ name: "All",        pattern: /all/ }, true);
 export const Is        = createToken({ name: "Is",         pattern: /is/ }, true);
 export const Export    = createToken({ name: "Export",     pattern: /export/ }, true);
+export const Type      = createToken({ name: "Type",       pattern: /type/ }, true);
+export const EndType   = createToken({ name: "EndType",    pattern: /end type/ }, true);
+export const Extends   = createToken({ name: "Extends",    pattern: /extends/ }, true);
 
 export const Async     = createToken({ name: "Async",      pattern: /async/ }, true);
 export const As        = createToken({ name: "As",         pattern: /as/ }, true);

@@ -19,7 +19,11 @@ export interface ICompilerFunction {
     set_module_name(module_name:string):void;
     
     set_returned_type(returned_type:ICompilerType):void;
-	get_returned_type():ICompilerType;
+    get_returned_type():ICompilerType;
+    
+    is_internal():boolean;
+    is_external():boolean;
+    is_inline():boolean;
     
     
     // AST
@@ -77,6 +81,7 @@ export interface ICompilerFunction {
     get_symbols_opds_table():SymbolsTable;
     has_symbols_opds_ordered_list(opds:string[]):boolean;
     get_symbols_opds_ordered_list():string[];
+    has_symbols_opds_types_ordered_list(opds_types_names:string[]):boolean;
 
     add_used_by_function(func_name:string):void;
     get_used_by_functions():string[];

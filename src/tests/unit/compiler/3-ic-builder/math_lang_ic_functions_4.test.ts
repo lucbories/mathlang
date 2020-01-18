@@ -26,12 +26,14 @@ describe('MathLang IC test: module functions part 4 (function call)', () => {
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
+        expect(modules.size).equals(2);
         const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `local function f():INTEGER
+ebb0()
 return i_inline(20)
+local function g():INTEGER
 ebb0()
 v0:INTEGER = call default@f
 v1:INTEGER = call mul v0 i_inline(2)
@@ -58,11 +60,12 @@ return v1
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
+        expect(modules.size).equals(2);
         const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0(v0:INTEGER)
+        const expected_ic_source = `local function fib(number:INTEGER):INTEGER
+ebb0(v0:INTEGER)
 v1:BOOLEAN = call inf_equal v0 i_inline(0)
 if_true v1 ebb2
 jump ebb1
@@ -103,11 +106,12 @@ return i_inline(1)
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
+        expect(modules.size).equals(2);
         const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0(v0:INTEGER)
+        const expected_ic_source = `exported function fib(number:INTEGER):INTEGER
+ebb0(v0:INTEGER)
 v1:BOOLEAN = call inf_equal v0 i_inline(0)
 if_true v1 ebb2
 jump ebb1

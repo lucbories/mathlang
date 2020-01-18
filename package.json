@@ -49,7 +49,7 @@
     "test-ic-func-4": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/3-ic-builder/math_lang_ic_functions_4.test.ts",
     "test-ic-func-5": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/3-ic-builder/math_lang_ic_functions_5.test.ts",
     "test-ic-func-6": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/3-ic-builder/math_lang_ic_functions_6.test.ts",
-    "test-ic-func-7": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/3-ic-builder/math_lang_ic_functions_7.test.ts",
+    "test-ic-type-1": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/3-ic-builder/math_lang_ic_types_1.test.ts",
     "test-vm": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/*.test.ts",
     "test-vm-instr1": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_instructions-1.test.ts",
     "test-vm-instr2": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_instructions-2.test.ts",

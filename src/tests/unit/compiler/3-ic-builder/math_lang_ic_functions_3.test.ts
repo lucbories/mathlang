@@ -26,11 +26,12 @@ describe('MathLang IC test: module functions part 3 (function with if)', () => {
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
+        expect(modules.size).equals(2);
         const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `local function f():INTEGER
+ebb0()
 if_true b_inline(1) ebb2
 jump ebb3
 ebb1()
@@ -60,11 +61,12 @@ return i_inline(2)
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
+        expect(modules.size).equals(2);
         const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `local function f():INTEGER
+ebb0()
 v0:INTEGER = call add i_inline(15) i_inline(59)
 v1:BOOLEAN = call sup v0 i_inline(89)
 if_true v1 ebb2

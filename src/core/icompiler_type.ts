@@ -4,7 +4,21 @@ import ICompilerFunction from './icompiler_function';
 
 export default interface ICompilerType {
     get_type_name():string;
-    equals(type:ICompilerType):boolean;
+	equals(type:ICompilerType):boolean;
+
+	is_generic():boolean;
+	set_generic(is_generic:boolean):void;
+    
+    is_scalar():boolean;
+	set_scalar(is_scalar:boolean):void;
+    
+    is_textual():boolean;
+	set_textual(is_textual:boolean):void;
+    
+    is_collection():boolean;
+	set_collection(is_collection:boolean):void;
+
+	set_property(property_name:string, property_value:string):void
 
     get_base_type():ICompilerType;
 

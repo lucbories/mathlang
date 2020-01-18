@@ -11,6 +11,10 @@ import { SymbolsTable, ICompilerFunction } from '../../core/icompiler_function';
 export default class CompilerFunction implements ICompilerFunction {
     private _is_exported:boolean = false;
     private _module_name:string = undefined;
+    
+    private _is_internal:boolean = false;
+    private _is_external:boolean = false;
+    private _is_inline:boolean = false;
 
     private _ast_node:ICompilerAstNode;
     private _ast_statements:ICompilerAstNode[];
@@ -34,7 +38,7 @@ export default class CompilerFunction implements ICompilerFunction {
     private _symbols_opds_ordered_list:string[] = [];
     private _used_by_functions:string[] = [];
 
-    constructor(/*private _module:ICompilerModule, */private _func_name:string, private _type:ICompilerType, opds_names:string[] = [], opds_types:ICompilerType[] = [], opds_values:string[] = []){
+    constructor(private _func_name:string, private _type:ICompilerType, opds_names:string[] = [], opds_types:ICompilerType[] = [], opds_values:string[] = []){
         if ( Array.isArray(opds_names) && Array.isArray(opds_types) ) {
             if (opds_names.length == opds_types.length) {
                 let i:number;
@@ -84,6 +88,14 @@ export default class CompilerFunction implements ICompilerFunction {
 	get_returned_type():ICompilerType {
         return this._type;
     }
+
+    is_internal():boolean  { return this._is_internal; }
+    is_external():boolean  { return this._is_external; }
+    is_inline():boolean    { return this._is_inline; }
+
+    set_is_internal(is_internal:boolean):void { this._is_internal = is_internal; }
+    set_is_external(is_external:boolean):void { this._is_external = is_external; }
+    set_is_inline(is_inline:boolean):void     { this._is_inline = is_inline; }
 
 	
     // AST
@@ -277,6 +289,22 @@ export default class CompilerFunction implements ICompilerFunction {
             (value, index)=>{
                 if (index >= opds.length || value != opds[index]) {
                     match = false;
+                }
+            }
+        );
+        return match;
+    }
+
+    has_symbols_opds_types_ordered_list(opds_types_names:string[]):boolean {
+        let match = true;
+        let type_name:string;
+        this._symbols_opds_ordered_list.map(
+            (value, index)=>{
+                if (index >= opds_types_names.length ) {
+                    type_name = this._symbols_opds_table.get(value).type.get_type_name()
+                    if (type_name != opds_types_names[index]) {
+                        match = false;
+                    }
                 }
             }
         );

@@ -26,12 +26,14 @@ describe('MathLang IC test: module functions part 5 (use module)', () => {
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(3);
+        expect(modules.size).equals(4);
         const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `exported function fA():INTEGER
+ebb0()
 return i_inline(20)
+local function fB():INTEGER
 ebb0()
 v0:INTEGER = call mA@fA
 v1:INTEGER = call mul v0 i_inline(2)
@@ -70,12 +72,14 @@ return v1
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(3);
+        expect(modules.size).equals(4);
         const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `exported function fA():INTEGER
+ebb0()
 return i_inline(20)
+local function fB():INTEGER
 ebb0()
 v0:INTEGER = call mA@fA
 v1:INTEGER = call mul v0 i_inline(2)
@@ -87,7 +91,7 @@ return v1
 
     it('Function returns local function call: f()=>module mA export fA() f(x is INTEGER)=x*2 return f(20)' , () => {
         compiler.reset();
-        const text = 'module mA export function fA() as INTEGER f(x is INTEGER)=x*2 return f(20) end function';
+        const text = 'module mA // example \n export function fA() as INTEGER f(x is INTEGER)=x*2 return f(20) end function';
         const result = compiler.compile(text, 'program');
 
         // ERRORS
@@ -102,11 +106,12 @@ return v1
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(2);
+        expect(modules.size).equals(3);
         const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `exported function fA():INTEGER
+ebb0()
 v0:INTEGER = call mA@f i_inline(20)
 return v0
 `;

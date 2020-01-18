@@ -123,11 +123,15 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
         this.create_ebb(operands_types, operands_names);
 
         // LOOP ON FUNCTION STATEMENTS
-        const ast_statements:ICompilerAstNode[] = func.get_ast_statements();
-        let loop_ast_statement;
-        for(loop_ast_statement of ast_statements){
-            this.visit_statement(loop_ast_statement);
-        }
+        if (! func.is_internal() && ! func.is_external()) {
+            const ast_statements:ICompilerAstNode[] = func.get_ast_statements();
+            let loop_ast_statement;
+            if (ast_statements) {
+                for(loop_ast_statement of ast_statements){
+                    if (loop_ast_statement) this.visit_statement(loop_ast_statement);
+                }
+            }
+        }   
 
         this.leave_function_declaration(func.get_func_name());
     }
@@ -306,7 +310,19 @@ export default abstract class MathLangAstToIcVisitorStatements extends MathLangA
             return this.add_error(ast_expression, 'Error in return expression:not a valid expression');
         }
         
+        // CHECK EXPECTED TYPE
+        const func_type = this.get_current_function().get_returned_type();
+        const expr_type = ast_expression.ic_type;
+        const func_gen = func_type.is_generic();
+        const expr_gen = expr_type.is_generic();
+        if (expr_type != func_type) {
+            if (! func_gen && ! expr_gen) {
+                return this.add_error(ast_expression, 'Error in return expression:bad type, function declaration [' + func_type.get_type_name() + '] <> returned expression [' + expr_type.get_type_name() + ']');
+            }
+        }
+
         const instr:ICompilerIcInstr = CompilerIcBuilder.create_return(ic_opd_var_name);
+        instr.ic_type = func_gen ? expr_type : func_type;
         this.add_ic_ebb_instruction(instr);
     }
 

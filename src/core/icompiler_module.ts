@@ -1,11 +1,16 @@
 
 import ICompilerSymbol  from './icompiler_symbol';
+import ICompilerType  from './icompiler_type';
 import { ICompilerFunction } from './icompiler_function';
 
 
 export default ICompilerModule;
 export interface ICompilerModule {
     get_module_name():string;
+
+    add_module_type(type_name:string, base_type_name:string):ICompilerType;
+    has_module_type(type_name:string):boolean;
+    get_module_type(type_name:string):ICompilerType;
 
     add_used_module(module:ICompilerModule):void;
     get_used_modules():Map<string,ICompilerModule>;

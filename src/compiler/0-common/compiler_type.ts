@@ -13,7 +13,11 @@ export default class CompilerType implements ICompilerType {
         private _name:string,
         private _base_type:ICompilerType|undefined,
         private _attributes:Map<string,ICompilerType> = new Map(),
-        private _methods:Map<string,ICompilerFunction> = new Map())
+        private _methods:Map<string,ICompilerFunction> = new Map(),
+        private _is_generic:boolean = false,
+        private _is_scalar:boolean = false,
+        private _is_textual:boolean = false,
+        private _is_collection:boolean = false)
     {
         // this._compiler_scope.add_available_lang_type(this._name, this);
     }
@@ -25,6 +29,22 @@ export default class CompilerType implements ICompilerType {
     
     equals(type:ICompilerType):boolean {
         return this._name == type.get_type_name();
+    }
+    
+    is_generic():boolean { return this._is_generic; }
+	set_generic(is_generic:boolean):void  { this._is_generic = is_generic; }
+    
+    is_scalar():boolean { return this._is_scalar; }
+	set_scalar(is_scalar:boolean):void  { this._is_scalar = is_scalar; }
+    
+    is_textual():boolean { return this._is_textual; }
+	set_textual(is_textual:boolean):void  { this._is_textual = is_textual; }
+    
+    is_collection():boolean { return this._is_collection; }
+	set_collection(is_collection:boolean):void  { this._is_collection = is_collection; }
+
+    set_property(property_name:string, property_value:string):void {
+        // TODO set_property
     }
 
     get_base_type():ICompilerType {
@@ -98,7 +118,7 @@ export default class CompilerType implements ICompilerType {
         }
 
         const types = operands.map( (value)=>value.get_type_name());
-        if ( ! method.has_symbols_opds_ordered_list(types) ) {
+        if ( ! method.has_symbols_opds_types_ordered_list(types) ) {
             return undefined;
         }
 

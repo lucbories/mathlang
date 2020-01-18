@@ -26,11 +26,12 @@ describe('MathLang IC test: module functions part 1 (function constants)', () =>
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
-        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, true);
+        expect(modules.size).equals(2);
+        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `local function f():INTEGER
+ebb0()
 return i_inline(123)
 `;
         expect(ic_source).equals(expected_ic_source);
@@ -54,11 +55,12 @@ return i_inline(123)
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
-        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, true);
+        expect(modules.size).equals(2);
+        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `local function f():INTEGER
+ebb0()
 v0:INTEGER = call add i_inline(123) i_inline(456)
 return v0
 `;
@@ -83,11 +85,12 @@ return v0
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
-        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, true);
+        expect(modules.size).equals(2);
+        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `local function f():FLOAT
+ebb0()
 v0:FLOAT = call add f_inline(123.78) f_inline(456.987458e-15)
 return v0
 `;
@@ -112,11 +115,12 @@ return v0
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
-        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, true);
+        expect(modules.size).equals(2);
+        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `local function f():BIGFLOAT
+ebb0()
 v0:BIGFLOAT = call add bf_inline(1234567890123.78) bf_inline(456.987458e-1545)
 return v0
 `;
@@ -141,11 +145,12 @@ return v0
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
-        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, true);
+        expect(modules.size).equals(2);
+        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `local function f():BIGINTEGER
+ebb0()
 v0:BIGINTEGER = call add bi_inline(1234567890123) bi_inline(45678965432198)
 return v0
 `;
@@ -170,11 +175,12 @@ return v0
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
-        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, true);
+        expect(modules.size).equals(2);
+        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `local function f():INTEGER
+ebb0()
 v0:INTEGER = call add i_inline(123) i_inline(456)
 v1:INTEGER = call add v0 i_inline(789)
 return v1
@@ -200,11 +206,12 @@ return v1
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
-        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, true);
+        expect(modules.size).equals(2);
+        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `local function f():INTEGER
+ebb0()
 v0:INTEGER = call mul i_inline(456) i_inline(654)
 v1:INTEGER = call add i_inline(123) v0
 v2:INTEGER = call add v1 i_inline(789)
@@ -231,11 +238,12 @@ return v2
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
-        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, true);
+        expect(modules.size).equals(2);
+        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `local function f():INTEGER
+ebb0()
 v0:INTEGER = call add i_inline(123) i_inline(456)
 v1:INTEGER = call mul v0 i_inline(654)
 v2:INTEGER = call add v1 i_inline(789)
@@ -247,7 +255,7 @@ return v2
 
     it('Function returns one add, one div and one mul of 4 int constants: f()=>return (123+456)*654/789' , () => {
         compiler.reset();
-        const text = 'function f() as INTEGER return (123+456)*654/789 end function';
+        const text = 'function f() as FLOAT return (123+456)*654/789 end function';
         const result = compiler.compile(text, 'program');
 
         // ERRORS
@@ -262,11 +270,12 @@ return v2
         // GET IC CODE
         const compiler_scope = compiler.get_scope();
         const modules = compiler_scope.get_new_modules();
-        expect(modules.size).equals(1);
-        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, true);
+        expect(modules.size).equals(2);
+        const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
         // TEST IC TEXT
-        const expected_ic_source = `ebb0()
+        const expected_ic_source = `local function f():FLOAT
+ebb0()
 v0:INTEGER = call add i_inline(123) i_inline(456)
 v1:FLOAT = call div i_inline(654) i_inline(789)
 v2:FLOAT = call mul v0 v1

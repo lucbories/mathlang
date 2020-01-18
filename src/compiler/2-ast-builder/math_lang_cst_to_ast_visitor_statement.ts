@@ -5,6 +5,7 @@ import { IAstNodeKindOf as AST, ICompilerAstAssignNode, ICompilerAstFunctionNode
 
 import CompilerScope from '../0-common/compiler_scope';
 import CompilerModule from '../0-common/compiler_module';
+import CompilerFunction from '../0-common/compiler_function';
 
 
 
@@ -70,6 +71,14 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
 
                 ast_statement = this.visit(cst_statement);
                 uses.push( { name:ast_statement.module_name, alias:ast_statement.module_alias, imports:ast_statement.modules_imports } );
+            }
+        }
+
+        // LOOP ON TYPE DECLARATION STATEMENTS
+        if (ctx.typeStatement){
+            for(cst_statement of ctx.typeStatement){
+
+                this.visit(cst_statement);
             }
         }
 
@@ -165,6 +174,140 @@ export default class MathLangCstToAstVisitorStatement extends MathLangCstToAstVi
             modules_imports: modules_imports_array
         }
     }
+
+    
+    /**
+     * Visit CST Type declaration node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    typeStatement(ctx:any) {
+        // console.log('typeStatement', ctx)
+
+        const type_name = ctx.typeName[0].image;
+        const base_type_name = ctx.baseType[0].image;
+
+        this._current_type = this._current_module.add_module_type(type_name, base_type_name);
+
+        let cst_statement;
+        if (ctx.typeAttributeStatement){
+            for(cst_statement of ctx.typeAttributeStatement){
+                this.visit(cst_statement);
+            }
+        }
+        if (ctx.typePropertyStatement){
+            for(cst_statement of ctx.typePropertyStatement){
+                this.visit(cst_statement);
+            }
+        }
+        if (ctx.typeMethodStatement){
+            for(cst_statement of ctx.typeMethodStatement){
+                this.visit(cst_statement);
+            }
+        }
+    }
+
+    
+    /**
+     * Visit CST Type attribute declaration node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    typeAttributeStatement(ctx:any) {
+        // console.log('typeAttributeStatement', ctx)
+        const attribute_name = ctx.attributeName[0].image;
+        const attribute_type = this.visit(ctx.attributeType[0]);
+        if (attribute_type) {
+            this._current_type.add_attribute(attribute_name, attribute_type);
+        }
+    }
+
+    
+    /**
+     * Visit CST Type attribute declaration node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    typePropertyStatement(ctx:any) {
+        // console.log('typePropertyStatement', ctx)
+        const property_name = ctx.propertyName[0].image;
+        const property_expr_ast = this.visit(ctx.propertyValue);
+
+        this._current_type.set_property(property_name, property_expr_ast.value);
+    }
+
+    
+    /**
+     * Visit CST Type method declaration node.
+     * 
+     * @param ctx CST nodes
+     * 
+     * @returns AST node
+     */
+    typeMethodStatement(ctx:any) {
+        // console.log('typeMethodStatement', ctx)
+        const method_name = ctx.methodName[0].image;
+        const method_type = this.visit(ctx.methodType[0]);
+        const method_operands_ast = this.visit(ctx.ArgumentsWithIds);
+
+
+        // DECLARE A NEW FUNCTION OR RECREATE AN EXISTING FUNCTION
+        const operands_types = method_operands_ast.ic_subtypes;
+        const operands_names = method_operands_ast.items;
+        const default_type = operands_types.length > 0 ? operands_types[0]:'INTEGER';
+        
+        // CREATE FUNCTION
+        const func = new CompilerFunction(method_name, method_type);
+
+        // PROCESS OPERANDS
+        let opd_index;
+        let loop_name;
+        let loop_type;
+        for(opd_index=0; opd_index < operands_names.length; opd_index++){
+            loop_name = operands_names[opd_index];
+            loop_type = opd_index < operands_types.length ?operands_types[opd_index] : default_type;
+            func.add_symbol_operand(loop_name, loop_type, undefined);
+        }
+
+        // EVALUATE RIGHT EXPRESSION
+        const saved_current_func = this._current_function;
+        const saved_current_module = this._current_module;
+        this._scopes_stack.push(func);
+        this._current_function = func
+        const cst_expr_node = ctx.methodExpr;
+        const ast_expr_node = this.visit(cst_expr_node);
+        this._scopes_stack.pop();
+        this._current_function = saved_current_func;
+        this._current_module = saved_current_module;
+
+        // CHECK LEFT TYPE == RIGHT TYPE
+        if (ast_expr_node.ic_type != this._type_unknow && ast_expr_node.ic_type.get_type_name() != method_type){
+            this.add_error(ctx, AST.EXPR_FUNCTION_DECL, 'Error:left type [' + method_type + '] and right type [' + ast_expr_node.ic_type + '] are different for function declaration [' + method_name + '].')
+        }
+
+        // SET INSTRUCTIONS
+        const instructions = [
+            {
+                ast_code: AST.STAT_RETURN,
+                ic_type: ast_expr_node.ic_type,
+                expression: ast_expr_node
+            }
+        ]
+        func.set_ast_statements(instructions);
+
+        func.set_exported(false);
+        func.set_module_name(this._current_module.get_module_name());
+
+        // REGISTER METHOD
+        this._current_type.add_method(func);
+    }
+
 
     
     /**

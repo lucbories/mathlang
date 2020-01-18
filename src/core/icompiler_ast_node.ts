@@ -6,6 +6,7 @@ export enum IAstNodeKindOf {
     BLOCK                   ='BLOCK',
 
     STAT_USE                ='USE_STATEMENT',
+    STAT_TYPE               ='TYPE_STATEMENT',
     STAT_MODULE             ='MODULE_STATEMENT',
     STAT_UNKNOW             ='UNKNOW_STATEMENT',
     STAT_IF                 ='IF_STATEMENT',

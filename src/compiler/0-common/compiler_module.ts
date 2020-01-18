@@ -1,13 +1,18 @@
 // import { ICompilerAstNode } from '../../core/icompiler_ast_node'
 // import { ICompilerIcNode } from '../../core/icompiler_ic_node'
 import ICompilerSymbol from '../../core/icompiler_symbol'
+import ICompilerType from '../../core/icompiler_type'
 import ICompilerFunction from '../../core/icompiler_function'
 import ICompilerModule from '../../core/icompiler_module'
 import ICompilerScope from '../../core/icompiler_scope'
+import CompilerType from './compiler_type';
 
 
 export default class CompilerModule implements ICompilerModule {
+
     private _used_modules:Map<string,ICompilerModule> = new Map();
+
+    private _module_types:Map<string,ICompilerType> = new Map();
 
     private _module_functions:Map<string,ICompilerFunction> = new Map();
     private _exported_functions:Map<string,ICompilerFunction> = new Map();
@@ -23,6 +28,28 @@ export default class CompilerModule implements ICompilerModule {
 
     get_module_name():string {
         return this._module_name;
+    }
+
+
+    // MODULE TYPES
+    add_module_type(type_name:string, base_type_name:string):ICompilerType {
+        const this_base_type = this.get_module_type(base_type_name) 
+        const base_type = this_base_type ? this_base_type : this._compiler_scope.get_available_lang_type(base_type_name);
+
+        const new_type_name = this._module_name + '@' + type_name;
+        const new_type:ICompilerType = new CompilerType(new_type_name, base_type, undefined, undefined);
+        
+        this._module_types.set(new_type_name, new_type);
+
+        return new_type;
+    }
+
+    has_module_type(type_name:string):boolean {
+        return this._module_types.has(type_name);
+    }
+
+    get_module_type(type_name:string):ICompilerType {
+        return this._module_types.get(type_name);
     }
 
 

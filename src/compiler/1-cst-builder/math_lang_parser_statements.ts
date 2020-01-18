@@ -35,6 +35,10 @@ export class MathLangParserStatements extends Parser {
         });
 
         this.MANY2(() => {
+            this.SUBRULE(this.typeStatement, { LABEL:"typeStatement" })
+        });
+
+        this.MANY3(() => {
             this.OR( [
                 { ALT: () => this.SUBRULE(this.functionStatement, { LABEL:'functionStatement' } ) },
                 { ALT: () => this.SUBRULE(this.exportedConstantStatement, { LABEL:'exportedConstantStatement' } ) },
@@ -62,6 +66,48 @@ export class MathLangParserStatements extends Parser {
             this.CONSUME4(t.ID, { LABEL:'alias' } );
         });
     });
+
+
+    // TYPE DECLARATION
+    private typeStatement = this.RULE("typeStatement", () => {
+        this.CONSUME(t.Type);
+        this.CONSUME(t.ID, { LABEL:'typeName' } );
+        this.CONSUME(t.Extends);
+        this.CONSUME2(t.ID, { LABEL:'baseType' } );
+
+        this.MANY(
+            ()=>{
+                this.OR( [
+                    { ALT: () => this.SUBRULE(this.typeAttributeStatement, { LABEL:'typeAttributeStatement' } ) },
+                    { ALT: () => this.SUBRULE(this.typePropertyStatement, { LABEL:'typePropertyStatement' } ) },
+                    { ALT: () => this.SUBRULE(this.typeMethodStatement, { LABEL:'typeMethodStatement' } ) }
+                ] );
+            }
+        );
+
+        this.CONSUME(t.EndType);
+    });
+
+    private typeAttributeStatement = this.RULE("typeAttributeStatement", () => {
+        this.CONSUME(t.ID, { LABEL:"attributeName" });
+        this.CONSUME(t.Is);
+        this.SUBRULE(this.idType, { LABEL:"attributeType" });
+    } );
+
+    private typePropertyStatement = this.RULE("typePropertyStatement", () => {
+        this.CONSUME(t.ID, { LABEL:"propertyName" });
+        this.CONSUME(t.Assign);
+        this.SUBRULE(this.PrimaryExpression, { LABEL:"propertyValue" });
+    } );
+
+    private typeMethodStatement = this.RULE("typeMethodStatement", () => {
+        this.CONSUME2(t.ID, { LABEL:"methodName" } );
+        this.SUBRULE(this.ArgumentsWithIds);
+        this.CONSUME3(t.As);
+        this.SUBRULE2(this.idType, { LABEL:"methodType" });
+        this.CONSUME(t.Assign);
+        this.SUBRULE(this.expression, { LABEL:"methodExpr" });
+    } );
 
 
     // BLOCK

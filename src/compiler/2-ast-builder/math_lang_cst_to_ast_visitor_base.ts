@@ -61,6 +61,7 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
     
     protected _current_module:CompilerModule     = undefined;
     protected _current_function:CompilerFunction = undefined;
+    protected _current_type:ICompilerType        = undefined;
 
     protected _type_unknow:ICompilerType         = undefined;
     protected _type_integer:ICompilerType        = undefined;
@@ -102,10 +103,31 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      */
     get_type(type_name:string, cst_context:any, ast_node_type:any):ICompilerType{
         const get_type = this._compiler_scope.get_available_lang_type(type_name);
-        if (! get_type){
-            this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
+
+        if (get_type) {
+            return get_type;
         }
-        return get_type;
+
+        if (this._current_module){
+            if (this._current_module.has_module_type(type_name)) {
+                return this._current_module.get_module_type(type_name);
+            }
+
+            const used_modules = this._current_module.get_used_modules();
+            let found_type:ICompilerType = undefined;
+            used_modules.forEach(
+                (loop_module)=>{
+                    if (loop_module.has_module_type(type_name)){
+                        found_type = loop_module.get_module_type(type_name);
+                        return;
+                    }
+                }
+            );
+            if (found_type) return found_type;
+        }
+        
+        this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
+        return undefined;
     }
 
 
@@ -249,12 +271,31 @@ export default class MathLangCstToAstVisitorBase extends BaseVisitor {
      * 
      * @returns true for success, else false.
      */
-    check_type(type_name:string, cst_context:string, ast_node_type:any){
+    check_type(type_name:string, cst_context:string, ast_node_type:any):boolean{
         const has_type = this._compiler_scope.has_available_lang_type(type_name);
-        if (! has_type){
-            this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
+        if (has_type) {
+            return true;
         }
-        return true;
+
+        if (this._current_module){
+            if (this._current_module.has_module_type(type_name)) {
+                return true;
+            }
+            const used_modules = this._current_module.get_used_modules();
+            let found = false;
+            used_modules.forEach(
+                (loop_module)=>{
+                    if (loop_module.has_module_type(type_name)){
+                        found = true;
+                        return;
+                    }
+                }
+            );
+            if (found) return true;
+        }
+
+        this.add_error(cst_context, ast_node_type, 'Error:type not found [' + type_name + ']');
+        return false;
     }
 
 

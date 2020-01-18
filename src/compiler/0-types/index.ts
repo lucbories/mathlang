@@ -12,9 +12,13 @@ import CompilerBoolean from './compiler_boolean';
 import CompilerError from './compiler_error';
 import CompilerRecord from './compiler_record';
 import CompilerArray from './compiler_array';
+import CompilerGeneric from './compiler_generic';
+import CompilerBaseType from './compiler_base_type';
 
 const AVAILABLE_TYPES = new Map<string, ICompilerType>();
 
+AVAILABLE_TYPES.set('TYPE',       new CompilerBaseType() );
+AVAILABLE_TYPES.set('GENERIC',    new CompilerGeneric() );
 AVAILABLE_TYPES.set('BOOLEAN',    new CompilerBoolean() );
 AVAILABLE_TYPES.set('INTEGER',    new CompilerInteger() );
 AVAILABLE_TYPES.set('BIGINTEGER', new CompilerBigInteger() );

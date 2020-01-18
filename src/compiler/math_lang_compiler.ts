@@ -1,27 +1,17 @@
 import { IToken, LexerDefinitionErrorType } from 'chevrotain';
 
-import IProgram from '../core/iprogram';
-import IType from '../core/itype';
-
 import { math_lang_lexer, math_lang_parser } from './1-cst-builder/math_lang_parser';
-
 import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visitor';
-
-// import { ModuleScope, FunctionScope } from './3-ic-builder/math_lang_function_scope';
-// import { ICModule } from './3-ic-builder/math_lang_ast_to_ic_builder_base';
 import MathLangAstToIcBuilder from './3-ic-builder/math_lang_ast_to_ic_builder';
-// import {ICLabel} from './3-ic-builder/math_lang_ast_to_ic_builder_base';
-
-// import MathLangIcToMcVisitor from './4-mc-builder/math_lang_ic_to_mc_builder';
 
 import CompilerScope from './0-common/compiler_scope';
-import CompilerFunction from './0-common/compiler_function';
 import ICompilerModule from '../core/icompiler_module';
 import ICompilerType from '../core/icompiler_type';
 
 import AVAILABLE_TYPES from './0-types/index';
 import AVAILABLE_RUNTIMES from './0-runtimes/index';
 import AVAILABLE_MODULES from './0-modules/index';
+import register_std_signatures from './math_lang_std';
 
 
 /**
@@ -168,6 +158,8 @@ export default class MathLangCompiler {
         this.TYPE_BIGFLOAT_LABEL = 'BIGFLOAT';
         this.TYPE_BIGFLOAT = this.get_scope().get_available_lang_type(this.TYPE_BIGFLOAT_LABEL);
 
+        register_std_signatures(this._compiler_scope);
+        
         this._ast_builder = new MathLangCstToAstVisitor(this._compiler_scope);
     }
 
@@ -459,23 +451,23 @@ export default class MathLangCompiler {
         ic_builder.visit();
         // // this._ic_modules = ic_builder.get_ic_modules_map();
 
-        // if (ic_builder.has_error()){
-        //     const errors = ic_builder.get_errors();
-        //     let ic_build_error;
-        //     for(ic_build_error of errors){                
-        //         const error:CompilerError = {
-        //             source:this._text,
-        //             step:CompilerStep.IC,
-        //             line:0,
-        //             column:0,
-        //             src_extract:'',
-        //             message:ic_build_error.message + ' with [ic_type=' + ic_build_error.ic_type + ', ic_source=' + ic_build_error.ic_source + ', ic_name=' + ic_build_error.ic_name + ', ic_index=' + ic_build_error.ic_index + ']',
-        //             solution:'IC build error [' + ic_build_error.message + ']'
-        //         };
-        //         this._errors.push(error);
-        //     }
-        //     return false;
-        // }
+        if (ic_builder.has_error()){
+            const errors = ic_builder.get_errors();
+            let ic_build_error;
+            for(ic_build_error of errors){                
+                const error:CompilerError = {
+                    source:this._text,
+                    step:CompilerStep.IC,
+                    line:0,
+                    column:0,
+                    src_extract:'',
+                    message:ic_build_error.error_message + ' with [ic_type=' + ic_build_error.ic_type + ', ic_source=' + ic_build_error.ic_source + ', ic_name=' + ic_build_error.ic_name + ', ic_index=' + ic_build_error.ic_index + ']',
+                    solution:'IC build error [' + ic_build_error.error_message + ']'
+                };
+                this._errors.push(error);
+            }
+            return false;
+        }
 
 
         return true;

@@ -192,7 +192,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
         const symbol_type = this.get_symbol_type(id);
 
         const ast_node = {
-            ast_code: AST.EXPR_ID_OPTION_UNKNOW,
+            ast_code: AST.EXPR_FUNCTION_LOCAL,
             ic_type: symbol_type,
             name: id,
             members:<any>[]
@@ -221,7 +221,7 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
 
                     indexes.push(loop_ast_node);
                 });
-
+                
                 // APPEND AST NODE
                 member_ast_node = {
                     ast_code: AST.EXPR_ID_OPTION_INDICES,
@@ -694,8 +694,11 @@ export default abstract class MathLangCstToAstVisitorExpression extends MathLang
      */
     idType(ctx:any){
         const id = ctx.ID[0].image;
-        this.check_type(id, ctx, AST.EXPR_TYPE_ID);
-        return this.get_type(id, ctx, 'idType');
+        const opt_type_name = ctx.opt_type_name ? ctx.opt_type_name[0].image : undefined;
+        const type_name = opt_type_name ? id + '@' + opt_type_name : id;
+
+        this.check_type(type_name, ctx, AST.EXPR_TYPE_ID);
+        return this.get_type(type_name, ctx, 'idType');
     }
 
 
