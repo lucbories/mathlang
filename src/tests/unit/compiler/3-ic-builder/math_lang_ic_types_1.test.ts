@@ -98,6 +98,16 @@ function main() as mA@type1 return std@New(\'type1\') end function
         expect(modules.size).equals(4);
         const ic_source:string = CompilerIcBuilder.build_modules_ic_source(modules, false);
 
+        // TEST TYPE
+        const type1 = compiler.get_scope().get_module('mA').get_module_type('mA@type1');
+        expect(type1.is_scalar()).is.true;
+        expect(type1.is_textual()).is.false;
+        expect(type1.is_collection()).is.false;
+        expect(type1.has_attribute('value')).is.true;
+        expect(type1.get_attribute('value').get_type_name()).equals('INTEGER');
+        expect(type1.has_method_with_types_names('add', ['mA@type1', 'INTEGER'])).is.true;
+        expect(type1.get_method_with_types_names('add', ['mA@type1', 'INTEGER']).get_returned_type().get_type_name()).equals('INTEGER');
+
         // TEST IC TEXT
         const expected_ic_source = `local function main():mA@type1
 ebb0()

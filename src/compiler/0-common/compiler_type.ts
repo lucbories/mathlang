@@ -44,7 +44,11 @@ export default class CompilerType implements ICompilerType {
 	set_collection(is_collection:boolean):void  { this._is_collection = is_collection; }
 
     set_property(property_name:string, property_value:string):void {
-        // TODO set_property
+        switch(property_name) {
+            case 'is_scalar':     this.set_scalar(property_value == 'TRUE' ? true : false); break;
+            case 'is_textual':    this.set_textual(property_value == 'TRUE' ? true : false); break;
+            case 'is_collection': this.set_collection(property_value == 'TRUE' ? true : false); break;
+        }
     }
 
     get_base_type():ICompilerType {
@@ -86,38 +90,38 @@ export default class CompilerType implements ICompilerType {
     }
 
     // METHODS
-    has_method_with_types_names(method_name:string, operands:string[]):boolean {
+    has_method_with_types_names(method_name:string, operands_types_names:string[]):boolean {
         const method = this._methods.get(method_name);
         if (! method) {
             return undefined;
         }
-        return method.has_symbols_opds_ordered_list(operands);
+        return method.has_symbols_opds_types_ordered_list(operands_types_names);
     }
 
-    has_method(method_name:string, operands:ICompilerType[]):boolean {
+    has_method(method_name:string, operands_types:ICompilerType[]):boolean {
         const method = this._methods.get(method_name);
         if (! method) {
             return undefined;
         }
-        const types = operands.map( (value)=>value.get_type_name());
-        return method.has_symbols_opds_ordered_list(types);
+        const types = operands_types.map( (value)=>value.get_type_name());
+        return method.has_symbols_opds_types_ordered_list(types);
     }
 
-    get_method_with_types_names(method_name:string, operands:string[]):ICompilerFunction {
+    get_method_with_types_names(method_name:string, operands_types_names:string[]):ICompilerFunction {
         const method = this._methods.get(method_name);
         if (! method) {
             return undefined;
         }
-        return method.has_symbols_opds_ordered_list(operands) ? method : undefined;
+        return method.has_symbols_opds_types_ordered_list(operands_types_names) ? method : undefined;
     }
 
-    get_method(method_name:string, operands:ICompilerType[]):ICompilerFunction {
+    get_method(method_name:string, operands_types:ICompilerType[]):ICompilerFunction {
         const method = this._methods.get(method_name);
         if (! method) {
             return undefined;
         }
 
-        const types = operands.map( (value)=>value.get_type_name());
+        const types = operands_types.map( (value)=>value.get_type_name());
         if ( ! method.has_symbols_opds_types_ordered_list(types) ) {
             return undefined;
         }
