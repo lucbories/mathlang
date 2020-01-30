@@ -1,12 +1,12 @@
 
-import ICompilerError from '../../core/icompiler_error';
-import ICompilerType from '../../core/icompiler_type';
-import ICompilerScope from '../../core/icompiler_scope';
-import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
-import { ICompilerIcInstr, ICompilerIcInstrOperand } from '../../core/icompiler_ic_instruction';
+import ICompilerError from '../0-api/icompiler_error';
+import ICompilerType from '../0-api/icompiler_type';
+import ICompilerScope from '../0-api/icompiler_scope';
+import { IAstNodeKindOf as AST } from '../0-api/icompiler_ast_node';
+import { ICompilerIcInstr, ICompilerIcInstrOperand } from '../0-api/icompiler_ic_instruction';
 import CompilerIcBuilder from '../0-common/compiler_ic_builder';
 import MathLangAstToIcVisitorStatements from './math_lang_ast_to_ic_builder_statements';
-import ICompilerFunction from '../../core/icompiler_function';
+import ICompilerFunction from '../0-api/icompiler_function';
 
 
 

@@ -1,7 +1,7 @@
 
-// import ICompilerScope from '../../core/icompiler_scope';
-import ICompilerType from '../../core/icompiler_type';
-import ICompilerFunction from '../../core/icompiler_function';
+// import ICompilerScope from '../0-api/icompiler_scope';
+import ICompilerType from '../0-api/icompiler_type';
+import ICompilerFunction from '../0-api/icompiler_function';
 
 
 export default class CompilerType implements ICompilerType {

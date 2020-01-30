@@ -1,8 +1,8 @@
 
 import MathLangCstToAstVisitorExpression from './math_lang_cst_to_ast_visitor_expressions';
 
-import ICompilerType from '../../core/icompiler_type';
-import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
+import ICompilerType from '../0-api/icompiler_type';
+import { IAstNodeKindOf as AST } from '../0-api/icompiler_ast_node';
 import CompilerScope from '../0-common/compiler_scope';
 
 

@@ -1,10 +1,10 @@
 
-import ICompilerType from '../../core/icompiler_type';
-import ICompilerSymbol from '../../core/icompiler_symbol';
-import ICompilerRuntime from '../../core/icompiler_runtime';
-import ICompilerFunction from '../../core/icompiler_function'
-import ICompilerModule from '../../core/icompiler_module'
-import ICompilerScope from '../../core/icompiler_scope'
+import ICompilerType from '../0-api/icompiler_type';
+import ICompilerSymbol from '../0-api/icompiler_symbol';
+import ICompilerRuntime from '../0-api/icompiler_runtime';
+import ICompilerFunction from '../0-api/icompiler_function'
+import ICompilerModule from '../0-api/icompiler_module'
+import ICompilerScope from '../0-api/icompiler_scope'
 
 
 export default class CompilerScope implements ICompilerScope {

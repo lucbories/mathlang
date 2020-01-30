@@ -1,7 +1,7 @@
 
 import MathLangCstToAstVisitorBase from './math_lang_cst_to_ast_visitor_base';
 
-import { IAstNodeKindOf as AST, ICompilerAstAssignNode, ICompilerAstFunctionNode } from '../../core/icompiler_ast_node';
+import { IAstNodeKindOf as AST, ICompilerAstAssignNode, ICompilerAstFunctionNode } from '../0-api/icompiler_ast_node';
 
 import CompilerScope from '../0-common/compiler_scope';
 import CompilerModule from '../0-common/compiler_module';

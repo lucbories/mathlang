@@ -1,11 +1,11 @@
 
-import ICompilerError from '../../core/icompiler_error';
-import ICompilerType from '../../core/icompiler_type';
-import ICompilerSymbol from '../../core/icompiler_symbol';
-import ICompilerFunction from '../../core/icompiler_function';
-import ICompilerModule from '../../core/icompiler_module';
-import ICompilerScope from '../../core/icompiler_scope';
-import { ICompilerIcInstr, ICompilerIcInstrOperand, ICompilerIcEbb } from '../../core/icompiler_ic_instruction';
+import ICompilerError from '../0-api/icompiler_error';
+import ICompilerType from '../0-api/icompiler_type';
+import ICompilerSymbol from '../0-api/icompiler_symbol';
+import ICompilerFunction from '../0-api/icompiler_function';
+import ICompilerModule from '../0-api/icompiler_module';
+import ICompilerScope from '../0-api/icompiler_scope';
+import { ICompilerIcInstr, ICompilerIcInstrOperand, ICompilerIcEbb } from '../0-api/icompiler_ic_instruction';
 
 import CompilerIcBuilder from '../0-common/compiler_ic_builder';
 import CompilerModule from '../0-common/compiler_module';
@@ -31,7 +31,7 @@ export default abstract class MathLangAstToIcVisitorBase {
      * 
      * @param _ast_functions AST functions scopes
      */
-    constructor(private _compiler_scope:ICompilerScope ) {
+    constructor(private _compiler_scope:ICompilerScope) {
         
         this._default_module = this._compiler_scope.get_new_module('default');
         if (! this._default_module) {

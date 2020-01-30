@@ -1,5 +1,5 @@
 
-import ICompilerType from '../../core/icompiler_type';
+import ICompilerType from '../0-api/icompiler_type';
 
 import CompilerInteger from './compiler_integer';
 import CompilerBigInteger from './compiler_biginteger';

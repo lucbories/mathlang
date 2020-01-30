@@ -1,5 +1,5 @@
 
-import ICompilerRuntime from '../../core/icompiler_runtime';
+import ICompilerRuntime from '../0-api/icompiler_runtime';
 // import CompilerWASM from './compiler_wasm_runtime';
 // import CompilerJS from './compiler_js_runtime';
 

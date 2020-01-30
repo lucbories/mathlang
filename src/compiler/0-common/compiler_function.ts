@@ -1,11 +1,11 @@
 
-import ICompilerType from '../../core/icompiler_type';
-import ICompilerAstNode from '../../core/icompiler_ast_node';
-import { ICompilerIcEbb } from '../../core/icompiler_ic_instruction';
-import ICompilerIcInstr from '../../core/icompiler_ic_instruction';
-import ICompilerSymbol from '../../core/icompiler_symbol';
-import { SymbolsTable, ICompilerFunction } from '../../core/icompiler_function';
-// import { ICompilerModule } from '../../core/icompiler_module';
+import ICompilerType from '../0-api/icompiler_type';
+import ICompilerAstNode from '../0-api/icompiler_ast_node';
+import { ICompilerIcEbb } from '../0-api/icompiler_ic_instruction';
+import ICompilerIcInstr from '../0-api/icompiler_ic_instruction';
+import ICompilerSymbol from '../0-api/icompiler_symbol';
+import { SymbolsTable, ICompilerFunction } from '../0-api/icompiler_function';
+// import { ICompilerModule } from '../0-api/icompiler_module';
 
 
 export default class CompilerFunction implements ICompilerFunction {

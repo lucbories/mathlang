@@ -1,15 +1,15 @@
 
-import ICompilerError from '../../core/icompiler_error';
-import ICompilerType from '../../core/icompiler_type';
-import ICompilerScope from '../../core/icompiler_scope';
-import ICompilerModule from '../../core/icompiler_module';
-import ICompilerFunction from '../../core/icompiler_function';
-import ICompilerSymbol from '../../core/icompiler_symbol';
-import { IAstNodeKindOf as AST, ICompilerAstBlockNode, ICompilerAstExpressionNode, ICompilerAstFunctionNode, ICompilerAstTypedNode, ICompilerAstNode } from '../../core/icompiler_ast_node';
-import { ICompilerIcInstr, ICompilerIcInstrOperand, ICompilerIcEbb } from '../../core/icompiler_ic_instruction';
+import ICompilerError from '../0-api/icompiler_error';
+import ICompilerType from '../0-api/icompiler_type';
+import ICompilerScope from '../0-api/icompiler_scope';
+import ICompilerModule from '../0-api/icompiler_module';
+import ICompilerFunction from '../0-api/icompiler_function';
+import ICompilerSymbol from '../0-api/icompiler_symbol';
+import { IAstNodeKindOf as AST, ICompilerAstBlockNode, ICompilerAstExpressionNode, ICompilerAstFunctionNode, ICompilerAstTypedNode, ICompilerAstNode } from '../0-api/icompiler_ast_node';
+import { ICompilerIcInstr, ICompilerIcInstrOperand, ICompilerIcEbb } from '../0-api/icompiler_ic_instruction';
 import CompilerIcBuilder from '../0-common/compiler_ic_builder'
 import MathLangAstToIcVisitorBase from './math_lang_ast_to_ic_builder_base';
-import { IC_OPCODES } from '../../core/icompiler_ic_instruction';
+import { IC_OPCODES } from '../0-api/icompiler_ic_instruction';
 
 
 

@@ -1,10 +1,10 @@
-// import { ICompilerAstNode } from '../../core/icompiler_ast_node'
-// import { ICompilerIcNode } from '../../core/icompiler_ic_node'
-import ICompilerSymbol from '../../core/icompiler_symbol'
-import ICompilerType from '../../core/icompiler_type'
-import ICompilerFunction from '../../core/icompiler_function'
-import ICompilerModule from '../../core/icompiler_module'
-import ICompilerScope from '../../core/icompiler_scope'
+// import { ICompilerAstNode } from '../0-api/icompiler_ast_node'
+// import { ICompilerIcNode } from '../0-api/icompiler_ic_node'
+import ICompilerSymbol from '../0-api/icompiler_symbol'
+import ICompilerType from '../0-api/icompiler_type'
+import ICompilerFunction from '../0-api/icompiler_function'
+import ICompilerModule from '../0-api/icompiler_module'
+import ICompilerScope from '../0-api/icompiler_scope'
 import CompilerType from './compiler_type';
 
 

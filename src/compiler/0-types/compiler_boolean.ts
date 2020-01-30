@@ -1,6 +1,6 @@
 
-import ICompilerType from '../../core/icompiler_type';
-import ICompilerFunction from '../../core/icompiler_function';
+import ICompilerType from '../0-api/icompiler_type';
+import ICompilerFunction from '../0-api/icompiler_function';
 
 import CompilerType from '../0-common/compiler_type';
 

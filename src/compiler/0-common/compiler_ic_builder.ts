@@ -1,12 +1,12 @@
 
-import ICompilerError from '../../core/icompiler_error';
-import ICompilerSymbol from '../../core/icompiler_symbol';
-import ICompilerModule from '../../core/icompiler_module';
-import ICompilerType from '../../core/icompiler_type';
-import ICompilerFunction from '../../core/icompiler_function';
+import ICompilerError from '../0-api/icompiler_error';
+import ICompilerSymbol from '../0-api/icompiler_symbol';
+import ICompilerModule from '../0-api/icompiler_module';
+import ICompilerType from '../0-api/icompiler_type';
+import ICompilerFunction from '../0-api/icompiler_function';
 import {
     ICompilerIcInstr, ICompilerIcEbb, IC_OPCODES, ICompilerIcEbbOperand, ICompilerIcInstrOperand
-} from '../../core/icompiler_ic_instruction';
+} from '../0-api/icompiler_ic_instruction';
 
 
 

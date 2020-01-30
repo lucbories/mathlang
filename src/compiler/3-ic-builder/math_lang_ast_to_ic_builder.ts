@@ -1,5 +1,5 @@
 
-import ICompilerScope from '../../core/icompiler_scope';
+import ICompilerScope from '../0-api/icompiler_scope';
 
 import MathLangAstToIcVisitorExpressions from './math_lang_ast_to_ic_builder_expressions';
 

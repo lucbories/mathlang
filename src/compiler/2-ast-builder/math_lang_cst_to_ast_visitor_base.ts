@@ -1,15 +1,15 @@
 
-import ICompilerType from '../../core/icompiler_type';
-import ICompilerScope from '../../core/icompiler_scope';
-import ICompilerSymbol from '../../core/icompiler_symbol';
-import ICompilerFunction from '../../core/icompiler_function';
+import ICompilerType from '../0-api/icompiler_type';
+import ICompilerScope from '../0-api/icompiler_scope';
+import ICompilerSymbol from '../0-api/icompiler_symbol';
+import ICompilerFunction from '../0-api/icompiler_function';
 
 import CompilerFunction from '../0-common/compiler_function'; // TODO replace by interface
 import CompilerModule from '../0-common/compiler_module'; // TODO replace by interface
 
 import { math_lang_parser } from '../1-cst-builder/math_lang_parser';
 import { BINOP_TYPES, PREUNOP_TYPES, POSTUNOP_TYPES } from '../math_lang_types';
-import ICompilerModule from '../../core/icompiler_module';
+import ICompilerModule from '../0-api/icompiler_module';
 
 
 

@@ -3,10 +3,10 @@ import { IToken, LexerDefinitionErrorType } from 'chevrotain';
 import { math_lang_lexer, math_lang_parser } from './1-cst-builder/math_lang_parser';
 import MathLangCstToAstVisitor from './2-ast-builder/math_lang_cst_to_ast_visitor';
 import MathLangAstToIcBuilder from './3-ic-builder/math_lang_ast_to_ic_builder';
+import MathLangIcToVmBuilder from './4-vm-builder/math_lang_ic_to_vm_builder';
 
 import CompilerScope from './0-common/compiler_scope';
-import ICompilerModule from '../core/icompiler_module';
-import ICompilerType from '../core/icompiler_type';
+import ICompilerType from './0-api/icompiler_type';
 
 import AVAILABLE_TYPES from './0-types/index';
 import AVAILABLE_RUNTIMES from './0-runtimes/index';
@@ -296,7 +296,7 @@ export default class MathLangCompiler {
         }
 
         // BUILD MC
-        if (! this.build_mc()){
+        if (! this.build_vm()){
             return false;
         }
 
@@ -443,13 +443,8 @@ export default class MathLangCompiler {
      * @returns boolean (true:success, false:error occures).
      */
     build_ic():boolean{
-        // const modules_map:Map<string, ICompilerModule> = this.get_scope().get_available_modules(); // TODO
-        
-        const modules_map:Map<string, ICompilerModule> = this.get_scope().get_new_modules();
-
         const ic_builder = new MathLangAstToIcBuilder(this.get_scope());
         ic_builder.visit();
-        // // this._ic_modules = ic_builder.get_ic_modules_map();
 
         if (ic_builder.has_error()){
             const errors = ic_builder.get_errors();
@@ -489,38 +484,29 @@ export default class MathLangCompiler {
      * 
      * @returns boolean (true:success, false:error occures).
      */
-    build_mc():boolean{
-/*        const mc_program_options = {
-            registers:20, // registers count
-            stack:50, // stack max size
-            instructions:100, // instructions max size
-            entry_label:'main' // program entry point label
-        };
+    build_vm():boolean{
+        const vm_builder = new MathLangIcToVmBuilder(this.get_scope());
+        vm_builder.visit();
 
-        const mc_builder = new MathLangIcToMcVisitor(this._types_map, '', mc_program_options, this._ic_modules);
-
-        mc_builder.visit();
-
-        this._mc_program = mc_builder.get_mc_program();
-
-        if (mc_builder.has_error()){
-            const errors = mc_builder.get_errors();
-            // let mc_build_error;
-            // for(mc_build_error of errors){                
-            //     const error:CompilerError = {
-            //         source:this._text,
-            //         step:CompilerStep.IC,
-            //         line:0,
-            //         column:0,
-            //         src_extract:'',
-            //         message:mc_build_error.message + ' with [ic_type=' + mc_build_error.ic_type + ', ic_source=' + mc_build_error.ic_source + ', ic_name=' + mc_build_error.ic_name + ', ic_index=' + mc_build_error.ic_index + ']',
-            //         solution:'IC build error [' + mc_build_error.message + ']'
-            //     };
-            //     this._errors.push(error);
-            // }
+        if (vm_builder.has_error()){
+            const errors = vm_builder.get_errors();
+            let ic_build_error;
+            for(ic_build_error of errors){                
+                // const error:CompilerError = {
+                //     source:this._text,
+                //     step:CompilerStep.IC,
+                //     line:0,
+                //     column:0,
+                //     src_extract:'',
+                //     message:ic_build_error.error_message + ' with [ic_type=' + ic_build_error.ic_type + ', ic_source=' + ic_build_error.ic_source + ', ic_name=' + ic_build_error.ic_name + ', ic_index=' + ic_build_error.ic_index + ']',
+                //     solution:'IC build error [' + ic_build_error.error_message + ']'
+                // };
+                // this._errors.push(error);
+            }
             return false;
         }
-*/
+
+
         return true;
     }
 

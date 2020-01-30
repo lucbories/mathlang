@@ -7,6 +7,7 @@
     "@types/node": "^11.12.1",
     "big-integer": "^1.6.43",
     "chevrotain": "^4.3.1",
+    "convert-units": "^2.3.4",
     "decimal.js": "^10.1.1",
     "systemjs": "^3.1.0"
   },
@@ -16,6 +17,7 @@
     "@types/sinon": "^7.0.10",
     "assemblyscript": "^0.8.1",
     "chai": "^4.2.0",
+    "fetch": "^1.1.0",
     "mocha": "^5.2.0",
     "ts-node": "^8.0.3",
     "typescript": "^3.4.1"
@@ -57,10 +59,11 @@
     "test-vm-reg": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_registers.test.ts",
     "test-vm-stack": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_stack.test.ts",
     "testjs": "mocha  dest/tests/unit/**/*.test.js",
+    "test-yacas": "node src/vmachine/javascript/cas/import_yacas.js",
     "watch-test": "mocha --reporter spec --require ts-node/register --watch --watch-extensions ts src/**/*.test.ts",
-    "asbuild-features:untouched": "asc src/features/assemblyscript/assembly/index.ts -b src/features/assemblyscript/build/untouched.wasm -t src/features/assemblyscript/build/untouched.wat --sourceMap --validate --debug",
-    "asbuild-features:optimized": "asc src/features/assemblyscript/assembly/index.ts -b src/features/assemblyscript/build/optimized.wasm -t src/features/assemblyscript/build/optimized.wat --sourceMap --validate --optimize",
-    "asbuild-features": "npm run asbuild:untouched && npm run asbuild:optimized"
+    "asbuild-vm:untouched": "asc src/vmachine/assemblyscript/assembly/index.ts -b src/vmachine/assemblyscript/build/untouched.wasm -t src/vmachine/assemblyscript/build/untouched.wat --sourceMap --validate --debug",
+    "asbuild-vm:optimized": "asc src/vmachine/assemblyscript/assembly/index.ts -b src/vmachine/assemblyscript/build/optimized.wasm -t src/vmachine/assemblyscript/build/optimized.wat --sourceMap --validate --optimize",
+    "asbuild-vm": "npm run asbuild-vm:untouched && npm run asbuild-vm:optimized"
   },
   "author": "",
   "license": "MIT"

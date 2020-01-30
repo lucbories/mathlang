@@ -1,11 +1,11 @@
 
 import MathLangCstToAstVisitorStatement from './math_lang_cst_to_ast_visitor_statement';
 
-import ICompilerType from '../../core/icompiler_type';
-import ICompilerFunction from '../../core/icompiler_function';
-import ICompilerSymbol from '../../core/icompiler_symbol';
+import ICompilerType from '../0-api/icompiler_type';
+import ICompilerFunction from '../0-api/icompiler_function';
+import ICompilerSymbol from '../0-api/icompiler_symbol';
 
-import { IAstNodeKindOf as AST } from '../../core/icompiler_ast_node';
+import { IAstNodeKindOf as AST } from '../0-api/icompiler_ast_node';
 import CompilerScope from '../0-common/compiler_scope';
 
 
