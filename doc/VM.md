@@ -24,3 +24,34 @@ u8 data: second operand
 u8 data: third operand
 u8 data: fourth operand or trigger to next u32 for operands
 
+
+
+VM KERNEL Features
+Program control flow
+Memory
+	instructions
+	read only values
+	read write values
+Operations
+	Integer standard ops
+	Float standard ops
+	Complex standard ops
+	BigInteger standard ops
+	BigFloat standard ops
+	BigComplex standard ops
+	Collections standard ops: List, Stack, Queue, Map, Set, Range
+	Vector/Matrix standard ops
+	Tensor standard ops
+	Graph standard ops
+
+VM KERNEL Features
+Math
+	Numerical ops
+	Statistical ops
+	Algebrical ops
+	Vector/Matrix complex ops
+	Tensor complex ops
+	Graph complex ops
+Physics
+	
+

@@ -3,7 +3,35 @@ import { Value, Boolean, Integer, Float, /*BigInteger, BigFloat,*/ String, List,
 
 /// <reference path="../../../../../node_modules/assemblyscript/std/portable/index.d.ts" />
 
-
+/**
+ * Scope of a program execution into the VM, contains:
+ *   - instructions memory
+ *   - readonly values memory
+ *   - read/write memory
+ * 
+ * API:
+ *
+ *  Load one value:
+ *   - get_ro_value(offset:i32):Value - get a value and determine its type
+ * 
+ *  Load atomic values:
+ *   - get one Integer
+ *   - get one Float
+ *   - get one BigInteger
+ *   - get one BigFloat
+ * 
+ *  Load collections of values:
+ *   - get one value of an array
+ *
+ *  Store atomic values:
+ *   - set one Integer
+ *   - set one Float
+ *   - set one BigInteger
+ *   - set one BigFloat
+ * 
+ *  Store collections of values:
+ *   - set one array of values
+ */
 export default class Scope {
     public instructions:Uint8Array;
     private _values:ArrayBuffer;
