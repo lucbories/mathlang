@@ -1,5 +1,6 @@
 import OPCODES from './opcodes'
 import Program from './program';
+import EvalInstruction from './eval_instruction';
 import { Value, Simple, Text, List, Error } from './value';
 
 /**
