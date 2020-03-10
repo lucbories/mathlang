@@ -8,6 +8,8 @@ import { Value, Boolean, Integer, Float, /*BigInteger, BigFloat,*/ String, List,
  *   - instructions memory
  *   - readonly values memory
  *   - read/write memory
+ *   - 
+ *   - 
  * 
  * API:
  *

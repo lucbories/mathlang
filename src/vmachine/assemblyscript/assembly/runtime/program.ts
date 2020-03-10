@@ -1,7 +1,8 @@
 
 import ProgramOptions from './program_options';
 import { Value, Text, List, Stack, Error, Null } from './value';
-import Scope from './scope';
+import Instructions from './instructions';
+import Memory from './memory';
 
 
 const DEFAULT_STACK_SIZE:u32 = 50;
@@ -9,11 +10,12 @@ const DEFAULT_REGISTERS_STACK_SIZE:u32 = 50;
 const DEFAULT_REGISTERS_SIZE:u32 = 50;
 
 /**
- * VMProgram class instances contain the program instructions, stack and registers.
+ * Program is a Virtual Machine thread instance.
+ * It contains all instructions, memory, stack and registers.
  * 
  * @Example
- *  const engine = new VMEngine('engine 1');
- *  const program = new VMProgram('program 1', { registers:10 });
+ *  const engine = new VM('engine 1');
+ *  const program = new Program('program 1', { registers:10 });
  *  
  *  // Init program stack
  *  program.push_value(new VMInteger(45) );
@@ -57,32 +59,49 @@ const DEFAULT_REGISTERS_SIZE:u32 = 50;
  *  VMProgramResult.value = BigInteger(div result)
  */
 export default class Program {
+	// ERRORS
     private _has_error:boolean = false;
     private _error_message:string = '';
-    private _error_cursor:number = -1;
+    private _error_cursor:i32 = -1;
+    private _error_index:i32 = -1;
 
-    private _registers:List;
-    private _registers_stack:Stack;
-    private _stack:Stack;
-    private _cursor:u32 = 0;
-
+	// BYTES INSTRUCTIONS
+    private _instructions:Instructions;
+    private _cursor:i32 = 0;
+	
+	// VALUES REGISTERS
+    private _value_registers:List;
+    private _value_registers_stack:Stack;
+	
+	// VALUES STACK
+    private _value_stack:Stack;
+	
+	// VALUES MEMORY
+    private _memory:Memory;
+    
+	
+	// PROGRAM STATE
     private _is_running = false;
 
-    constructor(private _scope: Scope, options: ProgramOptions){
-        // Init registers
+	/**
+	 * Create a Program instance with given options.
+	 */
+    constructor(options: ProgramOptions){
+        // Init values registers
         this._registers = new List(options.registers ? options.registers: DEFAULT_REGISTERS_SIZE);
 
-        // Init registers stack
-        this._registers_stack = new Stack(options.stack ? options.stack : DEFAULT_REGISTERS_STACK_SIZE);
+        // Init values registers stack
+        this._values_registers_stack = new Stack(options.stack ? options.stack : DEFAULT_REGISTERS_STACK_SIZE);
 
-        // Init stack
-        this._stack = new Stack(options.stack ? options.stack : DEFAULT_STACK_SIZE);
+        // Init values stack
+        this._values_stack = new Stack(options.stack ? options.stack : DEFAULT_STACK_SIZE);
     }
 
     // Error
     public has_error() : boolean { return this._has_error; }
     public get_error_message() : string { return this._error_message; }
-    public get_error_cursor() : number { return this._error_cursor; }
+    public get_error_cursor()  : i32 { return this._error_cursor; }
+    public get_error_index()   : i32 { return this._error_index; }
 
 
     /**
@@ -219,51 +238,24 @@ export default class Program {
     // }
 
 
-    // Values
+    // VALUES
     free_value(value:Value) {
         // TODO ...
     }
 
 
-    // Instructions
-    // set_instruction(index:u32, instruction:Instruction, label?:string):void {
-    //     if (index < 0 || index >= this._instructions_size)
-    //     {
-    //         this.error_bad_instructions_index(index);
-    //     }
-
-    //     const previous_instr = this._instructions[index];
-    //     if (previous_instr) {
-    //         this.free_instruction(previous_instr)
-    //     }
-
-    //     this._instructions[index] = instruction;
-    //     if (label) {
-    //         this._instructions_labels.set(label, index);
-    //     }
-    // }
-
-    // add_instruction(instruction:Instruction, label?:string):void {
-    //     this.set_instruction(this._instructions_count, instruction, label);
-    //     ++this._instructions_count;
-    // }
-
-    // free_instruction(instruction:Instruction) {
-    //     // ...
-    // }
+    // INSTRUCTIONS
+	get_instructions() {
+		return this._instructions;
+	}
 
 
-    get_entry_point() : u32 {
-        // if (this._instructions_entry_label) {
-        //     const index = this._instructions_labels.get(this._instructions_entry_label)
-        //     if (index) {
-        //         return index
-        //     }
-        // }
+	// CURSOR
+    get_entry_point() : i32 {
         return 0;
     }
 
-    set_cursor(index:u32):void {
+    set_cursor(index:i32):void {
         if (index < 0 || index >= this._scope.instructions.length)
         {
             this.error_bad_instructions_index(index);
@@ -273,11 +265,11 @@ export default class Program {
         this._cursor = index;
     }
 
-    get_cursor():u32 {
+    get_cursor():i32 {
         return this._cursor;
     }
 
-    move_cursor(index:u32):void {
+    move_cursor(index:i32):void {
         const new_cursor = this._cursor + index
         if (new_cursor < 0 || new_cursor >= this._scope.instructions.length)
         {
@@ -291,62 +283,9 @@ export default class Program {
     move_next_unsafe():void {
         this._cursor++;
     }
+	
 
-    get_cursor_u8(): u8 {
-        if (this._cursor < 0 || this._cursor >= this._scope.instructions.length)
-        {
-            this.error_bad_instructions_index(this._cursor);
-            return 0;
-        }
-        
-        return this._scope.instructions[this._cursor];
-    }
-
-    get_cursor_u32(): u32 {
-        if (this._cursor < 0 || this._cursor + 3 >= this._scope.instructions.length)
-        {
-            this.error_bad_instructions_index(this._cursor + 3);
-            return 0;
-        }
-        
-        const u8_1 = this._scope.instructions[this._cursor++];
-        const u8_2 = this._scope.instructions[this._cursor++];
-        const u8_3 = this._scope.instructions[this._cursor++];
-        const u8_4 = this._scope.instructions[this._cursor++];
-        const u32_combined:u32 = 2**32*u8_1 + 2**24*u8_2 + 2**16*u8_3 + u8_4;
-        return u32_combined;
-    }
-
-    get_cursor_i32(): i32 {
-        if (this._cursor < 0 || this._cursor + 3 >= this._scope.instructions.length)
-        {
-            this.error_bad_instructions_index(this._cursor + 3);
-            return 0;
-        }
-        
-        const u8_1 = this._scope.instructions[this._cursor++];
-        const u8_2 = this._scope.instructions[this._cursor++];
-        const u8_3 = this._scope.instructions[this._cursor++];
-        const u8_4 = this._scope.instructions[this._cursor++];
-        const i32_combined:i32 = <i32> (2**32*u8_1 + 2**24*u8_2 + 2**16*u8_3 + u8_4);
-        return i32_combined;
-    }
-
-    get_cursor_f32(): f32 {
-        if (this._cursor < 0 || this._cursor + 3 >= this._scope.instructions.length)
-        {
-            this.error_bad_instructions_index(this._cursor + 3);
-            return 0;
-        }
-        
-        const u8_1 = this._scope.instructions[this._cursor++];
-        const u8_2 = this._scope.instructions[this._cursor++];
-        const u8_3 = this._scope.instructions[this._cursor++];
-        const u8_4 = this._scope.instructions[this._cursor++];
-        const f32_combined:f32 = <f32> (2**32*u8_1 + 2**24*u8_2 + 2**16*u8_3 + u8_4);
-        return f32_combined;
-    }
-
+	// STATE
     start():void {
         this._is_running = true;
     }
@@ -355,12 +294,13 @@ export default class Program {
         this._is_running = false;
     }
 
+
     is_running():boolean {
-        return this._is_running && (this._cursor < this._scope.instructions.length);
+        return this._is_running && (this._cursor < this.instructions.bytesLength);
     }
 
     
-    // Errors
+    // ERRORS
     error_stack_overflow() {
         this._has_error = true;
         this._error_cursor = this._cursor;
