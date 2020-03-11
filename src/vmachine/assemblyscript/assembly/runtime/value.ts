@@ -26,6 +26,7 @@ export class Value {
     public static BFMATRIX:u8   = 35;
 
     public static CUSTOM:u8     = 99;
+    public static EMPTY:u8      = 255;
     
     public type:u8;
     public bytes:u32;

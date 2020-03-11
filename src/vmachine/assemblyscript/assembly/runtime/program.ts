@@ -1,4 +1,6 @@
 
+/// <reference path="../../../../../node_modules/assemblyscript/std/portable/index.d.ts" />
+
 import ProgramOptions from './program_options';
 import { Value, Text, List, Stack, Error, Null } from './value';
 import Instructions from './instructions';

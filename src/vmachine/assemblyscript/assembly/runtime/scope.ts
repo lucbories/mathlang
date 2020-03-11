@@ -1,7 +1,9 @@
 
+/// <reference path="../../../../../node_modules/assemblyscript/std/portable/index.d.ts" />
+
 import { Value, Boolean, Integer, Float, /*BigInteger, BigFloat,*/ String, List, Stack, Error, Null } from './value';
 
-/// <reference path="../../../../../node_modules/assemblyscript/std/portable/index.d.ts" />
+
 
 /**
  * Scope of a program execution into the VM, contains:
