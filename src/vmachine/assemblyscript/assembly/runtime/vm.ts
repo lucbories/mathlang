@@ -1,7 +1,11 @@
+
+/// <reference path="../../../../../node_modules/assemblyscript/std/portable/index.d.ts" />
+
 import OPCODES from './opcodes'
 import Program from './program';
-import EvalInstruction from './eval_instruction';
-import { Value, Simple, Text, List, Error } from './value';
+import { Value, Simple, Text, List, Error, Boolean, Integer, Float, Complex/*, BigInteger, BigFloat, BigComplex*/ } from './value';
+
+function i32(v:i32):i32 { return v; }
 
 /**
  * 
@@ -15,7 +19,8 @@ import { Value, Simple, Text, List, Error } from './value';
 export default class VirtualMachine {
     private _has_error:boolean = false;
     private _error_message:string = '';
-    private _error_cursor:number = -1;
+    private _error_cursor:u32 = 0;
+    private _error_opcode:u8 = 0;
 
     constructor(private _engine_name: string){
     }
@@ -24,7 +29,7 @@ export default class VirtualMachine {
 
     public has_error() : boolean { return this._has_error; }
     public get_error_message() : string { return this._error_message; }
-    public get_error_cursor() : number { return this._error_cursor; }
+    public get_error_cursor() : u32 { return this._error_cursor; }
 
     public run(program: Program) : Value {
         const entry_point:u32 = program.get_entry_point();
@@ -39,8 +44,10 @@ export default class VirtualMachine {
         let cursor_opd2:u8;
         let cursor_jump:u32;
         let cursor_tmp_value:Value;
+        let cursor_tmp_value_2:Value;
         let cursor_tmp_u32:u32;
-        let cursor_tmp_i32:u32;
+        let cursor_tmp_i32_1:u32;
+        let cursor_tmp_i32_2:u32;
         let cursor_tmp_f32:u32;
 
         // let cursor_operands_count:number;
@@ -53,110 +60,255 @@ export default class VirtualMachine {
         program.start();
 
         while(running) {
+
             // GET CURRENT INSTRUCTION
-            cursor_opcode = program.get_cursor_u8();
+            cursor_opcode = program.get_cursor_u8_and_move();
             // console.log('cursor opcode', cursor_opcode);
 
-            program.move_next_unsafe();
-            cursor_type = program.get_cursor_u8();
+            cursor_type = program.get_cursor_u8_and_move();
             // console.log('cursor type', cursor_type);
             
-            program.move_next_unsafe();
-            cursor_opd1 = program.get_cursor_u8();
+            cursor_opd1 = program.get_cursor_u8_and_move();
             // console.log('cursor opd1', cursor_opd1);
             
-            program.move_next_unsafe();
-            cursor_opd2 = program.get_cursor_u8();
+            cursor_opd2 = program.get_cursor_u8_and_move();
             // console.log('cursor opd2', cursor_opd2);
+
             
+            cursor_tmp_i32_1 = i32(cursor_opd1);
+            cursor_tmp_i32_2 = i32(cursor_opd2);
+
+            if (i32(cursor_opd1) >= OPCODES.LIMIT_OPD_INLINE) {
+                if (i32(cursor_opd1) == OPCODES.LIMIT_OPD_INLINE){
+                    cursor_tmp_i32_1 = program.get_cursor_i32_and_move()
+                }
+                else if (i32(cursor_opd1) == OPCODES.LIMIT_OPD_REGISTER) {
+                    cursor_tmp_u32 = program.get_cursor_u32_and_move();
+                    cursor_tmp_value = program.get_register_value(cursor_tmp_u32);
+                    cursor_tmp_i32_1 = (<Integer>cursor_tmp_value).value;
+                }
+                else if (i32(cursor_opd1) == OPCODES.LIMIT_OPD_MEMORY) {
+                    cursor_tmp_u32 = program.get_cursor_u32_and_move();
+                    cursor_tmp_value = program.get_memory_value(cursor_tmp_u32);
+                    cursor_tmp_i32_1 = (<Integer>cursor_tmp_value).value;
+                }
+            }
+            
+            if (i32(cursor_opd2) >= OPCODES.LIMIT_OPD_INLINE) {
+                if (i32(cursor_opd2) == OPCODES.LIMIT_OPD_INLINE){
+                    cursor_tmp_i32_2 = program.get_cursor_i32_and_move()
+                }
+                else if (i32(cursor_opd2) == OPCODES.LIMIT_OPD_REGISTER) {
+                    cursor_tmp_u32 = program.get_cursor_u32_and_move();
+                    cursor_tmp_value = program.get_register_value(cursor_tmp_u32);
+                    cursor_tmp_i32_2 = (<Integer>cursor_tmp_value).value;
+                }
+                else if (i32(cursor_opd2) == OPCODES.LIMIT_OPD_MEMORY) {
+                    cursor_tmp_u32 = program.get_cursor_u32_and_move();
+                    cursor_tmp_value = program.get_memory_value(cursor_tmp_u32);
+                    cursor_tmp_i32_2 = (<Integer>cursor_tmp_value).value;
+                }
+            }
+
             switch(cursor_opcode) {
-                // TERMINATION OPS
+
+                // ********** PROGRAM TERMINATION **********
                 case OPCODES.EXIT:{
                     program.stop();
                     break;
                 }
-
-                // JUMP OPS
-                case OPCODES.JUMP:{
-                    cursor_jump = cursor_opd1 < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32();
-                    program.set_cursor(cursor_jump);
+                
+                case OPCODES.TRAP:{
+                    // TODO PUSH CONTEXT ON STACK
+                    program.stop();
                     break;
                 }
-                case OPCODES.JUMP_IF_TRUE:{
-                    cursor_tmp_value = program.pop_value();
 
-                    if (cursor_tmp_value instanceof Simple) {
-                        if (cursor_tmp_value.is_true()) {
-                            program.move_cursor(1);
-                        }
-                        break;
-                    }
 
-                    cursor_jump = cursor_opd1 < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32();
+                // ********** CODE CONTROL **********
+                case OPCODES.CALL:{
+                    program.push_context();
+                    break;
+                }
+
+                case OPCODES.RETURN:{
+                    program.pop_context();
+                    break;
+                }
+
+                case OPCODES.JUMP:{
+                    cursor_jump = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32_and_move();
                     program.move_cursor(cursor_jump);
                     break;
                 }
 
-                // CONTEXT STACK
-                case OPCODES.CALL:{
-                    program.push_context();
-                    program.move_cursor(1);
+                case OPCODES.JUMP_IF_TRUE:{
+                    cursor_tmp_value = program.pop_value();
+
+                    if (cursor_tmp_value instanceof Simple) {
+                        if (! cursor_tmp_value.is_true()) {
+                            break;
+                        }
+                    }
+
+                    cursor_jump = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32_and_move();
+                    program.move_cursor(cursor_jump);
                     break;
                 }
-                // case OPCODES['CALL_LEAVE']:{
-                //     program.pop_context();
-                //     program.move_cursor(1);
-                //     break;
-                // }
 
-                // VALUES STACK OPS
+                
+                // ********** VALUES STACK OPS **********
                 case OPCODES.POP_VALUE:{
                     cursor_tmp_value = program.pop_value(); // unused value, free ?
-                    program.move_cursor(1);
                     break;
                 }
-                case OPCODES.PUSH_VALUE:{
-                    cursor_tmp_u32 = cursor_opd1 < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32();
+
+                case OPCODES.PUSH_VALUE_REG:{
+                    cursor_tmp_u32 = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32_and_move();
                     cursor_tmp_value = program.get_register_value(cursor_tmp_u32);
                     program.push_value(cursor_tmp_value);
-                    program.move_cursor(1);
+                    break;
+                };
+                
+                case OPCODES.PUSH_VALUE_MEM:{
+                    cursor_tmp_u32 = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32_and_move();
+                    cursor_tmp_value = program.get_memory_value(cursor_tmp_u32);
+                    program.push_value(cursor_tmp_value);
                     break;
                 };
 
-                // VALUES REGISTERS OPS
+
+                // ********** VALUES REGISTERS OPS **********
                 case OPCODES.REG_VALUE_SET:{
-                    cursor_tmp_u32 = cursor_opd1 < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32();
+                    cursor_tmp_u32 = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32_and_move();
                     cursor_tmp_value = program.pop_value();
                     program.set_register_value(cursor_tmp_u32, cursor_tmp_value);
-                    program.move_cursor(1);
                     break;
                 }
+
                 case OPCODES.REG_VALUE_GET:{
-                    cursor_tmp_u32 = cursor_opd1 < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32();
+                    cursor_tmp_u32 = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32_and_move();
                     cursor_tmp_value = program.get_register_value(cursor_tmp_u32);
                     program.push_value(cursor_tmp_value);
-                    program.move_cursor(1);
                     break;
                 }
 
-                // BYTE MEMORY OPS
+
+                // ********** VALUES MEMORY OPS **********
                 case OPCODES.MEMORY_SET_VALUE:{
-                    cursor_number_1 = cursor_instruction.get_inline_number_1();
-                    cursor_value = this.get_operand(cursor_operands, 0);
-                    program.register_value(cursor_number_1, cursor_value);
-                    program.move_cursor(1);
-                    break;
-                }
-                case OPCODES.MEMORY_GET_VALUE:{
-                    cursor_tmp_u32 = cursor_opd1 < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32();
-                    cursor_tmp_value = program._scope.get_value_at(cursor_tmp_u32);
-                    program.push_value(cursor_tmp_value);
-                    program.move_cursor(1);
+                    cursor_tmp_u32 = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32_and_move();
+                    cursor_tmp_value = program.pop_value();
+                    program.set_memory_value(cursor_tmp_u32, cursor_tmp_value);
                     break;
                 }
 
-                // DEFAULT ERROR
-                defautl:{
+                case OPCODES.MEMORY_GET_VALUE:{
+                    cursor_tmp_u32 = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32_and_move();
+                    cursor_tmp_value = program.get_memory_value(cursor_tmp_u32);
+                    program.push_value(cursor_tmp_value);
+                    break;
+                }
+
+
+                // ********** QUANTITY UNIT OPS **********
+                case OPCODES.U_FROM:{
+                    cursor_tmp_value = program.pop_value();
+                    // TODO 
+                    break;
+                }
+
+                case OPCODES.U_TO:{
+                    cursor_tmp_u32 = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32_and_move();
+                    cursor_tmp_value = program.pop_value();
+                    // TODO 
+                    break;
+                }
+
+                case OPCODES.U_NORM:{
+                    cursor_tmp_value = program.pop_value();
+                    // TODO 
+                    break;
+                }
+
+
+                // ********** INTEGER OPS **********
+                case OPCODES.I_EQUAL:{
+                    program.push_boolean(cursor_tmp_i32_1 == cursor_tmp_i32_2);
+                    break;
+                }
+
+                case OPCODES.I_ADD:{
+                    program.push_integer(cursor_tmp_i32_1 + cursor_tmp_i32_2);
+                    break;
+                }
+
+                case OPCODES.I_SUB:{
+                    program.push_integer(cursor_tmp_i32_1 - cursor_tmp_i32_2);
+                    break;
+                }
+
+                case OPCODES.I_MUL:{
+                    program.push_integer(cursor_tmp_i32_1 * cursor_tmp_i32_2);
+                    break;
+                }
+
+                case OPCODES.I_DIV:{
+                    program.push_integer(cursor_tmp_i32_1 / (cursor_tmp_i32_2 == 0 ? 1 : cursor_tmp_i32_2) ); // ERROR ?
+                    break;
+                }
+
+                case OPCODES.I_POW:{
+                    if (cursor_tmp_i32_2 > 50){
+                        // ERROR ????
+                        cursor_tmp_i32_2 = 1;
+                    }
+                    program.push_integer(cursor_tmp_i32_1 ^ (cursor_tmp_i32_2)); // CHECK ?
+                    break;
+                }
+
+                case OPCODES.I_IS_TRUE:{
+                    program.push_boolean(cursor_tmp_i32_1 > 0);
+                    break;
+                }
+
+                case OPCODES.I_IS_POSITIVE:{
+                    program.push_boolean(cursor_tmp_i32_1 > 0);
+                    break;
+                }
+
+                case OPCODES.I_IS_ZERO:{
+                    program.push_boolean(cursor_tmp_i32_1 == 0);
+                    break;
+                }
+
+                case OPCODES.I_NEG:{
+                    program.push_integer(cursor_tmp_i32_1 * -1);
+                    break;
+                }
+
+                case OPCODES.I_LT:{
+                    program.push_boolean(cursor_tmp_i32_1 < cursor_tmp_i32_2);
+                    break;
+                }
+
+                case OPCODES.I_GT:{
+                    program.push_boolean(cursor_tmp_i32_1 > cursor_tmp_i32_2);
+                    break;
+                }
+
+                case OPCODES.I_LE:{
+                    program.push_boolean(cursor_tmp_i32_1 <= cursor_tmp_i32_2);
+                    break;
+                }
+
+                case OPCODES.I_GE:{
+                    program.push_boolean(cursor_tmp_i32_1 >= cursor_tmp_i32_2);
+                    break;
+                }
+
+
+                // ********** DEFAULT ERROR **********
+                default:{
                     this.error_bad_opcode(program.get_cursor(), cursor_opcode);
                     break;
                 }
@@ -180,44 +332,45 @@ export default class VirtualMachine {
             return program.pop_value();
         }
 
-        return 0;
+        return new Error(0, 'no result');
     }
 
-    private get_operand(operands:IValue[], index:number): IValue {
-        if (operands) {
-            if ( operands.length > index && operands[index])
-            {
-                return operands[index];
-            }
-        }
-        return undefined
-    }
+    // private get_operand(operands:IValue[], index:number): IValue {
+    //     if (operands) {
+    //         if ( operands.length > index && operands[index])
+    //         {
+    //             return operands[index];
+    //         }
+    //     }
+    //     return undefined
+    // }
 
-    private get_operand_number(operands:IValue[], index:number): number {
-        if (operands) {
-            if ( operands.length > index && operands[index] )
-            {
-                return operands[index].to_number();
-            }
-        }
-        return undefined
-    }
+    // private get_operand_number(operands:IValue[], index:number): number {
+    //     if (operands) {
+    //         if ( operands.length > index && operands[index] )
+    //         {
+    //             return operands[index].to_number();
+    //         }
+    //     }
+    //     return undefined
+    // }
 
-    private error_bad_operand(cursor:number) {
+    // private error_bad_operand(cursor:number) {
+    //     this._has_error = true;
+    //     this._error_cursor = cursor;
+    //     this._error_message = 'undefined or null operand';
+    // }
+
+    // private error_bad_instruction(cursor:number) {
+    //     this._has_error = true;
+    //     this._error_cursor = cursor;
+    //     this._error_message = 'undefined or null instruction';
+    // }
+
+    private error_bad_opcode(cursor:u32, opcode:u8):void {
         this._has_error = true;
         this._error_cursor = cursor;
-        this._error_message = 'undefined or null operand';
-    }
-
-    private error_bad_instruction(cursor:number) {
-        this._has_error = true;
-        this._error_cursor = cursor;
-        this._error_message = 'undefined or null instruction';
-    }
-
-    private error_bad_opcode(cursor:number, opcode:number) {
-        this._has_error = true;
-        this._error_cursor = cursor;
-        this._error_message = 'unknow opcode:[' + opcode + ']';
+        this._error_opcode = opcode;
+        this._error_message = 'unknow opcode';
     }
 }

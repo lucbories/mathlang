@@ -1,6 +1,10 @@
 
 /// <reference path="../../../../../node_modules/assemblyscript/std/portable/index.d.ts" />
 
+
+function i32(v:i32):i32 { return v; }
+
+
 export class Value {
     public static ERROR:u8      = 0;
     public static BOOLEAN:u8    = 1;
@@ -34,6 +38,7 @@ export class Value {
         this.type = arg_type;
         this.bytes = arg_bytes;
     }
+    is_true():boolean { return true; }
 }
 
 export class Simple<T> extends Value {
@@ -44,8 +49,29 @@ export class Simple<T> extends Value {
         this.value = v;
     }
 
-    public is_true() {
-        return this.value || false;
+    public is_true():boolean {
+        return true;
+    }
+}
+
+export class Simple2<T> extends Value {
+    public value_1:T;
+    public value_2:T;
+
+    constructor(v1:T, v2:T, arg_type:u8, arg_bytes:u32) {
+        super(arg_type, arg_bytes);
+        this.value_1 = v1;
+        this.value_2 = v2;
+    }
+
+    public is_true():boolean {
+        return true;
+    }
+}
+
+export class Text extends Simple<u8> {
+    constructor(v:u8) {
+        super(v, Value.BOOLEAN, 1);
     }
 }
 
@@ -62,8 +88,14 @@ export class Integer extends Simple<i32> {
 }
 
 export class Float extends Simple<f32> {
-    constructor(v:i32) {
+    constructor(v:f32) {
         super(v, Value.FLOAT, 4);
+    }
+}
+
+export class Complex extends Simple2<f32> {
+    constructor(v1:f32, v2:f32) {
+        super(v1, v2, Value.FLOAT, 8);
     }
 }
 
@@ -75,24 +107,28 @@ export class String extends Simple<string> {
 
 export class List extends Value {
     private _values:Value[];
-    constructor(v:Value[]|u32) {
+    constructor(size:u32) {
         super(Value.LIST, 1);
-        this._values = v instanceof Array ? v : new Array<Value>(v);
+        this._values = new Array<Value>(size);
         // let i:u32 = 0;
         // while(i < this._values)
     }
-    get(index:u32) {
+    get(index:u32):Value {
         return this._values[index];
     }
-    set(index:u32, v:Value) {
+    set(index:u32, v:Value):void {
         this._values[index] = v;
     }
-    size() {
+    set_all(values:Value[]):void {
+        this._values = values;
+    }
+    size():u32 {
         return this._values.length;
     }
-    is_valid_index(index:u32) {
-        return index > 0 && index < this._values.length;
+    is_valid_index(index:u32):boolean {
+        return index >= 0 && i32(index) < this._values.length;
     }
+    is_true():boolean { return true; }
 }
 
 export class Stack extends Value {
@@ -102,22 +138,23 @@ export class Stack extends Value {
         super(Value.STACK, 1);
         this._values = new Array<Value>(size);
     }
-    pop() {
+    pop():Value {
         return this._values[this._top--];
     }
-    push(v:Value) {
+    push(v:Value):void {
         ++this._top;
         this._values[this._top] = v;
     }
-    size() {
+    size():u32 {
         return this._top + 1;
     }
-    is_full() {
+    is_full():boolean {
         return this._top + 1 == this._values.length;
     }
-    is_empty() {
+    is_empty():boolean {
         return this._top < 0;
     }
+    is_true():boolean { return true; }
 }
 
 export class Error extends Value {
@@ -128,10 +165,12 @@ export class Error extends Value {
         this.value= v;
         this.message = msg;
     }
+    is_true():boolean { return true; }
 }
 
 export class Null extends Value {
     constructor() {
         super(Value.ERROR, 1);
     }
+    is_true():boolean { return true; }
 }

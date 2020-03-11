@@ -1,12 +1,16 @@
 
+/// <reference path="../../../../../node_modules/assemblyscript/std/portable/index.d.ts" />
+
 import ProgramOptions from './program_options';
-import { Value, Text, List, Stack, Error, Null } from './value';
+import { Value, Text, List, Stack, Error, Null, Boolean, Integer, Float, Complex/*, BigInteger, BigFloat, BigComplex*/ } from './value';
 import Scope from './scope';
 
 
 const DEFAULT_STACK_SIZE:u32 = 50;
 const DEFAULT_REGISTERS_STACK_SIZE:u32 = 50;
 const DEFAULT_REGISTERS_SIZE:u32 = 50;
+
+function i32(v:i32):i32 { return v; }
 
 /**
  * VMProgram class instances contain the program instructions, stack and registers.
@@ -59,14 +63,14 @@ const DEFAULT_REGISTERS_SIZE:u32 = 50;
 export default class Program {
     private _has_error:boolean = false;
     private _error_message:string = '';
-    private _error_cursor:number = -1;
+    private _error_cursor:u32 = -1;
 
     private _registers:List;
     private _registers_stack:Stack;
     private _stack:Stack;
     private _cursor:u32 = 0;
 
-    private _is_running = false;
+    private _is_running:boolean = false;
 
     constructor(private _scope: Scope, options: ProgramOptions){
         // Init registers
@@ -82,13 +86,13 @@ export default class Program {
     // Error
     public has_error() : boolean { return this._has_error; }
     public get_error_message() : string { return this._error_message; }
-    public get_error_cursor() : number { return this._error_cursor; }
+    public get_error_cursor() : u32 { return this._error_cursor; }
 
 
     /**
      * Push current context onto the stack.
      */
-    push_context(){
+    push_context():void{
         if ( this._stack.is_full() )
         {
             this.error_registers_stack_overflow();
@@ -103,7 +107,7 @@ export default class Program {
     /**
      * Pop previous context from the stack.
      */
-    pop_context(){
+    pop_context():void{
         if (this._stack.is_empty())
         {
             this.error_registers_stack_underflow();
@@ -118,7 +122,7 @@ export default class Program {
      * Push a value onto the stack.
      * @param value Value to put on the stack.
      */
-    push_value(value:Value){
+    push_value(value:Value):void{
         if ( this._stack.is_full() )
         {
             this.error_stack_overflow();
@@ -133,6 +137,67 @@ export default class Program {
         this._stack.push(value);
     }
 
+
+    /**
+     * Push a value onto the stack.
+     * @param value Boolean value to put on the stack.
+     */
+    push_boolean(value:boolean):void{
+        if ( this._stack.is_full() )
+        {
+            this.error_stack_overflow();
+            return;
+        }
+
+        this._stack.push( new Boolean( u8(value ? 1 : 0) ) );
+    }
+
+
+    /**
+     * Push a value onto the stack.
+     * @param value Boolean value to put on the stack.
+     */
+    push_integer(value:i32):void{
+        if ( this._stack.is_full() )
+        {
+            this.error_stack_overflow();
+            return;
+        }
+
+        this._stack.push( new Integer(value) );
+    }
+
+
+    /**
+     * Push a value onto the stack.
+     * @param value Boolean value to put on the stack.
+     */
+    push_float(value:f32):void{
+        if ( this._stack.is_full() )
+        {
+            this.error_stack_overflow();
+            return;
+        }
+
+        this._stack.push( new Float(value) );
+    }
+
+
+    /**
+     * Push a value onto the stack.
+     * @param value Boolean value to put on the stack.
+     */
+    push_complex(re:f32, im:f32):void{
+        if ( this._stack.is_full() )
+        {
+            this.error_stack_overflow();
+            return;
+        }
+
+        this._stack.push( new Complex(re, im) );
+    }
+
+
     pop_value(): Value {
         if ( this._stack.is_empty() )
         {
@@ -146,13 +211,14 @@ export default class Program {
         return ! this._stack.is_empty();
     }
     
-    pop_values(count:number): List|Error {
-        if ( this._stack.size() < count )
+    pop_values(count:u32): List|null {
+        if ( this._stack.size() < i32(count) )
         {
-            return this.error_stack_underflow();
+            const error:Error = this.error_stack_underflow();
+            return null;
         }
         
-        const values = new List(count);
+        const values:List = new List(count);
         let i = count;
         while(i > 0){
             values.set(count - i, this._stack.pop());
@@ -219,30 +285,80 @@ export default class Program {
     // }
 
 
+    // MEMORY
+    set_memory_value(index:u32, value:Value):void { // TODO
+        if ( ! this._registers.is_valid_index(index) )
+        {
+            this.error_bad_register_index(index);
+            return;
+        }
+        if (! value) 
+        {
+            this.error_register_bad_value();
+            return;
+        }
+
+        const previous_value = this._registers.get(index);
+        if (previous_value) {
+            this.free_value(previous_value)
+        }
+
+        this._registers.set(index, value);
+    }
+
+    get_memory_value(index:u32):Value { // TODO
+        if ( ! this._registers.is_valid_index(index) )
+        {
+            return this.error_bad_register_index(index);
+        }
+
+        return this._registers.get(index);
+    }
+
+
     // Values
-    free_value(value:Value) {
-        // TODO ...
+    free_value(value:Value):void { // TODO
     }
 
 
     // Instructions
-    // set_instruction(index:u32, instruction:Instruction, label?:string):void {
-    //     if (index < 0 || index >= this._instructions_size)
+    // add_instruction(index:u32, instr:u8, opd1:u8, opd2:u8, opd3:u8):void|Error {
+    //     if (index < 0 || index >= this._scope.instructions.length)
     //     {
-    //         this.error_bad_instructions_index(index);
+    //         return this.error_bad_instructions_index(index);
     //     }
-
-    //     const previous_instr = this._instructions[index];
-    //     if (previous_instr) {
-    //         this.free_instruction(previous_instr)
-    //     }
-
-    //     this._instructions[index] = instruction;
-    //     if (label) {
-    //         this._instructions_labels.set(label, index);
-    //     }
+    //     this._scope.instructions[index] = instr;
+    //     this._scope.instructions[index+1] = opd1;
+    //     this._scope.instructions[index+2] = opd2;
+    //     this._scope.instructions[index+3] = opd3;
     // }
+    
+    set_instruction(index:u32, instr:u8, opd1:u8, opd2:u8, opd3:u8):Error|null {
+        if (index < 0 || i32(index) >= this._scope.instructions.length)
+        {
+            return this.error_bad_instructions_index(index);
+        }
+        this._scope.instructions[index] = instr;
+        this._scope.instructions[index+1] = opd1;
+        this._scope.instructions[index+2] = opd2;
+        this._scope.instructions[index+3] = opd3;
+        return null;
+    }
 
+    set_instruction_i32(index:u32, opd1:i32):Error|null {
+        if (index < 0 || i32(index) + 3 >= this._scope.instructions.length)
+        {
+            return this.error_bad_instructions_index(index);
+        }
+        const buffer = this._scope.instructions.buffer;
+        const dv = new DataView(buffer);
+        dv.setInt32(index, opd1, false);
+        // this._scope.instructions[index] = opd1 << 1;
+        // this._scope.instructions[index+1] = opd1 << 2;
+        // this._scope.instructions[index+2] = opd1 << 3;
+        // this._scope.instructions[index+3] = opd1 << 4;
+        return null;
+    }
     // add_instruction(instruction:Instruction, label?:string):void {
     //     this.set_instruction(this._instructions_count, instruction, label);
     //     ++this._instructions_count;
@@ -264,7 +380,7 @@ export default class Program {
     }
 
     set_cursor(index:u32):void {
-        if (index < 0 || index >= this._scope.instructions.length)
+        if (index < 0 || i32(index) >= this._scope.instructions.length)
         {
             this.error_bad_instructions_index(index);
             return;
@@ -279,7 +395,7 @@ export default class Program {
 
     move_cursor(index:u32):void {
         const new_cursor = this._cursor + index
-        if (new_cursor < 0 || new_cursor >= this._scope.instructions.length)
+        if (new_cursor < 0 || i32(new_cursor) >= this._scope.instructions.length)
         {
             this.error_bad_instructions_index(new_cursor);
             return;
@@ -292,59 +408,75 @@ export default class Program {
         this._cursor++;
     }
 
-    get_cursor_u8(): u8 {
-        if (this._cursor < 0 || this._cursor >= this._scope.instructions.length)
+    get_cursor_u8_and_move(): u8 {
+        if (this._cursor < 0 || i32(this._cursor) >= this._scope.instructions.length)
         {
             this.error_bad_instructions_index(this._cursor);
             return 0;
         }
         
-        return this._scope.instructions[this._cursor];
+        return this._scope.instructions[this._cursor++];
     }
 
-    get_cursor_u32(): u32 {
-        if (this._cursor < 0 || this._cursor + 3 >= this._scope.instructions.length)
+    get_cursor_u32_and_move(): u32 {
+        if (this._cursor < 0 || i32(this._cursor) + 3 >= this._scope.instructions.length)
         {
             this.error_bad_instructions_index(this._cursor + 3);
             return 0;
         }
         
-        const u8_1 = this._scope.instructions[this._cursor++];
-        const u8_2 = this._scope.instructions[this._cursor++];
-        const u8_3 = this._scope.instructions[this._cursor++];
-        const u8_4 = this._scope.instructions[this._cursor++];
-        const u32_combined:u32 = 2**32*u8_1 + 2**24*u8_2 + 2**16*u8_3 + u8_4;
-        return u32_combined;
+        const buffer = this._scope.instructions.buffer;
+        const dv = new DataView(buffer);
+        const v = dv.getUint32(this._cursor, false);
+        this._cursor += 4;
+        return v;
+
+        // const u8_1 = this._scope.instructions[this._cursor++];
+        // const u8_2 = this._scope.instructions[this._cursor++];
+        // const u8_3 = this._scope.instructions[this._cursor++];
+        // const u8_4 = this._scope.instructions[this._cursor++];
+        // const u32_combined:u32 = 2**32*u8_1 + 2**24*u8_2 + 2**16*u8_3 + u8_4;
+        // return u32_combined;
     }
 
-    get_cursor_i32(): i32 {
-        if (this._cursor < 0 || this._cursor + 3 >= this._scope.instructions.length)
+    get_cursor_i32_and_move(): i32 {
+        if (this._cursor < 0 || i32(this._cursor) + 3 >= this._scope.instructions.length)
         {
             this.error_bad_instructions_index(this._cursor + 3);
             return 0;
         }
         
-        const u8_1 = this._scope.instructions[this._cursor++];
-        const u8_2 = this._scope.instructions[this._cursor++];
-        const u8_3 = this._scope.instructions[this._cursor++];
-        const u8_4 = this._scope.instructions[this._cursor++];
-        const i32_combined:i32 = <i32> (2**32*u8_1 + 2**24*u8_2 + 2**16*u8_3 + u8_4);
-        return i32_combined;
+        const buffer = this._scope.instructions.buffer;
+        const dv = new DataView(buffer);
+        const v = dv.getInt32(this._cursor, false);
+        this._cursor += 4;
+        return v;
+        // const u8_1 = this._scope.instructions[this._cursor++];
+        // const u8_2 = this._scope.instructions[this._cursor++];
+        // const u8_3 = this._scope.instructions[this._cursor++];
+        // const u8_4 = this._scope.instructions[this._cursor++];
+        // const i32_combined:i32 = <i32> (2**32*u8_1 + 2**24*u8_2 + 2**16*u8_3 + u8_4);
+        // return i32_combined;
     }
 
-    get_cursor_f32(): f32 {
-        if (this._cursor < 0 || this._cursor + 3 >= this._scope.instructions.length)
+    get_cursor_f32_and_move(): f32 {
+        if (this._cursor < 0 || i32(this._cursor) + 3 >= this._scope.instructions.length)
         {
             this.error_bad_instructions_index(this._cursor + 3);
             return 0;
         }
         
-        const u8_1 = this._scope.instructions[this._cursor++];
-        const u8_2 = this._scope.instructions[this._cursor++];
-        const u8_3 = this._scope.instructions[this._cursor++];
-        const u8_4 = this._scope.instructions[this._cursor++];
-        const f32_combined:f32 = <f32> (2**32*u8_1 + 2**24*u8_2 + 2**16*u8_3 + u8_4);
-        return f32_combined;
+        const buffer = this._scope.instructions.buffer;
+        const dv = new DataView(buffer);
+        const v = dv.getFloat32(this._cursor, false);
+        this._cursor += 4;
+        return v;
+        // const u8_1 = this._scope.instructions[this._cursor++];
+        // const u8_2 = this._scope.instructions[this._cursor++];
+        // const u8_3 = this._scope.instructions[this._cursor++];
+        // const u8_4 = this._scope.instructions[this._cursor++];
+        // const f32_combined:f32 = <f32> (2**32*u8_1 + 2**24*u8_2 + 2**16*u8_3 + u8_4);
+        // return f32_combined;
     }
 
     start():void {
@@ -356,64 +488,68 @@ export default class Program {
     }
 
     is_running():boolean {
-        return this._is_running && (this._cursor < this._scope.instructions.length);
+        return this._is_running && (i32(this._cursor) < this._scope.instructions.length);
     }
 
     
     // Errors
-    error_stack_overflow() {
+    error_stack_overflow():Error {
         this._has_error = true;
         this._error_cursor = this._cursor;
-        this._error_message = 'stack overflow: actual size=[' + this._stack.size() + ']';
+        this._error_message = 'stack overflow: actual size=';
+        // this._error_message = 'stack overflow: actual size=[' + this._stack.size() + ']';
         return new Error(this._error_cursor, this._error_message);
     }
 
-    error_stack_underflow() {
+    error_stack_underflow():Error {
         this._has_error = true;
         this._error_cursor = this._cursor;
-        this._error_message = 'stack underflow: actual size=[' + this._stack.size() + ']';
+        this._error_message = 'stack underflow: actual size=';
+        // this._error_message = 'stack underflow: actual size=[' + this._stack.size() + ']';
         return new Error(this._error_cursor, this._error_message);
     }
 
-    error_registers_stack_overflow() {
+    error_registers_stack_overflow():Error {
         this._has_error = true;
         this._error_cursor = this._cursor;
-        this._error_message = 'registers stack overflow: actual size=[' + this._registers_stack.size() + ']';
+        this._error_message = 'registers stack overflow: actual size=';
+        // this._error_message = 'registers stack overflow: actual size=[' + this._registers_stack.size() + ']';
         return new Error(this._error_cursor, this._error_message);
     }
 
-    error_registers_stack_underflow() {
+    error_registers_stack_underflow():Error {
         this._has_error = true;
         this._error_cursor = this._cursor;
-        this._error_message = 'registers stack underflow: actual size=[' + this._registers_stack.size() + ']';
+        this._error_message = 'registers stack underflow: actual size=';
+        // this._error_message = 'registers stack underflow: actual size=[' + this._registers_stack.size() + ']';
         return new Error(this._error_cursor, this._error_message);
     }
 
-    error_stack_bad_value() {
+    error_stack_bad_value():Error {
         this._has_error = true;
         this._error_cursor = this._cursor;
         this._error_message = 'program want to push on the stack a bad value';
         return new Error(this._error_cursor, this._error_message);
     }
 
-    error_register_bad_value() {
+    error_register_bad_value():Error {
         this._has_error = true;
         this._error_cursor = this._cursor;
         this._error_message = 'program want to register a bad value';
         return new Error(this._error_cursor, this._error_message);
     }
 
-    error_bad_register_index(index:u32) {
+    error_bad_register_index(index:u32):Error {
         this._has_error = true;
-        this._error_cursor = this.cursor;
-        this._error_message = 'bad register index [' + index + ']';
+        this._error_cursor = this._cursor;
+        this._error_message = 'bad register index';
         return new Error(this._error_cursor, this._error_message);
     }
 
-    error_bad_instructions_index(index:u32) {
+    error_bad_instructions_index(index:u32):Error {
         this._has_error = true;
         this._error_cursor = this._cursor;
-        this._error_message = 'bad instruction index [' + index + ']';
+        this._error_message = 'bad instruction index';
         return new Error(this._error_cursor, this._error_message);
     }
 }

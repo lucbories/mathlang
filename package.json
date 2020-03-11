@@ -12,6 +12,7 @@
     "systemjs": "^3.1.0"
   },
   "devDependencies": {
+    "@assemblyscript/node": "github:AssemblyScript/node",
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.6",
     "@types/sinon": "^7.0.10",
@@ -52,7 +53,8 @@
     "test-ic-func-5": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/3-ic-builder/math_lang_ic_functions_5.test.ts",
     "test-ic-func-6": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/3-ic-builder/math_lang_ic_functions_6.test.ts",
     "test-ic-type-1": "mocha --reporter spec --require ts-node/register src/tests/unit/compiler/3-ic-builder/math_lang_ic_types_1.test.ts",
-    "test-vm": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/*.test.ts",
+    "test-vm": "mocha --reporter spec --require ts-node/register src/tests/unit/vmachine/*.test.ts",
+    "test-vm-run": "mocha --reporter spec --require ts-node/register src/tests/unit/vmachine/vm_run.test.ts",
     "test-vm-instr1": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_instructions-1.test.ts",
     "test-vm-instr2": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_instructions-2.test.ts",
     "test-vm-instr3": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_instructions-3.test.ts",

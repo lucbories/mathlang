@@ -96,7 +96,9 @@ export default class Scope {
                         v = Scope.get_buffer_value_at(buffer_view, value_offset);
                         value_offset = value_offset + v.bytes; // TODO break for collections
                     }
-                    return new List(values);
+                    const list:List = new List(values.length);
+                    list.set_all(values);
+                    return list
                 }
                 case Value.STACK: {
                     const v:u32 = buffer_view.getUint32(offset + 1);
