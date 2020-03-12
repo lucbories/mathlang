@@ -34,30 +34,26 @@
  * 
  */
 enum OPCODES {
-    EXIT            =   1,
-    TRAP            =   2,
+    EMPTY            = 0,
+    EXIT            = 1,
+    TRAP            = 2,
 
-    RETURN          =  11,
-    CALL            =  12,
-    JUMP            =  13,
-    JUMP_IF_TRUE    =  14,
+    RETURN          = 11,
+    CALL            = 12,
+    JUMP            = 13,
+    // JUMP_IF_TRUE    =  14,
 
-    POP_VALUE       =  20,
-    PUSH_VALUE_REG  =  21,
-    PUSH_VALUE_MEM  =  22,
+    POP_VALUE       = 20,
+    PUSH_VALUE      = 21,
 
-    REG_VALUE_GET   =  23,
-    REG_VALUE_SET   =  24,
+    REG_VALUE_GET   = 30,
+    REG_VALUE_SET   = 31,
 
-    MEMORY_GET_VALUE=  25,
-    MEMORY_SET_VALUE=  26,
+    MEMORY_GET_VALUE= 40,
+    MEMORY_SET_VALUE= 41,
 
-    U_TO            =  40,
-    U_FROM          =  41,
-    U_NORM          =  42,
-
-    I_EQUAL         =  50,
-    I_ADD           =  51,
+    I_EQUAL         = 50,
+    I_ADD           = 51,
     I_SUB           =  52,
     I_MUL           =  53,
     I_DIV           =  54,
