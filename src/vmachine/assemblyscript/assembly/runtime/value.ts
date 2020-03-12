@@ -68,7 +68,7 @@ export class Float extends Simple<f32> {
     }
 }
 
-export class String extends Simple<string> {
+export class Text extends Simple<string> {
     constructor(v:string) {
         super(v, Value.STRING, 1 + v.length * 2);
     }
