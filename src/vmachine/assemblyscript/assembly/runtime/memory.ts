@@ -320,6 +320,46 @@ export default class Memory {
 		switch(value_type){
 			
 			// Simple types
+			case Value.NULL: {
+				if (index >= this._view.byteLength)
+				{
+					return this.add_error( new Error(index, 'Memory.get_value:bad index reading Null') );
+				}
+				const v:u8 = this._view.getUint8(index);
+				if (v != 0)
+				{
+					return this.add_error( new Error(index, 'Memory.get_value:bad value reading Null') );
+				}
+				return new Null();
+			}
+			case Value.ERROR: {
+				if (index + 8 >= this._view.byteLength)
+				{
+					return this.add_error( new Error(index, 'Memory.get_value:bad index reading Error') );
+				}
+				const code:i32 = this._view.getInt32(index);
+				index += 4;
+				
+				const size:i32 = this._view.getInt32(index);
+				index += 4;
+				
+				if (index + size * 2 >= this._view.byteLength)
+				{
+					return this.add_error( new Error(index, 'Memory.set_value:bad index reading Error mesage chars') );
+				}
+				
+				let i:u32 = 0;
+				let u16_code:u16;
+				let msg:string = '';
+				while(i < size){
+					u16_code = this._view.getUint16(index + i * 2);
+					msg += String.fromCharCode(u16_code);
+					i++;
+				}
+				
+				const error:Error = new Error(code, msg);
+				return error;
+			}
 			case Value.BOOLEAN: {
 				if (index >= this._view.byteLength)
 				{
@@ -339,9 +379,9 @@ export default class Memory {
 			case Value.FLOAT: {
 				if (index + 3 >= this._view.byteLength)
 				{
-					return this.add_error( new Error(index, 'Memory.get_value:bad index reading Float 32') );
+					return this.add_error( new Error(index, 'Memory.get_value:bad index reading Float 64') );
 				}
-				const v:f32 = this._view.getFloat32(index);
+				const v:f64 = this._view.getFloat64(index);
 				return new Float(v);
 			}
 			// case Value.BIGINTEGER: {
@@ -461,7 +501,7 @@ export default class Memory {
 	set_value(index:i32, item:Value):i32 {
 		if (index < 0 || index >= this._view.byteLength)
         {
-			this.add_error( new Error(index, 'Memory.get_value:bad index') );
+			this.add_error( new Error(index, 'Memory.set_value:bad index') );
 			return -1;
 		}
 		const value_type:u8 = item.type;
@@ -471,10 +511,52 @@ export default class Memory {
 		switch(value_type){
 			
 			// Simple types
+			case Value.NULL: {
+				if (index >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.set_value:bad index writing Boolean') );
+					return -1;
+				}
+				const v:Null = <Null>item;
+				this._view.setUint8(index, 0);
+				index += 1;
+				return index;
+			}
+			case Value.ERROR: {
+				if (index + 8 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.set_value:bad index writing Boolean') );
+					return -1;
+				}
+				const v:Error = <Error>item;
+				
+				this._view.setInt32(index, v.value);
+				index += 4;
+				
+				const size:u32 = v.message.length;
+				this._view.setUint32(index, size);
+				index += 4;
+				
+				if (index + size * 2 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.set_value:bad index writing Error mesage chars') );
+					return -1;
+				}
+				
+				let i:u32 = 0;
+				let u16_code:u16;
+				while(i < size){
+					u16_code = v.message.codePointAt(i);
+					this._view.setUint16(index + i * 2, u16_code);
+					i++;
+				}
+				
+				return index + size * 2;
+			}
 			case Value.BOOLEAN: {
 				if (index >= this._view.byteLength)
 				{
-					this.add_error( new Error(index, 'Memory.get_value:bad index reading Boolean') );
+					this.add_error( new Error(index, 'Memory.set_value:bad index writing Boolean') );
 					return -1;
 				}
 				const v:Boolean = <Boolean>item;
@@ -485,47 +567,47 @@ export default class Memory {
 			case Value.INTEGER: {
 				if (index + 4 >= this._view.byteLength)
 				{
-					this.add_error( new Error(index, 'Memory.get_value:bad index reading Integer 32') );
+					this.add_error( new Error(index, 'Memory.set_value:bad index writing Integer 32') );
 					return -1;
 				}
 				const v:Integer = <Integer>item;
-				this._view.setInt32(index + 1, v.value);
+				this._view.setInt32(index, v.value);
 				index += 4;
 				return index;
 			}
 			case Value.FLOAT: {
-				if (index + 4 >= this._view.byteLength)
+				if (index + 8 >= this._view.byteLength)
 				{
-					this.add_error( new Error(index, 'Memory.get_value:bad index reading Float 32') );
+					this.add_error( new Error(index, 'Memory.set_value:bad index writing Float64') );
 					return -1;
 				}
 				const v:Float = <Float>item;
-				this._view.setInt32(index + 1, v.value);
-				index += 4;
+				this._view.setFloat64(index, v.value);
+				index += 8;
 				return index;
 			}
 			// case Value.BIGINTEGER: {
 				// if (index + 4 >= this._view.byteLength)
 				// {
-					// this.add_error( new Error(index, 'Memory.get_value:bad index reading BigInteger 32') );
+					// this.add_error( new Error(index, 'Memory.set_value:bad index writing BigInteger 32') );
 					// return -1;
 				// }
-				// this._view.setInt32(index + 1, item.value);
+				// this._view.setInt32(index, item.value);
 				// return index + 1;
 			// }
 			// case Value.BIGFLOAT: 
 				// if (index + 4 >= this._view.byteLength)
 				// {
-					// this.add_error( new Error(index, 'Memory.get_value:bad index reading BigFloat 32') );
+					// this.add_error( new Error(index, 'Memory.set_value:bad index writing BigFloat 32') );
 					// return -1;
 				// }
-				// this._view.setInt32(index + 1, item.value);
+				// this._view.setInt32(index, item.value);
 				// return index + 1;
 			// }
 			case Value.STRING: {
 				if (index + 4 >= this._view.byteLength)
 				{
-					this.add_error( new Error(index, 'Memory.get_value:bad index reading String length') );
+					this.add_error( new Error(index, 'Memory.set_value:bad index writing String length') );
 					return -1;
 				}
 				const size:u32 = item.bytes;
@@ -534,7 +616,7 @@ export default class Memory {
 				
 				if (index + size * 2 >= this._view.byteLength)
 				{
-					this.add_error( new Error(index, 'Memory.get_value:bad index reading String chars') );
+					this.add_error( new Error(index, 'Memory.set_value:bad index writing String chars') );
 					return -1;
 				}
 				
@@ -554,7 +636,7 @@ export default class Memory {
 			case Value.LIST: {
 				// if (index + 2 >= this._view.byteLength)
 				// {
-					// this.add_error( new Error(index, 'Memory.get_value:bad index reading List length') );
+					// this.add_error( new Error(index, 'Memory.set_value:bad index writing List length') );
 					// return -1;
 				// }
 				// const size:u32 = buffer_view.getUint16(index + 1);
@@ -562,7 +644,7 @@ export default class Memory {
 				
 				// if (index + size * 2 >= this._view.byteLength)
 				// {
-					// this.add_error( new Error(index, 'Memory.get_value:bad index reading List items') );
+					// this.add_error( new Error(index, 'Memory.set_value:bad index writing List items') );
 					// return -1;
 				// }
 				
@@ -580,7 +662,7 @@ export default class Memory {
 			case Value.STACK: {
 				// if (index + 4 >= this._view.byteLength)
 				// {
-					// this.add_error( new Error(index, 'Memory.get_value:bad index reading Stack size') );
+					// this.add_error( new Error(index, 'Memory.set_value:bad index writing Stack size') );
 					// return -1;
 				// }
 				// const v:u32 = buffer_view.getUint32(index + 1);
@@ -608,7 +690,7 @@ export default class Memory {
 			// }
 		}
 		
-        this.add_error( new Error(index, 'Scope.values:bad value type:[' + value_type + ']') );
+        this.add_error( new Error(index, 'Memory.set_value:bad value type:[' + value_type + ']') );
 		return -1;
 	}
 }

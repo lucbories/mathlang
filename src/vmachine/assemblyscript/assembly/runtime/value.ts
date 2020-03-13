@@ -9,6 +9,7 @@ export class Value {
     public static BIGINTEGER:u8 = 4;
     public static BIGFLOAT:u8   = 5;
     public static STRING:u8     = 6;
+    public static NULL:u8       = 7;
 
     public static LIST:u8       = 11;
     public static STACK:u8      = 12;
@@ -62,9 +63,15 @@ export class Integer extends Simple<i32> {
     }
 }
 
-export class Float extends Simple<f32> {
-    constructor(v:i32) {
+export class Float32 extends Simple<f32> {
+    constructor(v:f32) {
         super(v, Value.FLOAT, 4);
+    }
+}
+
+export class Float extends Simple<f64> {
+    constructor(v:f64) {
+        super(v, Value.FLOAT, 8);
     }
 }
 
@@ -122,9 +129,9 @@ export class Stack extends Value {
 }
 
 export class Error extends Value {
-    public value:u32;
+    public value:i32;
     public message:string;
-    constructor(v:u32, msg:string) {
+    constructor(v:i32, msg:string) {
         super(Value.ERROR, 1);
         this.value= v;
         this.message = msg;
@@ -133,6 +140,6 @@ export class Error extends Value {
 
 export class Null extends Value {
     constructor() {
-        super(Value.ERROR, 1);
+        super(Value.NULL, 1);
     }
 }
