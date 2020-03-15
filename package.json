@@ -57,7 +57,7 @@
     "test-vm-instr1": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_instructions-1.test.ts",
     "test-vm": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/*.test.ts",
     "test-vm-instructions": "mocha --reporter spec --require ts-node/register src/tests/unit/vmachine/instructions.test.ts",
-    "test-vm-run": "mocha --reporter spec --require ts-node/register src/tests/unit/vmachine/vm_run.test.ts",
+    "test-vm-memory": "mocha --reporter spec --require ts-node/register src/tests/unit/vmachine/memory.test.ts",
     "test-vm-instr2": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_instructions-2.test.ts",
     "test-vm-instr3": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_instructions-3.test.ts",
     "test-vm-reg": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_registers.test.ts",

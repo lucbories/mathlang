@@ -13,6 +13,7 @@ export class Value {
     public static BIGINTEGER:u8 = 4;
     public static BIGFLOAT:u8   = 5;
     public static STRING:u8     = 6;
+    public static NULL:u8       = 7;
 
     public static LIST:u8       = 11;
     public static STACK:u8      = 12;
@@ -88,19 +89,19 @@ export class Integer extends Simple<i32> {
     }
 }
 
-export class Float extends Simple<f32> {
+export class Float32 extends Simple<f32> {
     constructor(v:f32) {
         super(v, Value.FLOAT, 4);
     }
 }
 
-export class Complex extends Simple2<f32> {
-    constructor(v1:f32, v2:f32) {
-        super(v1, v2, Value.FLOAT, 8);
+export class Float extends Simple<f64> {
+    constructor(v:f64) {
+        super(v, Value.FLOAT, 8);
     }
 }
 
-export class String extends Simple<string> {
+export class Text extends Simple<string> {
     constructor(v:string) {
         super(v, Value.STRING, 1 + v.length * 2);
     }
@@ -159,9 +160,9 @@ export class Stack extends Value {
 }
 
 export class Error extends Value {
-    public value:u32;
+    public value:i32;
     public message:string;
-    constructor(v:u32, msg:string) {
+    constructor(v:i32, msg:string) {
         super(Value.ERROR, 1);
         this.value= v;
         this.message = msg;
@@ -171,7 +172,7 @@ export class Error extends Value {
 
 export class Null extends Value {
     constructor() {
-        super(Value.ERROR, 1);
+        super(Value.NULL, 1);
     }
     is_true():boolean { return true; }
 }
