@@ -106,8 +106,7 @@ export class List extends Value {
     constructor(size:u32) {
         super(Value.LIST, 1);
         this._values = new Array<Value>(size);
-        // let i:u32 = 0;
-        // while(i < this._values)
+		this.bytes = 4 + size*4;
     }
     get(index:u32):Value {
         return this._values[index];
@@ -133,16 +132,24 @@ export class Stack extends Value {
     constructor(size:u32) {
         super(Value.STACK, 1);
         this._values = new Array<Value>(size);
+		this.bytes = 8 + size*4;
+    }
+    get(index:u32):Value {
+        return this._values[index];
     }
     pop():Value {
-        return this._values[this._top--];
+		const v:Value = this._values[this._top--];
+        return v;
     }
     push(v:Value):void {
         ++this._top;
         this._values[this._top] = v;
     }
     size():u32 {
-        return this._top + 1;
+        return this._values.length;
+    }
+    top():u32 {
+        return this._top;
     }
     is_full():boolean {
         return this._top + 1 == this._values.length;

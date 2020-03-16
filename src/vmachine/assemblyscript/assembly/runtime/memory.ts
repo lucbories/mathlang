@@ -2,7 +2,7 @@
 /// <reference path="../../../../../node_modules/assemblyscript/std/portable/index.d.ts" />
 
 import { Value, Boolean, Integer, Float, Text, List, Stack, Error, Null } from './value';
-
+import BitArray from './bitarray';
 
 
 const DEFAULT_MEMORY_BYTES:i32 = 1000;
@@ -17,6 +17,11 @@ const DEFAULT_MEMORY_BYTES:i32 = 1000;
  *   get_u8_unsafe(index:i32):u8
  *   set_u8(index:i32, item:u8):i32
  *   set_u8_unsafe(index:i32, item:u8):i32
+ *   
+ *   get_u32(index:i32):u32
+ *   get_u32_unsafe(index:i32):u32
+ *   set_u32(index:i32, item:u32):i32
+ *   set_u32_unsafe(index:i32, item:u32):i32
  *   
  *   get_i32(index:i32):i32
  *   get_i32_unsafe(index:i32):i32
@@ -41,16 +46,25 @@ export default class Memory {
 	
     private _buffer:ArrayBuffer;
     private _view:DataView;
+	
+    private _space:BitArray;
+	
     private _errors:Stack;
+	
+	
 
 	/**
 	 * Create an Memory instance.
-	 
+	 *
 	 * @param i32		memory size in bytes
 	 */
     constructor(size:i32 = DEFAULT_MEMORY_BYTES){
 		this._buffer = new ArrayBuffer(size);
 		this._view = new DataView(this._buffer);
+		
+		this._space = new BitArray( Math.floor(size / 8) + 1 );
+		this._space.fill_with_zeros();
+		
 		this._errors = new Stack(10);
     }
 	
@@ -82,6 +96,50 @@ export default class Memory {
 		this._errors.push(error);
 		return error;
 	}
+	
+	
+	// **************************** ALLOCATION ****************************
+	
+	/**
+	 * Get free space.
+	 * @param size u32
+	 * @returns index i32
+	 */
+	reserve_space(size:u32):i32{
+		const size:u32 = this._space.get_size();
+		
+		let index:i32 = 0;
+		let for_i:i32 = 0;
+		let found:boolean=false;
+		
+		while(! found && for_i < size){
+			for(for_i = index ; for_i < size ; for_i++) {
+				b = this._space.get_at(i);
+				if(b) {
+					index = for_i + 1;
+					found = false;
+					break;
+				}
+			}
+			if (found
+			found = true;
+			break;
+		}
+	}
+	
+	
+	/**
+	 * Get free space.
+	 * @param size u32
+	 * @returns index i32
+	 */
+	release_space(index:i32, size:u32):void{
+		let i:i32 = index;
+		for(i ; i < size ; i++) {
+			this._space.set_zero_at(i);
+		}
+	}
+	
 	
 	
 	// **************************** U8 ****************************
@@ -138,6 +196,62 @@ export default class Memory {
 	}
 	
 	
+	
+	// **************************** I32 ****************************
+	
+	/**
+	 * Get Unsigned Integer (32 bits) item.
+	 * @param index i32
+	 * @returns u32
+	 */
+	get_u32(index:i32):i32{
+		if (index < 0 || index + 3 >= this._view.byteLength)
+        {
+			return 999999999;
+		}
+		return this._view.getUint32(index);
+	}
+	
+	
+	/**
+	 * Get Unsigned Integer (32 bits) item without index check.
+	 * @param index i32
+	 * @returns u32
+	 */
+	get_u32_unsafe(index:i32):u32{
+		return this._view.getUint32(index);
+	}
+	
+	
+	/**
+	 * Set Unsigned Integer (32 bits) item with index checking.
+	 * @param index i32
+	 * @param item u32
+	 * @returns next index i32
+	 */
+	set_u32(index:i32, item:u32):i32{
+		if (index < 0 || index >= this._view.byteLength)
+        {
+			return -999999999;
+		}
+		this._view.setUint32(index, item);
+		return index + 4;
+	}
+	
+	
+	/**
+	 * Set Unsigned Integer (32 bits) item without index checking.
+	 * @param index i32
+	 * @param item u32
+	 * @returns next index
+	 */
+	set_u32_unsafe(index:i32, item:u32):i32{
+		this._view.setUint32(index, item);
+		return index + 4;
+	}
+	
+	
+	
 	// **************************** I32 ****************************
 	
 	/**
@@ -190,6 +304,7 @@ export default class Memory {
 		this._view.setInt32(index, item);
 		return index + 4;
 	}
+	
 	
 	
 	// **************************** F32 ****************************
@@ -246,6 +361,7 @@ export default class Memory {
 	}
 	
 	
+	
 	// **************************** F32 ****************************
 	
 	
@@ -299,6 +415,7 @@ export default class Memory {
 		this._view.setFloat64(index, item);
 		return index + 8;
 	}
+	
 	
 	
 	// **************************** Value ****************************
@@ -384,6 +501,7 @@ export default class Memory {
 				const v:f64 = this._view.getFloat64(index);
 				return new Float(v);
 			}
+			
 			// case Value.BIGINTEGER: {
 			//     const v:i32 = this._view.getInt32(index);
 			//     return new Integer(v);
@@ -392,7 +510,8 @@ export default class Memory {
 			//     const v:i32 = this._view.getInt32(index);
 			//     return new Integer(v);
 			// }
-			case Value.STRING: {
+			
+			case Value.STRING: { // READ STRING CHARS
 				if (index + 3 >= this._view.byteLength)
 				{
 					return this.add_error( new Error(index, 'Memory.get_value:bad index reading String length') );
@@ -416,9 +535,10 @@ export default class Memory {
 				
 				return s;
 			}
+			
 
 			// Collections
-			case Value.LIST: {
+			case Value.LIST: { // READ LIST ITEMS
 				if (index + 3 >= this._view.byteLength)
 				{
 					return this.add_error( new Error(index, 'Memory.get_value:bad index reading List length') );
@@ -433,21 +553,27 @@ export default class Memory {
 				
 				const values:List = new List(size);
 				let i:u32 = 0;
+				let item_index:u32 = 0;
 				let v:Value;
 				while(i < size){
-					v = this.get_value(index);
-					index += v.bytes;
+					item_index = this.get_u32(index);
+					v = this.get_value(item_index);
 					values.set(i, v);
+					index += 4;
 					i++;
 				}
 				return values;
 			}
-			case Value.STACK: {
-				if (index + 3 >= this._view.byteLength)
+			
+			case Value.STACK: { // READ STACK ITEMS
+				if (index + 7 >= this._view.byteLength)
 				{
 					return this.add_error( new Error(index, 'Memory.get_value:bad index reading Stack size') );
 				}
 				const size:u32 = this._view.getUint32(index);
+				index += 4;
+				
+				const top:u32 = this._view.getUint32(index);
 				index += 4;
 				
 				if (index + size >= this._view.byteLength)
@@ -457,11 +583,13 @@ export default class Memory {
 				
 				const values:Stack = new Stack(size);
 				let i:u32 = 0;
+				let item_index:u32 = 0;
 				let v:Value;
-				while(i < size){
-					v = this.get_value(index);
-					index += v.bytes;
+				while(i <= top){
+					item_index = this.get_u32(index);
+					v = this.get_value(item_index);
 					values.push(v);
+					index += 4;
 					i++;
 				}
 				return values;
@@ -586,6 +714,7 @@ export default class Memory {
 				index += 8;
 				return index;
 			}
+			
 			// case Value.BIGINTEGER: {
 				// if (index + 4 >= this._view.byteLength)
 				// {
@@ -604,7 +733,8 @@ export default class Memory {
 				// this._view.setInt32(index, item.value);
 				// return index + 1;
 			// }
-			case Value.STRING: {
+			
+			case Value.STRING: { // WRITE STRING CHARS
 				if (index + 4 >= this._view.byteLength)
 				{
 					this.add_error( new Error(index, 'Memory.set_value:bad index writing String length') );
@@ -634,7 +764,7 @@ export default class Memory {
 			
 
 			// Collections
-			case Value.LIST: {
+			case Value.LIST: { // WRITE LIST ITEMS
 				if (index + 4 >= this._view.byteLength)
 				{
 					this.add_error( new Error(index, 'Memory.set_value:bad index writing List length') );
@@ -646,25 +776,44 @@ export default class Memory {
 				index += 4;
 				
 				let i:u32 = 0;
+				let item_index:u32 = 0;
 				let v:Value;
 				while(i < size){
 					v = list.get(i);
-					index = this.set_value(index, v);
+					item_index = this.reserve_space(v.bytes);
+					this.set_value(index, v);
+					this._view.setUint32(index, item_index);
+					index += 4;
 					i++;
 				}
 
 				return index;
 			}
 
-			case Value.STACK: {
-				// if (index + 4 >= this._view.byteLength)
-				// {
-					// this.add_error( new Error(index, 'Memory.set_value:bad index writing Stack size') );
-					// return -1;
-				// }
-				// const v:u32 = buffer_view.getUint32(index + 1);
-				// index += size * 2;
-				// return index;
+			case Value.STACK: { // WRITE STACK ITEMS
+				if (index + 4 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.set_value:bad index writing Stack length') );
+					return -1;
+				}
+				const stack:Stack = <Stack>item;
+				const size:u32 = stack.size();
+				this._view.setUint32(index, size);
+				index += 4;
+				
+				let i:u32 = 0;
+				let item_index:u32 = 0;
+				let v:Value;
+				while(i < size){
+					v = stack.get(i);
+					item_index = this.reserve_space(v.bytes);
+					this.set_value(item_index, v);
+					this._view.setUint32(index, item_index);
+					index += 4;
+					i++;
+				}
+
+				return index;
 			}
 
 			// Vectors
