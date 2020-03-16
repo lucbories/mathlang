@@ -631,34 +631,31 @@ export default class Memory {
 				
 				return index + size * 2;
 			}
+			
 
 			// Collections
 			case Value.LIST: {
-				// if (index + 2 >= this._view.byteLength)
-				// {
-					// this.add_error( new Error(index, 'Memory.set_value:bad index writing List length') );
-					// return -1;
-				// }
-				// const size:u32 = buffer_view.getUint16(index + 1);
-				// index += 4;
+				if (index + 4 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.set_value:bad index writing List length') );
+					return -1;
+				}
+				const list:List = <List>item;
+				const size:u32 = list.size();
+				this._view.setUint32(index, size);
+				index += 4;
 				
-				// if (index + size * 2 >= this._view.byteLength)
-				// {
-					// this.add_error( new Error(index, 'Memory.set_value:bad index writing List items') );
-					// return -1;
-				// }
-				
-				// let i:u16 = 0;
-				// let values:Value[] = [];
-				// let value_index:i32 = index + 1 + 2;
-				// let v:Value;
-				// while(i < size){
-					// v = Scope.get_buffer_value_at(buffer_view, value_index);
-					// value_index = value_index + v.bytes;
-				// }
-				// index += size * 2;
-				// return index;
+				let i:u32 = 0;
+				let v:Value;
+				while(i < size){
+					v = list.get(i);
+					index = this.set_value(index, v);
+					i++;
+				}
+
+				return index;
 			}
+
 			case Value.STACK: {
 				// if (index + 4 >= this._view.byteLength)
 				// {

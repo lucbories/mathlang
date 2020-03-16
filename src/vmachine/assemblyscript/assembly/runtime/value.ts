@@ -71,12 +71,6 @@ export class Simple2<T> extends Value {
     }
 }
 
-export class Text extends Simple<u8> {
-    constructor(v:u8) {
-        super(v, Value.BOOLEAN, 1);
-    }
-}
-
 export class Boolean extends Simple<u8> {
     constructor(v:u8) {
         super(v, Value.BOOLEAN, 1);
