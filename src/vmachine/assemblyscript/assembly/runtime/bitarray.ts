@@ -101,6 +101,59 @@ export default class BitArray {
 	
 	
 	/**
+	 * Set a binary 1 at given positions range.
+	 * 
+	 * @param first bit index i32
+	 * @param last bit index i32
+	 */
+	set_one_in_range(index_begin:i32, index_end:i32):void{
+		let array_index_begin:u32 = Math.floor(index_begin / 8);
+		let array_index_end:u32 = Math.floor(index_end / 8);
+		
+		let for_i:i32;
+		
+		// PROCESS FIRST BITS
+		// 12345678 12345678 12345678
+		// 00111100 00000000 00000000
+		// BBB  EEE
+		// B=E
+		if (array_index_begin == array_index_end ){
+			for(for_i = index_begin ; for_i <= index_end ; for_i++){
+				this.set_one_at(for_i);
+			}
+			return;
+		}
+		
+		// 12345678 12345678 12345678
+		// 01111111 11100000 00000000
+		//  B       EEE
+		// B        E
+		if (index_begin > array_index_begin * 8){
+			for(for_i = index_begin ; for_i < array_index_begin * 8 + 8; for_i++){
+				this.set_one_at(for_i);
+			}
+			array_index_begin++;
+		}
+		
+		// 12345678 12345678 12345678
+		// 11111111 11000000 00000000
+		//           E
+		//          E
+		if (index_end < (array_index_end * 8 + 8)){
+			for(for_i = array_index_end * 8 ; for_i <= index_end ; for_i++){
+				this.set_one_at(for_i);
+			}
+			array_index_end--;
+		}
+
+		// PROCESS MIDDLE BITS
+		for(for_i = array_index_begin; for_i <= array_index_end ; for_i++){
+			this._view[for_i] = 255;
+		}
+	}
+	
+	
+	/**
 	 * Set a binary 1 at given posuition (1-8).
 	 * 
 	 * @param bit index i32
@@ -119,6 +172,56 @@ export default class BitArray {
 			case 6: this._view[array_index] = byte_value | this._11011111; return;
 			case 7: this._view[array_index] = byte_value | this._10111111; return;
 			case 8: this._view[array_index] = byte_value | this._01111111; return;
+		}
+	}
+	
+	
+	/**
+	 * Set a binary 0 at given positions range.
+	 * 
+	 * @param first bit index i32
+	 * @param last bit index i32
+	 */
+	set_zero_in_range(index_begin:i32, index_end:i32):void{
+		let array_index_begin:u32 = Math.floor(index_begin / 8);
+		let array_index_end:u32 = Math.floor(index_end / 8);
+		
+		let for_i:i32;
+		
+		// PROCESS FIRST BITS
+		// 12345678 12345678 12345678
+		// BBB  EEE
+		// B=E
+		if (array_index_begin == array_index_end ){
+			for(for_i = index_begin ; for_i <= index_end ; for_i++){
+				this.set_zero_at(for_i);
+			}
+			return;
+		}
+		
+		// 12345678 12345678 12345678
+		//  B       EEE
+		// B        E
+		if (index_begin > array_index_begin * 8){
+			for(for_i = index_begin ; for_i < array_index_begin * 8 + 8; for_i++){
+				this.set_zero_at(for_i);
+			}
+			array_index_begin++;
+		}
+		
+		// 12345678 12345678 12345678
+		//           E
+		//          E
+		if (index_end < (array_index_end * 8 + 8)){
+			for(for_i = array_index_end * 8 ; for_i <= index_end ; for_i++){
+				this.set_zero_at(for_i);
+			}
+			array_index_end--;
+		}
+
+		// PROCESS MIDDLE BITS
+		for(for_i = array_index_begin; for_i <= array_index_end ; for_i++){
+			this._view[for_i] = 0;
 		}
 	}
 	

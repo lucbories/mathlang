@@ -105,8 +105,8 @@ export default class Memory {
 	 * @param size u32
 	 * @returns index i32
 	 */
-	reserve_space(size:u32):i32{
-		const size:u32 = this._space.get_size();
+	allocate(size:u32):i32{
+		// const size:u32 = this._space.get_size();
 		
 		let index:i32 = 0;
 		let for_i:i32 = 0;
@@ -114,30 +114,47 @@ export default class Memory {
 		
 		while(! found && for_i < size){
 			for(for_i = index ; for_i < size ; for_i++) {
-				b = this._space.get_at(i);
-				if(b) {
+				const b:boolean = this._space.get_at(for_i);
+				if (b) {
 					index = for_i + 1;
 					found = false;
 					break;
 				}
 			}
-			if (found
-			found = true;
+			// if (found)
+			// found = true;
 			break;
 		}
+		return -1;
 	}
 	
 	
 	/**
-	 * Get free space.
+	 * Free space.
+	 * @param index i32
 	 * @param size u32
 	 * @returns index i32
 	 */
-	release_space(index:i32, size:u32):void{
+	release(index:i32, size:u32):void{
 		let i:i32 = index;
 		for(i ; i < size ; i++) {
 			this._space.set_zero_at(i);
 		}
+	}
+	
+	type MemRange = {
+		index:i32;
+		size:u32;
+	}
+	
+	
+	/**
+	 * Free space.
+	 * @param size u32
+	 * @returns index i32
+	 */
+	get_free_ranges():Map<u32,MemRange>{
+		return this._free_ranges;
 	}
 	
 	
@@ -780,7 +797,7 @@ export default class Memory {
 				let v:Value;
 				while(i < size){
 					v = list.get(i);
-					item_index = this.reserve_space(v.bytes);
+					item_index = this.allocate(v.bytes);
 					this.set_value(index, v);
 					this._view.setUint32(index, item_index);
 					index += 4;
@@ -806,7 +823,7 @@ export default class Memory {
 				let v:Value;
 				while(i < size){
 					v = stack.get(i);
-					item_index = this.reserve_space(v.bytes);
+					item_index = this.allocate(v.bytes);
 					this.set_value(item_index, v);
 					this._view.setUint32(index, item_index);
 					index += 4;
@@ -838,5 +855,213 @@ export default class Memory {
 		
         this.add_error( new Error(index, 'Memory.set_value:bad value type:[' + value_type + ']') );
 		return -1;
+	}
+	
+	
+	/**
+	 * Realease value space at given index.
+	 *
+	 * @param index i32
+	 */
+	release_value(index:i32):void {
+		if (index < 0 || index >= this._view.byteLength)
+        {
+			this.add_error( new Error(index, 'Memory.release_value:bad index') );
+			return;
+		}
+		const value_type:u8 = this._view.getUint8(index);
+		this.release(index, 1);
+		index += 1;
+		
+		switch(value_type){
+			
+			// Simple types
+			case Value.NULL: {
+				if (index >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.release_value:bad index releasing Boolean') );
+					return;
+				}
+				this.release(index, 1);
+				
+				return;
+			}
+			case Value.ERROR: {
+				if (index + 8 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.release_value:bad index releasing Boolean') );
+					return;
+				}
+				const code:i32 = this._view.getInt32(index);
+				this.release(index, 4);
+				index += 4;
+				
+				const size:i32 = this._view.getInt32(index);
+				this.release(index, 4);
+				index += 4;
+				
+				if (index + size * 2 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.release_value:bad index releasing Error mesage chars') );
+					return;
+				}
+				this.release(index, size * 2);
+				
+				return;
+			}
+			case Value.BOOLEAN: {
+				if (index >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.release_value:bad index releasing Boolean') );
+					return;
+				}
+				this.release(index, 1);
+				
+				return;
+			}
+			case Value.INTEGER: {
+				if (index + 4 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.release_value:bad index releasing Integer 32') );
+					return;
+				}
+				this.release(index, 4);
+				
+				return;
+			}
+			case Value.FLOAT: {
+				if (index + 8 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.release_value:bad index releasing Float64') );
+					return;
+				}
+				this.release(index, 8);
+				
+				return;
+			}
+			
+			// case Value.BIGINTEGER: {
+				// if (index + 4 >= this._view.byteLength)
+				// {
+					// this.add_error( new Error(index, 'Memory.release_value:bad index releasing BigInteger 32') );
+					// return -1;
+				// }
+				// this._view.setInt32(index, item.value);
+				// return index + 1;
+			// }
+			// case Value.BIGFLOAT: 
+				// if (index + 4 >= this._view.byteLength)
+				// {
+					// this.add_error( new Error(index, 'Memory.release_value:bad index releasing BigFloat 32') );
+					// return -1;
+				// }
+				// this._view.setInt32(index, item.value);
+				// return index + 1;
+			// }
+			
+			case Value.STRING: { // RELEASE STRING CHARS
+				if (index + 4 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.release_value:bad index releasing String length') );
+					return;
+				}
+				const size:u32 = this._view.getUint32(index);
+				this.release(index, 4);
+				index += 4;
+				
+				if (index + size * 2 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.release_value:bad index releasing String chars') );
+					return;
+				}
+				this.release(index, size * 2);
+				
+				return;
+			}
+			
+
+			// Collections
+			case Value.LIST: { // RELEASE LIST ITEMS
+				if (index + 3 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.release_value:bad index releasing List length') );
+					return;
+				}
+				const size:u32 = this._view.getUint32(index);
+				this.release(index, 4);
+				index += 4;
+				
+				if (index + size * 4 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.release_value:bad index releasing List items') );
+					return;
+				}
+				const indices_index = index;
+				
+				let i:u32 = 0;
+				let item_index:u32 = 0;
+				while(i < size){
+					item_index = this.get_u32(index);
+					this.release_value(item_index);
+					index += 4;
+					i++;
+				}
+				this.release(indices_index, size * 4);
+				
+				return;
+			}
+			
+			case Value.STACK: { // RELEASE STACK ITEMS
+				if (index + 4 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.release_value:bad index releasing Stack length') );
+					return;
+				}
+				const size:u32 = this._view.getUint32(index);
+				this.release(index, 4);
+				index += 4;
+				
+				if (index + size * 4 >= this._view.byteLength)
+				{
+					this.add_error( new Error(index, 'Memory.release_value:bad index releasing Stack items') );
+					return;
+				}
+				const indices_index = index;
+				
+				let i:u32 = 0;
+				let item_index:u32 = 0;
+				while(i < size){
+					item_index = this.get_u32(index);
+					this.release_value(item_index);
+					index += 4;
+					i++;
+				}
+				this.release(indices_index, size * 4);
+				
+				return;
+			}
+
+			// Vectors
+			// case Value.BVECTOR: {
+			//     const size:u32 = buffer_view.getUint32(index + 1);
+			//     return new Float(v);
+			// }
+			// case Value.IVECTOR: {
+			//     const size:u32 = buffer_view.getUint32(index + 1);
+			//     return new Float(v);
+			// }
+			// case Value.FVECTOR: {
+			//     const size:u32 = buffer_view.getUint32(index + 1);
+			//     return new Float(v);
+			// }
+
+			// case Value.: {
+			//     const v:f32 = buffer_view.getFloat32(index + 1);
+			//     return new Float(v);
+			// }
+		}
+		
+        this.add_error( new Error(index, 'Memory.release_value:bad value type:[' + value_type + ']') );
+		return;
 	}
 }
