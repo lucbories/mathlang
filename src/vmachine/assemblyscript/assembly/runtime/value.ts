@@ -128,7 +128,7 @@ export class List extends Value {
 
 export class Stack extends Value {
     private _values:Value[];
-    private _top:u32 = 0;
+    private _top:u32 = -1;
     constructor(size:u32) {
         super(Value.STACK, 1);
         this._values = new Array<Value>(size);
@@ -161,11 +161,11 @@ export class Stack extends Value {
 }
 
 export class Error extends Value {
-    public value:i32;
+    public code:i32;
     public message:string;
     constructor(v:i32, msg:string) {
         super(Value.ERROR, 1);
-        this.value= v;
+        this.code= v;
         this.message = msg;
     }
     is_true():boolean { return true; }
