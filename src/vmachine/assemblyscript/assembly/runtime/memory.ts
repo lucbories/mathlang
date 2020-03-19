@@ -84,7 +84,18 @@ export default class Memory {
 		this._free_flags.fill_with_ones();
 		
 		this._errors = new Stack(10);
-    }
+	}
+	
+
+	/**
+	 * Dump to output for debug.
+	 */
+	dump(){
+		let i:i32;
+		for(i=0 ; i < this._view.byteLength ; i++){
+			console.log('buffer at [' + i + ']', this._view.getUint8(i));
+		}
+	}
 	
 	
 	// **************************** Errors ****************************
@@ -175,21 +186,23 @@ export default class Memory {
 	 */
 	reserve(index:i32, size:i32):void{
 		let i:i32 = index;
-		for(i ; i < size ; i++) {
+		let last_index = index + size;
+		for(i ; i < last_index ; i++) {
 			this._free_flags.set_zero_at(index);
 			index++;
 		}
+		this._last_allocated_index = Math.max(this._last_allocated_index, index);
 	}
 	
 	
 	/**
-	 * Free space.
-	 * @param size i32
+	 * Free space index.
+	 * 
 	 * @returns index i32
 	 */
-	// get_free_ranges():Map<i32,MemRange>{
-		// return this._free_ranges;
-	// }
+	get_free_index():i32{
+		return this._last_allocated_index;
+	}
 	
 	
 	
@@ -485,7 +498,6 @@ export default class Memory {
 		}
 		const value_type:u8 = this._view.getUint8(index);
 		index++;
-		console.log('get_value:after load type', index);
 		
 		switch(value_type){
 			
@@ -511,8 +523,8 @@ export default class Memory {
 				index += 4;
 				
 				const size:i32 = this._view.getInt32(index);
-				console.log('get_value:Error:chars count', size);
-				console.log('get_value:Error:chars count index', index);
+				// console.log('get_value:Error:chars count', size);
+				// console.log('get_value:Error:chars count index', index);
 				index += 4;
 				
 				if (index + size * 2 >= this._view.byteLength)
@@ -594,6 +606,7 @@ export default class Memory {
 
 			// Collections
 			case Value.LIST: { // READ LIST ITEMS
+				console.log('get_value:List:index', index);
 				if (index + 3 >= this._view.byteLength)
 				{
 					return this.add_error( new Error(index, 'Memory.get_value:bad index reading List length at [' + index + '], mem size [' + this._view.byteLength + ']') );
@@ -612,11 +625,11 @@ export default class Memory {
 				let v:Value;
 				while(i < size){
 					item_index = this.get_i32(index);
-					console.log('get_value:List:read item ', i, ' at ', item_index);
+					// console.log('get_value:List:read item ', i, ' at ', item_index);
 					if (item_index > 0) {
 						v = this.get_value(item_index);
 						if (v) {
-							console.log('get_value:List:set item ', i, ' from ', item_index);
+							// console.log('get_value:List:add item ', i, ' from ', item_index);
 							values.set(i, v);
 						}
 					}
@@ -627,19 +640,22 @@ export default class Memory {
 			}
 			
 			case Value.STACK: { // READ STACK ITEMS
+				console.log('get_value:Stack:index', index);
 				if (index + 7 >= this._view.byteLength)
 				{
 					return this.add_error( new Error(index, 'Memory.get_value:bad index reading Stack size at [' + index + '], mem size [' + this._view.byteLength + ']') );
 				}
 				const size:i32 = this._view.getInt32(index);
+				// console.log('get_value:Stack:get size index', index, ' size ', size);
 				index += 4;
 				
 				const top:i32 = this._view.getInt32(index);
+				// console.log('get_value:Stack:get top index', index, ' top ', top);
 				index += 4;
 				
-				if (index + size >= this._view.byteLength)
+				if (index + size * 4 >= this._view.byteLength)
 				{
-					return this.add_error( new Error(index, 'Memory.get_value:bad index reading List items at [' + index + '], items count [' + size + '], mem size [' + this._view.byteLength + ']') );
+					return this.add_error( new Error(index, 'Memory.get_value:bad index reading Stack items at [' + index + '], items count [' + size + '], mem size [' + this._view.byteLength + ']') );
 				}
 				
 				const values:Stack = new Stack(size);
@@ -648,9 +664,11 @@ export default class Memory {
 				let v:Value;
 				while(i <= top){
 					item_index = this.get_i32(index);
+					// console.log('get_value:Stack:read item ', i, ' at ', index, ' pointing to', item_index);
 					if (item_index > 0) {
 						v = this.get_value(item_index);
 						if (v) {
+							// console.log('get_value:Stack:set item ', i, ' from ', item_index);
 							values.push(v);
 						}
 					}
@@ -692,7 +710,11 @@ export default class Memory {
 	 * @returns next index
 	 */
 	set_value(index:i32, item:Value):i32 {
+		if (index == -1){
+			index = this._last_allocated_index;
+		}
 		console.log('set_value:type', index);
+
 		if (index < 0 || index >= this._view.byteLength)
         {
 			this.add_error( new Error(index, 'Memory.set_value:bad index at [' + index + '], mem size [' + this._view.byteLength + ']') );
@@ -701,12 +723,13 @@ export default class Memory {
 		const value_type:u8 = item.type;
 		this._view.setUint8(index, value_type);
 		index += 1;
-		console.log('set_value:index after save type', index);
+		// console.log('set_value:index after save type', index);
 		
 		switch(value_type){
 			
 			// Simple types
 			case Value.NULL: {
+				this.reserve(index-1, 1+1);
 				if (index >= this._view.byteLength)
 				{
 					this.add_error( new Error(index, 'Memory.set_value:bad index writing Null at [' + index + '], mem size [' + this._view.byteLength + ']') );
@@ -724,17 +747,17 @@ export default class Memory {
 					return -1;
 				}
 				const v:Error = <Error>item;
+				const size:i32 = v.message.length;
+				this.reserve(index-1, 1 + 8 + size * 2);
 				
 				const code:i32 = v.code;
 				this._view.setInt32(index, code);
 				index += 4;
 				
-				const size:i32 = v.message.length;
 				this._view.setInt32(index, size);
-				console.log('set_value:Error:chars [' + v.message + ']');
-				console.log('set_value:Error:chars count', size);
-				console.log('set_value:Error:chars count index', index);
-				console.log('set_value:Error:chars count read', this._view.getInt32(index));
+				// console.log('set_value:Error:chars [' + v.message + ']');
+				// console.log('set_value:Error:chars count', size);
+				// console.log('set_value:Error:chars count index', index);
 				index += 4;
 				
 				if (index + size * 2 >= this._view.byteLength)
@@ -751,9 +774,11 @@ export default class Memory {
 					i++;
 				}
 				
-				return index + size * 2;
+				// console.log('set_value:Error:next index', index + (size - 1) * 2);
+				return index + (size - 1) * 2;
 			}
 			case Value.BOOLEAN: {
+				this.reserve(index-1, 1+1);
 				if (index >= this._view.byteLength)
 				{
 					this.add_error( new Error(index, 'Memory.set_value:bad index writing Boolean at [' + index + '], mem size [' + this._view.byteLength + ']') );
@@ -765,6 +790,7 @@ export default class Memory {
 				return index;
 			}
 			case Value.INTEGER: {
+				this.reserve(index-1, 4+1);
 				if (index + 4 >= this._view.byteLength)
 				{
 					this.add_error( new Error(index, 'Memory.set_value:bad index writing Integer 32 at [' + index + '], mem size [' + this._view.byteLength + ']') );
@@ -776,6 +802,7 @@ export default class Memory {
 				return index;
 			}
 			case Value.FLOAT: {
+				this.reserve(index-1, 8+1);
 				if (index + 8 >= this._view.byteLength)
 				{
 					this.add_error( new Error(index, 'Memory.set_value:bad index writing Float 64 at [' + index + '], mem size [' + this._view.byteLength + ']') );
@@ -813,6 +840,8 @@ export default class Memory {
 					return -1;
 				}
 				const size:i32 = item.bytes;
+				this.reserve(index-1, 1 + 4 + size * 2);
+
 				this._view.setInt32(index, item.bytes);
 				index += 4;
 				
@@ -837,25 +866,31 @@ export default class Memory {
 
 			// Collections
 			case Value.LIST: { // WRITE LIST ITEMS
-				if (index + 4 >= this._view.byteLength)
+				console.log('set_value:List:index', index);
+				const list:List = <List>item;
+				const size:i32 = list.size();
+				const list_bytes = list.bytes_size();
+				if (index + list_bytes >= this._view.byteLength)
 				{
 					this.add_error( new Error(index, 'Memory.set_value:bad index writing List length at [' + index + '], mem size [' + this._view.byteLength + ']') );
 					return -1;
 				}
-				const list:List = <List>item;
-				const size:i32 = list.size();
+				this.reserve(index-1, list_bytes+1);
+				
 				this._view.setInt32(index, size);
 				index += 4;
+				// console.log('set_value:List:list_bytes', list_bytes);
+				// console.log('set_value:List:write size: next index', index);
 				
 				let i:i32 = 0;
 				let item_index:i32 = 0;
 				let v:Value;
 				while(i < size){
-					console.log('set_value:List:write item? ', i);
+					// console.log('set_value:List:write item? ', i, ' at ', index);
 					v = list.get(i);
 					if (v) {
 						item_index = this.allocate(v.bytes);
-						console.log('set_value:List:write item ', i, ' at ', index, ' with own index', item_index);
+						// console.log('set_value:List:write item ', i, ' at ', index, ' with list item index', item_index);
 						this.set_value(item_index, v);
 						this._view.setInt32(index, item_index);
 					} else {
@@ -869,30 +904,40 @@ export default class Memory {
 			}
 
 			case Value.STACK: { // WRITE STACK ITEMS
+				console.log('set_value:Stack:index', index);
 				if (index + 4 >= this._view.byteLength)
 				{
 					this.add_error( new Error(index, 'Memory.set_value:bad index writing Stack length at [' + index + '], mem size [' + this._view.byteLength + ']') );
 					return -1;
 				}
 				const stack:Stack = <Stack>item;
-				
 				const size:i32 = stack.size();
-				this._view.setUint32(index, size);
+				const list_bytes = 1 + 8 + size*4;
+				this.reserve(index-1, list_bytes);
+				
+				this._view.setInt32(index, size);
+				// console.log('set_value:Stack:set size index', index, ' size ', size);
 				index += 4;
 				
 				const top:i32 = stack.top();
-				this._view.setUint32(index, top);
+				// console.log('set_value:Stack:set top index', index, ' top ', top);
+				this._view.setInt32(index, top);
 				index += 4;
 				
 				let i:i32 = 0;
 				let item_index:i32 = 0;
 				let v:Value;
-				while(i <= top){
-					v = stack.get(i);
-					if (v) {
-						item_index = this.allocate(v.bytes);
-						this.set_value(item_index, v);
-						this._view.setUint32(index, item_index);
+				while(i < size){
+					// console.log('set_value:Stack:write item? ', i, ' at ', index);
+					if (i <= top){
+						v = stack.get(i);
+						if (v) {
+							item_index = this.allocate(v.bytes);
+							this.set_value(item_index, v);
+							this._view.setInt32(index, item_index);
+						}
+					} else {
+						this._view.setInt32(index, -1);
 					}
 					index += 4;
 					i++;

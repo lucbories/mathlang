@@ -11,7 +11,7 @@ import Memory from '../../../vmachine/assemblyscript/assembly/runtime/memory';
 
 
 describe('VM Memory', () => {
-	const MEMORY_BYTES:i32 = 100;
+	const MEMORY_BYTES:i32 = 200;
 	/*
     it('VM Memory: set and read u8, i32' , () => {
 		const mem:Memory = new Memory(MEMORY_BYTES);
@@ -149,7 +149,7 @@ describe('VM Memory', () => {
 		const value_e_1:Error = new Error(123, 'error msg');
 		
 		const list_1:List = new List(15);
-		// const stack_1:Stack = new Stack(12);
+		const stack_1:Stack = new Stack(12);
 		
 		list_1.set(0, value_f_1);
 		list_1.set(1, value_i_1);
@@ -157,25 +157,41 @@ describe('VM Memory', () => {
 		list_1.set(11, value_i_2);
 		list_1.set(14, value_e_1);
 		
-		// stack_1.push(value_f_2);
-		// stack_1.push(value_b_2);
-		// stack_1.push(value_n_1);
+		stack_1.push(value_f_2);
+		stack_1.push(value_b_2);
+		stack_1.push(value_n_1);
 		
 		const next_index_0:i32 = 0;
-		const next_index_1:i32 = mem.set_value(next_index_0, list_1);
-		// const next_index_2:i32 = mem.set_value(next_index_1, stack_1);
+		mem.set_value(next_index_0, list_1);
+		const next_index_1:i32 = mem.get_free_index();
+		mem.set_value(next_index_1, stack_1);
 		
+		// console.log('mem', mem.dump() );
+
 		const read_list_1:List = <List>mem.get_value(next_index_0);
-		// const read_stack_1:Stack = <Stack>mem.get_value(next_index_1);
+		const read_stack_1:Stack = <Stack>mem.get_value(next_index_1);
 		
-		// console.log('errors', mem.get_errors());
+		console.log('errors', mem.get_errors());
 		
 		expect( read_list_1.size(), 'read_list_1.size() at [' + next_index_0 + ']' ).equals(15);
-		// expect( read_stack_1.size(), 'read_stack_1.size() at [' + next_index_1 + ']' ).equals(12);
-		// expect( read_stack_1.top(), 'read_stack_1.top()' ).equals(2);
+		expect( read_stack_1.size(), 'read_stack_1.size() at [' + next_index_1 + ']' ).equals(12);
+		expect( read_stack_1.top(), 'read_stack_1.top()' ).equals(2);
 		
 		expect( read_list_1.get(0).type, 'read_list_1.get(0).type' ).equals(value_f_1.type);
 		expect( (<Float>read_list_1.get(0)).value, 'read_list_1.get(0).value' ).equals(value_f_1.value);
+
+		expect( read_list_1.get(1).type, 'read_list_1.get(1).type' ).equals(value_i_1.type);
+		expect( (<Integer>read_list_1.get(1)).value, 'read_list_1.get(1).value' ).equals(value_i_1.value);
+
+		expect( read_list_1.get(2).type, 'read_list_1.get(2).type' ).equals(value_f_2.type);
+		expect( (<Float>read_list_1.get(2)).value, 'read_list_1.get(2).value' ).equals(value_f_2.value);
+
+		expect( read_list_1.get(11).type, 'read_list_1.get(11).type' ).equals(value_i_2.type);
+		expect( (<Integer>read_list_1.get(11)).value, 'read_list_1.get(11).value' ).equals(value_i_2.value);
+
+		expect( read_list_1.get(14).type, 'read_list_1.get(14).type' ).equals(value_e_1.type);
+		expect( (<Error>read_list_1.get(14)).code, 'read_list_1.get(14).value' ).equals(value_e_1.code);
+		expect( (<Error>read_list_1.get(14)).message, 'read_list_1.get(14).value' ).equals(value_e_1.message);
 	} );
 	
 	/*
