@@ -2,69 +2,24 @@
 /// <reference path="../../../../../node_modules/assemblyscript/std/portable/index.d.ts" />
 
 import { Value, Boolean, Integer, Float, Text, List, Stack, Error, Null } from './value';
-import BitArray from './bitarray';
+import MemoryScalar from './memory_scalar';
 
-
-const DEFAULT_MEMORY_BYTES:i32 = 1000;
 
 /**
  * Memory contains initial and run values of a program.
  * 
  * API:
- *   constructor(size:i32 = DEFAULT_INSTRUCTIONS_SIZE
+ *   constructor(size_in_bytes:i32)
  *   
- *   get_u8(index:i32):u8
- *   get_u8_unsafe(index:i32):u8
- *   set_u8(index:i32, item:u8):i32
- *   set_u8_unsafe(index:i32, item:u8):i32
- *   
- *   get_i32(index:i32):i32
- *   get_i32_unsafe(index:i32):i32
- *   set_i32(index:i32, item:i32):i32
- *   set_i32_unsafe(index:i32, item:i32):i32
- *   
- *   get_i32(index:i32):i32
- *   get_i32_unsafe(index:i32):i32
- *   set_i32(index:i32, item:i32):i32
- *   set_i32_unsafe(index:i32, item:i32):i32
- *   
- *   get_f32(index:i32):f32
- *   get_f32_unsafe(index:i32):f32
- *   set_f32(index:i32, item:f32):i32
- *   set_f32_unsafe(index:i32, item:f32):i32
- *   
- *   get_f64(index:i32):f64
- *   get_f64_unsafe(index:i32):f64
- *   set_f64(index:i32, item:f64):i32
- *   set_f64_unsafe(index:i32, item:f64):i32
+ *   has_error():boolean
+ *   get_errors():Stack
+ *   add_error(error:Error):Error
  *   
  *   get_value(index:i32):Value
  *   set_value(index:i32, item:Value):i32
- *
+ *   release_value(index:i32):void
  */
-export default class Memory {
-	
-    private _buffer:ArrayBuffer;
-    private _view:DataView;
-	
-	/*
-		Memory allocation is needed if the Memory is used in a dynamic way, not only readonly.
-		Allocation is used to know which part of the memory is free to store new data.
-		
-		Many allocation strategies exist: save free ranges, save allocate ranges, pages management...
-		It's a very hard task, not the purpose of this project.
-		So keep simple.
-		
-		To every byte in _buffer corresponds a bit flag in _free_flags: true if the byte is free and false else.
-		_last_allocated_index is the last index after all allocate ranges.
-	*/
-	// private type MemRange = {
-		// index:i32;
-		// size:i32;
-	// }
-	private _last_allocated_index:i32;
-    private _free_flags:BitArray;
-	// private _free_ranges:Map
+export default class Memory extends MemoryScalar {
 	
     private _errors:Stack;
 	
@@ -73,29 +28,14 @@ export default class Memory {
 	/**
 	 * Create an Memory instance.
 	 *
-	 * @param i32		memory size in bytes
+	 * @param size_in_bytes		i32		memory size in bytes
 	 */
-    constructor(size:i32 = DEFAULT_MEMORY_BYTES){
-		this._buffer = new ArrayBuffer(size);
-		this._view = new DataView(this._buffer);
-		
-		this._last_allocated_index = 0;
-		this._free_flags = new BitArray( Math.floor(size / 8) + 1 );
-		this._free_flags.fill_with_ones();
+    constructor(size_in_bytes:i32){
+		super(size_in_bytes);
 		
 		this._errors = new Stack(10);
 	}
 	
-
-	/**
-	 * Dump to output for debug.
-	 */
-	dump(){
-		let i:i32;
-		for(i=0 ; i < this._view.byteLength ; i++){
-			console.log('buffer at [' + i + ']', this._view.getUint8(i));
-		}
-	}
 	
 	
 	// **************************** Errors ****************************
@@ -124,360 +64,6 @@ export default class Memory {
 	add_error(error:Error):Error{
 		this._errors.push(error);
 		return error;
-	}
-	
-	
-	// **************************** ALLOCATION ****************************
-	
-	/**
-	 * Get free space.
-	 * @param size i32
-	 * @returns index i32
-	 */
-	allocate(size:i32):i32{
-		const memory_size:i32 = this._view.byteLength;
-		
-		if (this._last_allocated_index + 1 + size < memory_size){
-			const allocated_index = this._last_allocated_index + 1;
-			this.reserve(allocated_index, size);
-			this._last_allocated_index = allocated_index + size;
-			return allocated_index;
-		}
-		
-		let index:i32 = 0;
-		let for_i:i32 = 0;
-		let found:boolean=false;
-		
-		while(! found && index < size){
-			for_i = index;
-			for(; for_i < size ; for_i++) {
-				const b:boolean = this._free_flags.get_at(for_i);
-				if (b) {
-					continue;
-				}
-			}
-			index = for_i + 1;
-		}
-		
-		this._last_allocated_index = Math.max(this._last_allocated_index, index + size);
-		return index;
-	}
-	
-	
-	/**
-	 * Free space.
-	 * @param index i32
-	 * @param size i32
-	 */
-	release(index:i32, size:i32):void{
-		let i:i32 = index;
-		for(i ; i < size ; i++) {
-			this._free_flags.set_one_at(i);
-		}
-		
-		// if (this._last_allocated_index)
-	}
-	
-	
-	/**
-	 * Reserve space.
-	 * @param index i32
-	 * @param size i32
-	 */
-	reserve(index:i32, size:i32):void{
-		let i:i32 = index;
-		let last_index = index + size;
-		for(i ; i < last_index ; i++) {
-			this._free_flags.set_zero_at(index);
-			index++;
-		}
-		this._last_allocated_index = Math.max(this._last_allocated_index, index);
-	}
-	
-	
-	/**
-	 * Free space index.
-	 * 
-	 * @returns index i32
-	 */
-	get_free_index():i32{
-		return this._last_allocated_index;
-	}
-	
-	
-	
-	// **************************** U8 ****************************
-	
-	/**
-	 * Get u8 item.
-	 * @param index i32
-	 * @returns u8
-	 */
-	get_u8(index:i32):u8{
-		if (index < 0 || index >= this._view.byteLength)
-        {
-			return 0;
-		}
-		return this._view.getUint8(index);
-	}
-	
-	
-	/**
-	 * Get u8 item without index check.
-	 * @param index i32
-	 * @returns u8
-	 */
-	get_u8_unsafe(index:i32):u8{
-		return this._view.getUint8(index);
-	}
-	
-	
-	/**
-	 * Set u8 item with index checking.
-	 * @param index i32
-	 * @param item u8
-	 * @returns next index i32
-	 */
-	set_u8(index:i32, item:u8):i32{
-		if (index < 0 || index >= this._view.byteLength)
-        {
-			return -999999999;
-		}
-		this._view.setUint8(index, item);
-		return index + 1;
-	}
-	
-	
-	/**
-	 * Set u8 item without index checking.
-	 * @param index i32
-	 * @param item u8
-	 * @returns next index
-	 */
-	set_u8_unsafe(index:i32, item:u8):i32{
-		this._view.setUint8(index, item);
-		return index + 1;
-	}
-	
-	
-	
-	// **************************** I32 ****************************
-	
-	/**
-	 * Get Signed Integer (32 bits) item.
-	 * @param index i32
-	 * @returns i32
-	 */
-	get_i32(index:i32):i32{
-		if (index < 0 || index + 3 >= this._view.byteLength)
-        {
-			return 999999999;
-		}
-		return this._view.getInt32(index);
-	}
-	
-	
-	/**
-	 * Get Signed Integer (32 bits) item without index check.
-	 * @param index i32
-	 * @returns i32
-	 */
-	get_i32_unsafe(index:i32):i32{
-		return this._view.getInt32(index);
-	}
-	
-	
-	/**
-	 * Set Signed Integer (32 bits) item with index checking.
-	 * @param index i32
-	 * @param item i32
-	 * @returns next index i32
-	 */
-	set_i32(index:i32, item:i32):i32{
-		if (index < 0 || index >= this._view.byteLength)
-        {
-			return -999999999;
-		}
-		this._view.setInt32(index, item);
-		return index + 4;
-	}
-	
-	
-	/**
-	 * Set Signed Integer (32 bits) item without index checking.
-	 * @param index i32
-	 * @param item i32
-	 * @returns next index
-	 */
-	set_i32_unsafe(index:i32, item:i32):i32{
-		this._view.setInt32(index, item);
-		return index + 4;
-	}
-	
-	
-	
-	// **************************** U32 ****************************
-	
-	/**
-	 * Get Unsigned Integer (32 bits) item.
-	 * @param index i32
-	 * @returns u32
-	 */
-	get_u32(index:i32):u32{
-		if (index < 0 || index + 3 >= this._view.byteLength)
-        {
-			return 999999999;
-		}
-		return this._view.getUint32(index);
-	}
-	
-	
-	/**
-	 * Get Unsigned Integer (32 bits) item without index check.
-	 * @param index i32
-	 * @returns u32
-	 */
-	get_u32_unsafe(index:i32):u32{
-		return this._view.getUint32(index);
-	}
-	
-	
-	/**
-	 * Set Integer (32 bits) item with index checking.
-	 * @param index i32
-	 * @param item iu32
-	 * @returns next index i32
-	 */
-	set_u32(index:i32, item:u32):i32{
-		if (index < 0 || index >= this._view.byteLength)
-        {
-			return -999999999;
-		}
-		this._view.setUint32(index, item);
-		return index + 4;
-	}
-	
-	
-	/**
-	 * Set Unsigned Integer (32 bits) item without index checking.
-	 * @param index i32
-	 * @param item u32
-	 * @returns next index
-	 */
-	set_u32_unsafe(index:i32, item:u32):i32{
-		this._view.setUint32(index, item);
-		return index + 4;
-	}
-	
-	
-	
-	// **************************** F32 ****************************
-	
-	/**
-	 * Get Float (32 bits) item.
-	 * @param index i32
-	 * @returns f32
-	 */
-	get_f32(index:i32):f32{
-		if (index < 0 || index + 3 >= this._view.byteLength)
-        {
-			return -999999999.999;
-		}
-		return this._view.getFloat32(index);
-	}
-	
-	
-	/**
-	 * Get Float (32 bits) item without index check.
-	 * @param index i32
-	 * @returns f32
-	 */
-	get_f32_unsafe(index:i32):f32{
-		return this._view.getFloat32(index);
-	}
-	
-	
-	/**
-	 * Set Float (32 bits) item with index checking.
-	 * @param index i32
-	 * @param item f32
-	 * @returns next index
-	 */
-	set_f32(index:i32, item:f32):i32{
-		if (index < 0 || index >= this._view.byteLength)
-        {
-			return -999999999;
-		}
-		this._view.setFloat32(index, item);
-		return index + 4;
-	}
-	
-	
-	/**
-	 * Set Float (32 bits) item without index checking.
-	 * @param index i32
-	 * @param item f32
-	 * @returns next index
-	 */
-	set_f32_unsafe(index:i32, item:f32):i32{
-		this._view.setFloat32(index, item);
-		return index + 4;
-	}
-	
-	
-	
-	// **************************** F32 ****************************
-	
-	
-	/**
-	 * Get one float 64 item.
-	 * @param index i32
-	 * @returns f64
-	 */
-	get_f64(index:i32):f64{
-		if (index < 0 || index + 7 >= this._view.byteLength)
-        {
-			return -999999999.999;
-		}
-		return this._view.getFloat64(index);
-	}
-	
-	
-	/**
-	 * Get float 64 item without index check.
-	 * @param index i32
-	 * @returns f64
-	 */
-	get_f64_unsafe(index:i32):f64{
-		return this._view.getFloat64(index);
-	}
-	
-	
-	/**
-	 * Set Float (64 bits) item with index checking.
-	 * @param index i32
-	 * @param item f64
-	 * @returns next index
-	 */
-	set_f64(index:i32, item:f64):i32{
-		if (index < 0 || index >= this._view.byteLength)
-        {
-			return -999999999;
-		}
-		this._view.setFloat64(index, item);
-		return index + 8;
-	}
-	
-	
-	/**
-	 * Set Float (64 bits) item without index checking.
-	 * @param index i32
-	 * @param item f64
-	 * @returns next index
-	 */
-	set_f64_unsafe(index:i32, item:f64):i32{
-		this._view.setFloat64(index, item);
-		return index + 8;
 	}
 	
 	
@@ -711,7 +297,7 @@ export default class Memory {
 	 */
 	set_value(index:i32, item:Value):i32 {
 		if (index == -1){
-			index = this._last_allocated_index;
+			index = this.get_free_index();
 		}
 		console.log('set_value:type', index);
 
