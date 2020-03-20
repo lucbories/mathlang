@@ -83,6 +83,8 @@ export default class MemoryBase {
 			const allocated_index = this._last_allocated_index + 1;
 			this.reserve(allocated_index, size);
 			this._last_allocated_index = allocated_index + size;
+			
+			// console.log('MemoryBase:allocate: size=[' + size + '] allocated index=[' + this._last_allocated_index + ']');
 			return allocated_index;
 		}
 		
@@ -102,6 +104,8 @@ export default class MemoryBase {
 		}
 		
 		this._last_allocated_index = Math.max(this._last_allocated_index, index + size);
+		
+		// console.log('MemoryBase:allocate: size=[' + size + '] allocated index=[' + this._last_allocated_index + ']');
 		return index;
 	}
 	
@@ -117,7 +121,7 @@ export default class MemoryBase {
 			this._free_flags.set_one_at(i);
 		}
 		
-		// if (this._last_allocated_index)
+		console.log('MemoryBase:release: index=[' + index + '] size=[' + size + '] allocated index=[' + this._last_allocated_index + ']');
 	}
 	
 	
@@ -134,6 +138,7 @@ export default class MemoryBase {
 			index++;
 		}
 		this._last_allocated_index = Math.max(this._last_allocated_index, index);
+		console.log('MemoryBase:reserve: index=[' + index + '] size=[' + size + '] allocated index=[' + this._last_allocated_index + ']');
 	}
 	
 	

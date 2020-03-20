@@ -11,52 +11,8 @@ import Memory from '../../../vmachine/assemblyscript/assembly/runtime/memory';
 
 
 describe('VM Memory', () => {
-	const MEMORY_BYTES:i32 = 200;
+	const MEMORY_BYTES:i32 = 300;
 	/*
-    it('VM Memory: set and read u8, i32' , () => {
-		const mem:Memory = new Memory(MEMORY_BYTES);
-		let index:i32 = 0;
-		// console.log('index', index);
-		
-		index = mem.set_u8(index, 123);
-		// console.log('index', index);
-		
-		index = mem.set_u8(index, 58);
-		// console.log('index', index);
-		
-		index = mem.set_i32(index, -45123);
-		// console.log('index', index);
-		
-		index = mem.set_i32(index, 2147483647);
-		// console.log('index', index);
-		
-		// console.log('mem', mem);
-		
-		expect( mem.get_u8(0), 'read at [0]' ).equal(123);
-		expect( mem.get_u8(1), 'read at [1]' ).equal(58);
-		expect( mem.get_i32(2), 'read at [2]' ).equal(-45123);
-		expect( mem.get_i32(6), 'read at [6]' ).equal(2147483647);
-	} );
-	
-	
-    it('VM Memory: set and read f32, f64' , () => {
-		const mem:Memory = new Memory(MEMORY_BYTES);
-		let index:i32 = 0;
-		// console.log('index', index);
-		
-		index = mem.set_f32(index, 1.23e-9);
-		// console.log('index', index);
-		
-		index = mem.set_f64(index, -2.56e-23);
-		// console.log('index', index);
-		
-		// console.log('mem', mem);
-		
-		expect( mem.get_f32(0) -  1.23e-9, 'read f32 at [0]' ).lt(0.0001);
-		expect( mem.get_f64(4) + 2.56e-23, 'read f64 at [4]' ).lt(0.0001);
-	} );
-	
-	
     it('VM Memory: set and read Boolean, Integer, Float' , () => {
 		const mem:Memory = new Memory(MEMORY_BYTES);
 		
@@ -112,30 +68,6 @@ describe('VM Memory', () => {
 		expect( read_e_1.message, 'read Value at [' + next_index_7 + ']' ).equals('error msg');
 	} );
 	
-	
-    it('VM Memory: set and read floats 32 and 64' , () => {
-		const mem:Memory = new Memory(MEMORY_BYTES);
-		let index:i32 = 0;
-		// console.log('index', index);
-		
-		index = mem.set_f32(index, 1.23e-9);
-		// console.log('index', index);
-		
-		index = mem.set_f64(index, -2.56e-23);
-		// console.log('index', index);
-		
-		// console.log('mem', mem);
-		
-		expect( mem.get_f32(0) -  1.23e-9, 'read f32 at [0]' ).lt(0.0001);
-		expect( mem.get_f64(4) + 2.56e-23, 'read f64 at [4]' ).lt(0.0001);
-	} );
-	
-	
-    it('VM Memory: allocate, release' , () => {
-		const mem:Memory = new Memory(MEMORY_BYTES);
-	} );
-	*/
-	
     it('VM Memory: set and read list, stack' , () => {
 		const mem:Memory = new Memory(MEMORY_BYTES);
 		
@@ -171,7 +103,8 @@ describe('VM Memory', () => {
 		const read_list_1:List = <List>mem.get_value(next_index_0);
 		const read_stack_1:Stack = <Stack>mem.get_value(next_index_1);
 		
-		console.log('errors', mem.get_errors());
+		// console.log('errors', mem.get_errors());
+		expect( mem.get_errors().top() ).equals(-1);
 		
 		expect( read_list_1.size(), 'read_list_1.size() at [' + next_index_0 + ']' ).equals(15);
 		expect( read_stack_1.size(), 'read_stack_1.size() at [' + next_index_1 + ']' ).equals(12);
@@ -192,9 +125,9 @@ describe('VM Memory', () => {
 		expect( read_list_1.get(14).type, 'read_list_1.get(14).type' ).equals(value_e_1.type);
 		expect( (<Error>read_list_1.get(14)).code, 'read_list_1.get(14).value' ).equals(value_e_1.code);
 		expect( (<Error>read_list_1.get(14)).message, 'read_list_1.get(14).value' ).equals(value_e_1.message);
-	} );
+	} );*/
 	
-	/*
+	
     it('VM Memory: set and read list with a stack value inside' , () => {
 		const mem:Memory = new Memory(MEMORY_BYTES);
 		
@@ -211,22 +144,50 @@ describe('VM Memory', () => {
 		const stack_1:Stack = new Stack(15);
 		
 		stack_1.push(value_f_2);
-		stack_1.push(value_b_2);
-		stack_1.push(value_n_1);
+		// stack_1.push(value_b_2);
+		// stack_1.push(value_b_1);
+		// stack_1.push(value_n_1);
 		
 		list_1.set(0, value_f_1);
 		list_1.set(1, value_i_1);
 		list_1.set(2, value_f_2);
+		list_1.set(7, value_i_2);
 		list_1.set(11, stack_1);
 		list_1.set(14, value_e_1);
 		
 		const next_index_0:i32 = 0;
 		const next_index_1:i32 = mem.set_value(next_index_0, list_1);
+		// console.log('next_index_1', next_index_1);
 		
-		const read_list_1:List = <List>mem.get_value(next_index_0);
+		const read_list_1:List   = <List>mem.get_value(next_index_0);
+		const read_stack_1:Stack = <Stack>read_list_1.get(11);
 		
-		console.log('errors', mem.get_errors());
+		mem.dump();
+		// console.log('errors', mem.get_errors());
+		expect( mem.get_errors().top() ).equals(-1);
 		
-		expect( read_list_1.size(), 'read_list_1.size() at [' + next_index_0 + ']' ).equals(15);
-	} );*/
+		// CHECK LIST
+		expect( read_list_1.size(), 'read_list_1.size() at [' + next_index_1 + ']' ).equals(15);
+		
+		// CHECK STACK VALUES
+		// const read_n_1:Null    = <Null>read_stack_1.pop();
+		// const read_b_1:Boolean = <Boolean>read_stack_1.pop();
+		// const read_b_2:Boolean = <Boolean>read_stack_1.pop();
+		const read_f_2:Float   = <Float>read_stack_1.pop();
+		// console.log('read_n_1', read_n_1);
+		// console.log('read_b_1', read_b_1);
+		// console.log('read_b_2', read_b_2);
+		console.log('read_f_2', read_f_2);
+		
+		// expect(read_n_1.type, 'read_n_1.type').equals(value_n_1.type);
+		
+		// expect(read_b_1.type, 'read_b_1.type').equals(value_b_1.type);
+		// expect(read_b_1.value, 'read_b_1.value').equals(value_b_1.value);
+		
+		// expect(read_b_2.type, 'read_b_2.type').equals(value_b_2.type);
+		// expect(read_b_2.value, 'read_b_2.value').equals(value_b_2.value);
+		
+		expect(read_f_2.type, 'read_f_2.type').equals(value_f_2.type);
+		expect(read_f_2.value, 'read_f_2.value').equals(value_f_2.value);
+	} );
 } );

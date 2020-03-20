@@ -58,6 +58,8 @@
     "test-vm": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/*.test.ts",
     "test-vm-instructions": "mocha --reporter spec --require ts-node/register src/tests/unit/vmachine/instructions.test.ts",
     "test-vm-bitarray": "mocha --reporter spec --require ts-node/register src/tests/unit/vmachine/bitarray.test.ts",
+    "test-vm-memory-base": "mocha --reporter spec --require ts-node/register src/tests/unit/vmachine/memory_base.test.ts",
+    "test-vm-memory-scalar": "mocha --reporter spec --require ts-node/register src/tests/unit/vmachine/memory_scalar.test.ts",
     "test-vm-memory": "mocha --reporter spec --require ts-node/register src/tests/unit/vmachine/memory.test.ts",
     "test-vm-instr2": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_instructions-2.test.ts",
     "test-vm-instr3": "mocha --reporter spec --require ts-node/register src/tests/unit/engine/engine_instructions-3.test.ts",

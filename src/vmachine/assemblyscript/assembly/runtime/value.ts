@@ -124,19 +124,6 @@ export class List extends Value {
         return this._values.length;
     }
     public bytes_size():u32 {
-        // let s:u32 = 4;
-        // let i:i32 = 0;
-        // let v:Value;
-        // while(i < this._values.length){
-        //     v = this._values[i];
-        //     if (v) {
-        //         s += v.bytes_collection_size();
-        //     } else {
-        //         s += 4;
-        //     }
-        //     i++;
-        // }
-        // return s;
         return 4 + this._values.length * 4;
     }
     public is_valid_index(index:u32):boolean {
@@ -168,6 +155,9 @@ export class Stack extends Value {
     }
     public top():u32 {
         return this._top;
+    }
+    public bytes_size():u32 {
+        return 4 + this._values.length * 4;
     }
     public is_full():boolean {
         return this._top + 1 == this._values.length;
