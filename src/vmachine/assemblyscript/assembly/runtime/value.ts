@@ -157,7 +157,7 @@ export class Stack extends Value {
         return this._top;
     }
     public bytes_size():u32 {
-        return 4 + this._values.length * 4;
+        return 8 + this._values.length * 4;
     }
     public is_full():boolean {
         return this._top + 1 == this._values.length;
@@ -172,7 +172,7 @@ export class Error extends Value {
     public code:i32;
     public message:string;
     constructor(v:i32, msg:string) {
-        super(Value.ERROR, 1);
+        super(Value.ERROR, 4 + msg.length * 2);
         this.code= v;
         this.message = msg;
     }

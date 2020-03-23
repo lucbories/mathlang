@@ -12,7 +12,7 @@ import Memory from '../../../vmachine/assemblyscript/assembly/runtime/memory';
 
 describe('VM Memory', () => {
 	const MEMORY_BYTES:i32 = 300;
-	/*
+	
     it('VM Memory: set and read Boolean, Integer, Float' , () => {
 		const mem:Memory = new Memory(MEMORY_BYTES);
 		
@@ -95,8 +95,10 @@ describe('VM Memory', () => {
 		
 		const next_index_0:i32 = 0;
 		mem.set_value(next_index_0, list_1);
+
 		const next_index_1:i32 = mem.get_free_index();
 		mem.set_value(next_index_1, stack_1);
+		// console.log('next_index_1', next_index_1);
 		
 		// console.log('mem', mem.dump() );
 
@@ -125,7 +127,7 @@ describe('VM Memory', () => {
 		expect( read_list_1.get(14).type, 'read_list_1.get(14).type' ).equals(value_e_1.type);
 		expect( (<Error>read_list_1.get(14)).code, 'read_list_1.get(14).value' ).equals(value_e_1.code);
 		expect( (<Error>read_list_1.get(14)).message, 'read_list_1.get(14).value' ).equals(value_e_1.message);
-	} );*/
+	} );
 	
 	
     it('VM Memory: set and read list with a stack value inside' , () => {
@@ -144,9 +146,9 @@ describe('VM Memory', () => {
 		const stack_1:Stack = new Stack(15);
 		
 		stack_1.push(value_f_2);
-		// stack_1.push(value_b_2);
-		// stack_1.push(value_b_1);
-		// stack_1.push(value_n_1);
+		stack_1.push(value_b_2);
+		stack_1.push(value_b_1);
+		stack_1.push(value_n_1);
 		
 		list_1.set(0, value_f_1);
 		list_1.set(1, value_i_1);
@@ -162,32 +164,38 @@ describe('VM Memory', () => {
 		const read_list_1:List   = <List>mem.get_value(next_index_0);
 		const read_stack_1:Stack = <Stack>read_list_1.get(11);
 		
-		mem.dump();
+		// mem.dump();
 		// console.log('errors', mem.get_errors());
 		expect( mem.get_errors().top() ).equals(-1);
 		
 		// CHECK LIST
-		expect( read_list_1.size(), 'read_list_1.size() at [' + next_index_1 + ']' ).equals(15);
+		expect( read_list_1.size(), 'read_list_1.size() at [' + next_index_1 + ']' ).equals(list_1.size());
+		expect( read_stack_1.size(), 'read_stack_1.size() at [' + 11 + ']' ).equals(stack_1.size());
+		expect( read_stack_1.top(), 'read_stack_1.top() at [' + 11 + ']' ).equals(stack_1.top());
 		
 		// CHECK STACK VALUES
-		// const read_n_1:Null    = <Null>read_stack_1.pop();
-		// const read_b_1:Boolean = <Boolean>read_stack_1.pop();
-		// const read_b_2:Boolean = <Boolean>read_stack_1.pop();
+		const read_n_1:Null    = <Null>read_stack_1.pop();
+		const read_b_1:Boolean = <Boolean>read_stack_1.pop();
+		const read_b_2:Boolean = <Boolean>read_stack_1.pop();
 		const read_f_2:Float   = <Float>read_stack_1.pop();
 		// console.log('read_n_1', read_n_1);
 		// console.log('read_b_1', read_b_1);
 		// console.log('read_b_2', read_b_2);
-		console.log('read_f_2', read_f_2);
+		// console.log('read_f_2', read_f_2);
 		
-		// expect(read_n_1.type, 'read_n_1.type').equals(value_n_1.type);
+		expect(read_n_1.type, 'read_n_1.type').equals(value_n_1.type);
 		
-		// expect(read_b_1.type, 'read_b_1.type').equals(value_b_1.type);
-		// expect(read_b_1.value, 'read_b_1.value').equals(value_b_1.value);
+		expect(read_b_1.type, 'read_b_1.type').equals(value_b_1.type);
+		expect(read_b_1.value, 'read_b_1.value').equals(value_b_1.value);
 		
-		// expect(read_b_2.type, 'read_b_2.type').equals(value_b_2.type);
-		// expect(read_b_2.value, 'read_b_2.value').equals(value_b_2.value);
+		expect(read_b_2.type, 'read_b_2.type').equals(value_b_2.type);
+		expect(read_b_2.value, 'read_b_2.value').equals(value_b_2.value);
 		
 		expect(read_f_2.type, 'read_f_2.type').equals(value_f_2.type);
 		expect(read_f_2.value, 'read_f_2.value').equals(value_f_2.value);
+
+		expect( read_list_1.get(14).type, 'read_list_1.get(14).type' ).equals(value_e_1.type);
+		expect( (<Error>read_list_1.get(14)).code, 'read_list_1.get(14).value' ).equals(value_e_1.code);
+		expect( (<Error>read_list_1.get(14)).message, 'read_list_1.get(14).value' ).equals(value_e_1.message);
 	} );
 } );

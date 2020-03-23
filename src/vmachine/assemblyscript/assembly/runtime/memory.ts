@@ -20,7 +20,8 @@ import MemoryScalar from './memory_scalar';
  *   release_value(index:i32):void
  */
 export default class Memory extends MemoryScalar {
-	
+	private EMPTY_INDEX:i32 = -1;
+
     private _errors:Stack;
 	
 	
@@ -77,7 +78,7 @@ export default class Memory extends MemoryScalar {
 	 * @returns Value
 	 */
 	get_value(index:i32):Value {
-		console.log('get_value:type', index);
+		// console.log('get_value:index', index);
 		if (index < 0 || index >= this._view.byteLength)
         {
 			return this.add_error( new Error(index, 'Memory.get_value:bad index [' + index + '], mem size [' + this._view.byteLength + ']') );
@@ -124,6 +125,7 @@ export default class Memory extends MemoryScalar {
 				while(i < size){
 					u16_code = this._view.getUint16(index + i * 2);
 					msg += String.fromCharCode(u16_code);
+					// console.log('get_value:Error:read char i=', i, ' at=', index + i * 2, ' u16_code=', u16_code);
 					i++;
 				}
 				
@@ -250,11 +252,11 @@ export default class Memory extends MemoryScalar {
 				let v:Value;
 				while(i <= top){
 					item_index = this.get_i32(index);
-					console.log('get_value:Stack:read item ', i, ' at ', index, ' pointing to', item_index);
+					// console.log('get_value:Stack:read item ', i, ' at ', index, ' pointing to', item_index);
 					if (item_index > 0) {
 						v = this.get_value(item_index);
 						if (v) {
-							console.log('get_value:Stack:set item ', i, ' from ', item_index);
+							// console.log('get_value:Stack:set item ', i, ' from ', item_index);
 							values.push(v);
 						}
 					}
@@ -306,6 +308,7 @@ export default class Memory extends MemoryScalar {
 			this.add_error( new Error(index, 'Memory.set_value:bad index at [' + index + '], mem size [' + this._view.byteLength + ']') );
 			return -1;
 		}
+		this.reserve(index, 1);
 		const value_type:u8 = item.type;
 		this._view.setUint8(index, value_type);
 		index += 1;
@@ -316,7 +319,7 @@ export default class Memory extends MemoryScalar {
 			
 			// Simple types
 			case Value.NULL: {
-				this.reserve(index-1, 1+1);
+				this.reserve(index, 1);
 				if (index >= this._view.byteLength)
 				{
 					this.add_error( new Error(index, 'Memory.set_value:bad index writing Null at [' + index + '], mem size [' + this._view.byteLength + ']') );
@@ -335,7 +338,7 @@ export default class Memory extends MemoryScalar {
 				}
 				const v:Error = <Error>item;
 				const size:i32 = v.message.length;
-				this.reserve(index-1, 1 + 8 + size * 2);
+				this.reserve(index, 8 + size * 2);
 				
 				const code:i32 = v.code;
 				this._view.setInt32(index, code);
@@ -358,14 +361,15 @@ export default class Memory extends MemoryScalar {
 				while(i < size){
 					u16_code = v.message.codePointAt(i);
 					this._view.setUint16(index + i * 2, u16_code);
+					// console.log('set_value:Error:write char i=', i, ' at=', index + i * 2, ' u16_code=', u16_code);
 					i++;
 				}
 				
-				// console.log('set_value:Error:next index', index + (size - 1) * 2);
-				return index + (size - 1) * 2;
+				// console.log('set_value:Error:next index', index + size * 2 - 1);
+				return index + size * 2 - 1;
 			}
 			case Value.BOOLEAN: {
-				this.reserve(index-1, 1+1);
+				this.reserve(index, 1);
 				if (index >= this._view.byteLength)
 				{
 					this.add_error( new Error(index, 'Memory.set_value:bad index writing Boolean at [' + index + '], mem size [' + this._view.byteLength + ']') );
@@ -377,7 +381,7 @@ export default class Memory extends MemoryScalar {
 				return index;
 			}
 			case Value.INTEGER: {
-				this.reserve(index-1, 4+1);
+				this.reserve(index, 4);
 				if (index + 4 >= this._view.byteLength)
 				{
 					this.add_error( new Error(index, 'Memory.set_value:bad index writing Integer 32 at [' + index + '], mem size [' + this._view.byteLength + ']') );
@@ -389,7 +393,7 @@ export default class Memory extends MemoryScalar {
 				return index;
 			}
 			case Value.FLOAT: {
-				this.reserve(index-1, 8+1);
+				this.reserve(index, 8);
 				if (index + 8 >= this._view.byteLength)
 				{
 					this.add_error( new Error(index, 'Memory.set_value:bad index writing Float 64 at [' + index + '], mem size [' + this._view.byteLength + ']') );
@@ -427,7 +431,7 @@ export default class Memory extends MemoryScalar {
 					return -1;
 				}
 				const size:i32 = item.bytes;
-				this.reserve(index-1, 1 + 4 + size * 2);
+				this.reserve(index, 4 + size * 2);
 
 				this._view.setInt32(index, item.bytes);
 				index += 4;
@@ -447,7 +451,7 @@ export default class Memory extends MemoryScalar {
 					i++;
 				}
 				
-				return index + size * 2;
+				return index + size * 2 - 1;
 			}
 			
 
@@ -462,7 +466,7 @@ export default class Memory extends MemoryScalar {
 					this.add_error( new Error(index, 'Memory.set_value:bad index writing List length at [' + index + '], mem size [' + this._view.byteLength + ']') );
 					return -1;
 				}
-				this.reserve(index - 1, list_bytes + 1);
+				this.reserve(index, list_bytes);
 				
 				this._view.setInt32(index, size);
 				index += 4;
@@ -476,12 +480,12 @@ export default class Memory extends MemoryScalar {
 					// console.log('set_value:List:write item? ', i, ' at ', index);
 					v = list.get(i);
 					if (v) {
-						item_index = this.allocate(v.bytes);
+						item_index = this.allocate(v.bytes + 1);
 						// console.log('set_value:List:write item ', i, ' at ', index, ' pointing to', item_index);
 						this.set_value(item_index, v);
 						this._view.setInt32(index, item_index);
 					} else {
-						this._view.setInt32(index, -1);
+						this._view.setInt32(index, this.EMPTY_INDEX);
 					}
 					index += 4;
 					i++;
@@ -500,7 +504,7 @@ export default class Memory extends MemoryScalar {
 				const stack:Stack = <Stack>item;
 				const size:i32 = stack.size();
 				const stack_bytes = stack.bytes_size();
-				this.reserve(index - 1, stack_bytes + 1);
+				this.reserve(index, stack_bytes);
 				
 				this._view.setInt32(index, size);
 				// console.log('set_value:Stack:set size index', index, ' size ', size);
@@ -515,17 +519,19 @@ export default class Memory extends MemoryScalar {
 				let item_index:i32 = 0;
 				let v:Value;
 				while(i < size){
-					console.log('set_value:Stack:write item? ', i, ' at ', index);
+					// console.log('set_value:Stack:write item? ', i, ' at ', index);
 					if (i <= top){
 						v = stack.get(i);
-						if (v) {
-							item_index = this.allocate(v.bytes);
-							console.log('set_value:Stack:write item ', i, ' at ', index, ' pointing to', item_index);
-							this.set_value(item_index, v);
-							this._view.setInt32(index, item_index);
+						if (! v) {
+							this.add_error( new Error(index, 'Memory.set_value:bad Stack value at position [' + i + ']') );
+							return -1;
 						}
+						item_index = this.allocate(v.bytes + 1);
+						// console.log('set_value:Stack:write item ', i, ' at ', index, ' pointing to', item_index);
+						this.set_value(item_index, v);
+						this._view.setInt32(index, item_index)
 					} else {
-						this._view.setInt32(index, -1);
+						this._view.setInt32(index, this.EMPTY_INDEX);
 					}
 					index += 4;
 					i++;

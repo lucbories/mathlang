@@ -3,7 +3,8 @@
 
 import OPCODES from './opcodes'
 import Program from './program';
-import { Value, Simple, Text, List, Error, Boolean, Integer, Float, Complex/*, BigInteger, BigFloat, BigComplex*/ } from './value';
+import { Value, Simple, Text, List, Error, Boolean, Integer, Float/*, Complex, BigInteger, BigFloat, BigComplex*/ } from './value';
+import Instructions from './instructions';
 
 function i32(v:i32):i32 { return v; }
 
@@ -37,18 +38,23 @@ export default class VirtualMachine {
 
         program.set_cursor(entry_point);
 
+        const instructions:Instructions = program.get_instructions();
 
+        let cursor_instr:any;
         let cursor_opcode:u8;
         let cursor_type:u8;
         let cursor_opd1:u8;
         let cursor_opd2:u8;
-        let cursor_jump:u32;
+        let cursor_next:i32;
+
+        let cursor_jump:i32;
         let cursor_tmp_value:Value;
         let cursor_tmp_value_2:Value;
-        let cursor_tmp_u32:u32;
-        let cursor_tmp_i32_1:u32;
-        let cursor_tmp_i32_2:u32;
-        let cursor_tmp_f32:u32;
+        // let cursor_tmp_u32:u32;
+        let cursor_tmp_i32:i32;
+        let cursor_tmp_i32_1:i32;
+        let cursor_tmp_i32_2:i32;
+        let cursor_tmp_f32:f32;
 
         // let cursor_operands_count:number;
 
@@ -62,17 +68,21 @@ export default class VirtualMachine {
         while(running) {
 
             // GET CURRENT INSTRUCTION
-            cursor_opcode = program.get_cursor_u8_and_move();
+            cursor_instr = instructions.get_instruction(instructions.get_cursor());
+
+            cursor_opcode = cursor_instr.opcode;
             // console.log('cursor opcode', cursor_opcode);
 
-            cursor_type = program.get_cursor_u8_and_move();
+            cursor_type = cursor_instr.opd_type;
             // console.log('cursor type', cursor_type);
             
-            cursor_opd1 = program.get_cursor_u8_and_move();
+            cursor_opd1 = cursor_instr.operand_1;
             // console.log('cursor opd1', cursor_opd1);
             
-            cursor_opd2 = program.get_cursor_u8_and_move();
+            cursor_opd2 = cursor_instr.operqnd_2;
             // console.log('cursor opd2', cursor_opd2);
+
+            cursor_next = cursor_instr.next_index;
 
             
             cursor_tmp_i32_1 = i32(cursor_opd1);
@@ -80,32 +90,32 @@ export default class VirtualMachine {
 
             if (i32(cursor_opd1) >= OPCODES.LIMIT_OPD_INLINE) {
                 if (i32(cursor_opd1) == OPCODES.LIMIT_OPD_INLINE){
-                    cursor_tmp_i32_1 = program.get_cursor_i32_and_move()
+                    cursor_tmp_i32_1 = instructions.get_i32_unsafe(cursor_next);
                 }
                 else if (i32(cursor_opd1) == OPCODES.LIMIT_OPD_REGISTER) {
-                    cursor_tmp_u32 = program.get_cursor_u32_and_move();
-                    cursor_tmp_value = program.get_register_value(cursor_tmp_u32);
+                    cursor_tmp_i32 = instructions.get_i32_unsafe(cursor_next);
+                    cursor_tmp_value = program.get_register_value(cursor_tmp_i32);
                     cursor_tmp_i32_1 = (<Integer>cursor_tmp_value).value;
                 }
                 else if (i32(cursor_opd1) == OPCODES.LIMIT_OPD_MEMORY) {
-                    cursor_tmp_u32 = program.get_cursor_u32_and_move();
-                    cursor_tmp_value = program.get_memory_value(cursor_tmp_u32);
+                    cursor_tmp_i32 = instructions.get_i32_unsafe(cursor_next);
+                    cursor_tmp_value = program.get_memory_value(cursor_tmp_i32);
                     cursor_tmp_i32_1 = (<Integer>cursor_tmp_value).value;
                 }
             }
             
             if (i32(cursor_opd2) >= OPCODES.LIMIT_OPD_INLINE) {
                 if (i32(cursor_opd2) == OPCODES.LIMIT_OPD_INLINE){
-                    cursor_tmp_i32_2 = program.get_cursor_i32_and_move()
+                    cursor_tmp_i32_2 = instructions.get_i32_unsafe(cursor_next);
                 }
                 else if (i32(cursor_opd2) == OPCODES.LIMIT_OPD_REGISTER) {
-                    cursor_tmp_u32 = program.get_cursor_u32_and_move();
-                    cursor_tmp_value = program.get_register_value(cursor_tmp_u32);
+                    cursor_tmp_i32 = instructions.get_i32_unsafe(cursor_next);
+                    cursor_tmp_value = program.get_register_value(cursor_tmp_i32);
                     cursor_tmp_i32_2 = (<Integer>cursor_tmp_value).value;
                 }
                 else if (i32(cursor_opd2) == OPCODES.LIMIT_OPD_MEMORY) {
-                    cursor_tmp_u32 = program.get_cursor_u32_and_move();
-                    cursor_tmp_value = program.get_memory_value(cursor_tmp_u32);
+                    cursor_tmp_i32 = instructions.get_i32_unsafe(cursor_next);
+                    cursor_tmp_value = program.get_memory_value(cursor_tmp_i32);
                     cursor_tmp_i32_2 = (<Integer>cursor_tmp_value).value;
                 }
             }
@@ -137,7 +147,7 @@ export default class VirtualMachine {
                 }
 
                 case OPCODES.JUMP:{
-                    cursor_jump = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32_and_move();
+                    cursor_jump = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? i32(cursor_opd1) : program.get_cursor_u32_and_move();
                     program.move_cursor(cursor_jump);
                     break;
                 }
@@ -151,7 +161,7 @@ export default class VirtualMachine {
                         }
                     }
 
-                    cursor_jump = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32_and_move();
+                    cursor_jump = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? i32(cursor_opd1) : program.get_cursor_u32_and_move();
                     program.move_cursor(cursor_jump);
                     break;
                 }
@@ -164,7 +174,7 @@ export default class VirtualMachine {
                 }
 
                 case OPCODES.PUSH_VALUE_REG:{
-                    cursor_tmp_u32 = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? u32(cursor_opd1) : program.get_cursor_u32_and_move();
+                    cursor_tmp_i32 = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? i32(cursor_opd1) : program.get_cursor_u32_and_move();
                     cursor_tmp_value = program.get_register_value(cursor_tmp_u32);
                     program.push_value(cursor_tmp_value);
                     break;

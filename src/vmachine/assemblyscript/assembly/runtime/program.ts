@@ -92,13 +92,13 @@ export default class Program {
 	 */
     constructor(options: ProgramOptions){
         // Init values registers
-        this._registers = new List(options.registers ? options.registers: DEFAULT_REGISTERS_SIZE);
+        this._value_registers = new List(options.registers ? options.registers: DEFAULT_REGISTERS_SIZE);
 
         // Init values registers stack
-        this._values_registers_stack = new Stack(options.stack ? options.stack : DEFAULT_REGISTERS_STACK_SIZE);
+        this._value_registers_stack = new Stack(options.stack ? options.stack : DEFAULT_REGISTERS_STACK_SIZE);
 
         // Init values stack
-        this._values_stack = new Stack(options.stack ? options.stack : DEFAULT_STACK_SIZE);
+        this._value_stack = new Stack(options.stack ? options.stack : DEFAULT_STACK_SIZE);
     }
 
     // Error
@@ -112,14 +112,14 @@ export default class Program {
      * Push current context onto the stack.
      */
     push_context():void{
-        if ( this._stack.is_full() )
+        if ( this._value_registers_stack.is_full() )
         {
             this.error_registers_stack_overflow();
         }
 
-        const size:u32 = this._registers.size();
-        this._registers_stack.push(this._registers);
-        this._registers = new List(size);
+        const size:u32 = this._value_registers.size();
+        this._value_registers_stack.push(this._value_registers);
+        this._value_registers = new List(size);
     }
 
 
@@ -127,13 +127,13 @@ export default class Program {
      * Pop previous context from the stack.
      */
     pop_context():void{
-        if (this._stack.is_empty())
+        if (this._value_registers_stack.is_empty())
         {
             this.error_registers_stack_underflow();
             return;
         }
         
-        this._registers = <List>this._registers_stack.pop();
+        this._value_registers = <List>this._value_registers_stack.pop();
     }
 
 
@@ -142,7 +142,7 @@ export default class Program {
      * @param value Value to put on the stack.
      */
     push_value(value:Value):void{
-        if ( this._stack.is_full() )
+        if ( this._value_stack.is_full() )
         {
             this.error_stack_overflow();
             return;
@@ -153,7 +153,7 @@ export default class Program {
             return;
         }
 
-        this._stack.push(value);
+        this._value_stack.push(value);
     }
 
 
@@ -162,13 +162,13 @@ export default class Program {
      * @param value Boolean value to put on the stack.
      */
     push_boolean(value:boolean):void{
-        if ( this._stack.is_full() )
+        if ( this._value_stack.is_full() )
         {
             this.error_stack_overflow();
             return;
         }
 
-        this._stack.push( new Boolean( u8(value ? 1 : 0) ) );
+        this._value_stack.push( new Boolean( u8(value ? 1 : 0) ) );
     }
 
 
@@ -177,13 +177,13 @@ export default class Program {
      * @param value Boolean value to put on the stack.
      */
     push_integer(value:i32):void{
-        if ( this._stack.is_full() )
+        if ( this._value_stack.is_full() )
         {
             this.error_stack_overflow();
             return;
         }
 
-        this._stack.push( new Integer(value) );
+        this._value_stack.push( new Integer(value) );
     }
 
 
@@ -192,13 +192,13 @@ export default class Program {
      * @param value Boolean value to put on the stack.
      */
     push_float(value:f32):void{
-        if ( this._stack.is_full() )
+        if ( this._value_stack.is_full() )
         {
             this.error_stack_overflow();
             return;
         }
 
-        this._stack.push( new Float(value) );
+        this._value_stack.push( new Float(value) );
     }
 
 
@@ -207,31 +207,31 @@ export default class Program {
      * @param value Boolean value to put on the stack.
      */
     push_complex(re:f32, im:f32):void{
-        if ( this._stack.is_full() )
+        if ( this._value_stack.is_full() )
         {
             this.error_stack_overflow();
             return;
         }
 
-        this._stack.push( new Complex(re, im) );
+        this._value_stack.push( new Complex(re, im) );
     }
 
 
     pop_value(): Value {
-        if ( this._stack.is_empty() )
+        if ( this._value_stack.is_empty() )
         {
             return this.error_stack_underflow();
         }
         
-        return this._stack.pop();
+        return this._value_stack.pop();
     }
 
     pop_value_available(): boolean {
-        return ! this._stack.is_empty();
+        return ! this._value_stack.is_empty();
     }
     
     pop_values(count:u32): List|null {
-        if ( this._stack.size() < i32(count) )
+        if ( this._value_stack.size() < i32(count) )
         {
             const error:Error = this.error_stack_underflow();
             return null;
@@ -240,7 +240,7 @@ export default class Program {
         const values:List = new List(count);
         let i = count;
         while(i > 0){
-            values.set(count - i, this._stack.pop());
+            values.set(count - i, this._value_stack.pop());
             --i;
         }
 
@@ -265,7 +265,7 @@ export default class Program {
     // }
 
     set_register_value(index:u32, value:Value):void {
-        if ( ! this._registers.is_valid_index(index) )
+        if ( ! this._value_registers.is_valid_index(index) )
         {
             this.error_bad_register_index(index);
             return;
@@ -276,21 +276,21 @@ export default class Program {
             return;
         }
 
-        const previous_value = this._registers.get(index);
+        const previous_value = this._value_registers.get(index);
         if (previous_value) {
             this.free_value(previous_value)
         }
 
-        this._registers.set(index, value);
+        this._value_registers.set(index, value);
     }
 
     get_register_value(index:u32):Value {
-        if ( ! this._registers.is_valid_index(index) )
+        if ( ! this._value_registers.is_valid_index(index) )
         {
             return this.error_bad_register_index(index);
         }
 
-        return this._registers.get(index);
+        return this._value_registers.get(index);
     }
 
     // push_register_value(index:u32):void {
@@ -322,7 +322,7 @@ export default class Program {
     }
 
     set_cursor(index:i32):void {
-        if (index < 0 || index >= this._scope.instructions.length)
+        if (index < 0 || index >= this._instructions. .size())
         {
             this.error_bad_instructions_index(index);
             return;

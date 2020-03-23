@@ -15,6 +15,7 @@ const DEFAULT_INSTRUCTIONS_SIZE:i32 = 50;
  *   constructor(size:i32 = DEFAULT_INSTRUCTIONS_SIZE
  *   
  *   get_cursor():i32
+ *   set_cursor(cursor:i32):void
  *   
  *   append_instruction(opcode:u8, optype:u8, operand_1:u8, operand_2:u8)
  *
@@ -93,6 +94,16 @@ export default class Instructions {
 	 */
 	get_cursor():i32 {
 		return this._cursor;
+	}
+	
+	
+	/**
+	 * Set current cursor value.
+	 *
+	 * @return cursor i32
+	 */
+	set_cursor(cursor:i32):void {
+		this._cursor = cursor;
 	}
 	
 	
@@ -420,6 +431,30 @@ export default class Instructions {
 	 */
 	get_i32_unsafe(index:i32):i32{
 		return this._view.getInt32(index);
+	}
+	
+	
+	/**
+	 * Get u32 item.
+	 * @param index i32
+	 * @returns u32
+	 */
+	get_u32(index:i32):u32{
+		if (index < 0 || index + 3 >= this._view.byteLength)
+        {
+			return 999999999;
+		}
+		return this._view.getUint32(index);
+	}
+	
+	
+	/**
+	 * Get u32 item without index check.
+	 * @param index i32
+	 * @returns u32
+	 */
+	get_u32_unsafe(index:i32):u32{
+		return this._view.getUint32(index);
 	}
 	
 	

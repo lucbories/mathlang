@@ -79,12 +79,12 @@ export default class MemoryBase {
 	allocate(size:i32):i32{
 		const memory_size:i32 = this._view.byteLength;
 		
-		if (this._last_allocated_index + 1 + size < memory_size){
+		if (this._last_allocated_index + size < memory_size){
 			const allocated_index = this._last_allocated_index + 1;
 			this.reserve(allocated_index, size);
-			this._last_allocated_index = allocated_index + size;
+			this._last_allocated_index = allocated_index + size - 1;
 			
-			// console.log('MemoryBase:allocate: size=[' + size + '] allocated index=[' + this._last_allocated_index + ']');
+			// console.log('MemoryBase:allocate:at end: size=[' + size + '] last allocated index=[' + this._last_allocated_index + ']');
 			return allocated_index;
 		}
 		
@@ -105,7 +105,7 @@ export default class MemoryBase {
 		
 		this._last_allocated_index = Math.max(this._last_allocated_index, index + size);
 		
-		// console.log('MemoryBase:allocate: size=[' + size + '] allocated index=[' + this._last_allocated_index + ']');
+		// console.log('MemoryBase:allocate:search: size=[' + size + '] last allocated index=[' + this._last_allocated_index + ']');
 		return index;
 	}
 	
@@ -117,11 +117,12 @@ export default class MemoryBase {
 	 */
 	release(index:i32, size:i32):void{
 		let i:i32 = index;
-		for(i ; i < size ; i++) {
+		let last_index = index + size - 1;
+		for(i ; i <= last_index ; i++) {
 			this._free_flags.set_one_at(i);
 		}
 		
-		console.log('MemoryBase:release: index=[' + index + '] size=[' + size + '] allocated index=[' + this._last_allocated_index + ']');
+		// console.log('MemoryBase:release: index=[' + index + '] size=[' + size + '] last index=[' + (i - 1) + '] last allocated index=[' + this._last_allocated_index + ']');
 	}
 	
 	
@@ -132,13 +133,12 @@ export default class MemoryBase {
 	 */
 	reserve(index:i32, size:i32):void{
 		let i:i32 = index;
-		let last_index = index + size;
-		for(i ; i < last_index ; i++) {
-			this._free_flags.set_zero_at(index);
-			index++;
+		let last_index = index + size - 1;
+		for(i ; i <= last_index ; i++) {
+			this._free_flags.set_zero_at(i);
 		}
-		this._last_allocated_index = Math.max(this._last_allocated_index, index);
-		console.log('MemoryBase:reserve: index=[' + index + '] size=[' + size + '] allocated index=[' + this._last_allocated_index + ']');
+		this._last_allocated_index = Math.max(this._last_allocated_index, i-1);
+		// console.log('MemoryBase:reserve: index=[' + index + '] size=[' + size + '] last index=[' + (i - 1) + '] last allocated index=[' + this._last_allocated_index + ']');
 	}
 	
 	
@@ -148,6 +148,6 @@ export default class MemoryBase {
 	 * @returns index i32
 	 */
 	get_free_index():i32{
-		return this._last_allocated_index;
+		return this._last_allocated_index + 1;
 	}
 }
