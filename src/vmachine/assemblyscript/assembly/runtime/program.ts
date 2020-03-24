@@ -2,65 +2,91 @@
 /// <reference path="../../../../../node_modules/assemblyscript/std/portable/index.d.ts" />
 
 import ProgramOptions from './program_options';
-import { Value, Text, List, Stack, Error, Null } from './value';
+import { Value, Boolean, Integer, Float, Complex, Text, List, Stack, Error, Null } from './value';
 import Instructions from './instructions';
 import Memory from './memory';
 
 
 const DEFAULT_STACK_SIZE:u32 = 50;
 const DEFAULT_REGISTERS_STACK_SIZE:u32 = 50;
-const DEFAULT_REGISTERS_SIZE:u32 = 50;
 
-function i32(v:i32):i32 { return v; }
+// function i32(v:i32):i32 { return v; }
+
 
 /**
  * Program is a Virtual Machine thread instance.
  * It contains all instructions, memory, stack and registers.
  * 
- * @Example
- *  const engine = new VM('engine 1');
- *  const program = new Program('program 1', { registers:10 });
+ * @API
+ *  constructor(instructions:Instructions, instructions_start:i32, instructions_size:i32, values:List, options: ProgramOptions)
  *  
- *  // Init program stack
- *  program.push_value(new VMInteger(45) );
- *  program.push_value(new VMBigInteger('78215411554411000') );
+ *  push_context():void
+ *  pop_context():void
  * 
- *  // Fill program registers
- *  program.register_value(1, new VMInteger(33) );
- *  program.register_value(3, new VMBigInteger('9998215411554411000') );
- *  program.register_value(2, new VMDate('2018/05/14') );
- *  program.register_value(5, new VMMatrix( [[1,2,3],[4,5,6],[7,8,9]]) );
+ *  push_value(value:Value):void
+ *  push_boolean(value:boolean):void
+ *  push_integer(value:i32):void
+ *  push_float(value:f64):void
+ *  push_complex(re:f64, im:f64):void
  * 
- *  // Step 0
+ *  pop_value(): Value
+ *  pop_value_available(): boolean
+ *  pop_values(count:u32): List|null
  * 
- *  program.add_instruction(new VMInstruction('BigInteger.add') ); // Step 1
- *  program.push_register_value(1);                                // Step 2
- *  program.add_instruction(new VMInstruction('BigInteger.sub') ); // Step 3
- *  program.push_register_value(3);                                // Step 4
- *  program.add_instruction(new VMInstruction('BigInteger.div') ); // Step 5
+ *  set_register_value(index:i32, value:Value):void
+ *  get_register_value(index:i32):Value
  * 
- *  const VMProgramResult = program.run()
+ *  free_value(value:Value):void
+ * 
+ *  get_instructions():Instructions
+ *  get_entry_point():i32
+ * 
+ *  start():void
+ *  stop():void
+ *  is_running():boolean
+ * 
+ * @Example
+ *      r0 = BigInteger('78215411554411000') + Integer(45)  // Step 1
+ *      r1 = Integer(33) - r0                               // Step 2
+ *      r2 = BigInteger(9998215411554411000') / r1          // Step 3
+ * 
+ *  const instructions:Instructions = new Instructions(undefined, 0, 250);
+ *  instructions.bi_add(OPCODES.LIMIT_OPD_STACK, OPCODES.LIMIT_OPD_INLINE, 0, 45);    // Step 1: pop + pop
+ *  instructions.bi_sub(OPCODES.LIMIT_OPD_REGISTER, OPCODES.LIMIT_OPD_STACK, );       // Step 2: reg - pop
+ *  instructions.bi_div(OPCODES.LIMIT_OPD_REGISTER, OPCODES.LIMIT_OPD_STACK, );       // Step 3: reg / pop
+ * 
+ *  const values:List = new List(20);
+ *  values.set(0, new VMBigInteger('78215411554411000') );
+ *  values.set(1, new VMInteger(33) );
+ *  values.set(3, new VMBigInteger('9998215411554411000') );
+ *  values.set(2, new VMDate('2018/05/14') );
+ *  values.set(5, new VMMatrix( [[1,2,3],[4,5,6],[7,8,9]]) );
+ * 
+ *  const engine = new VM('VM name');
+ *  const program = new Program(instructions, 0, 0, values, { stack_size:10 });
+ * 
+ *  const result:Value = program.run()
  * 
  *  ---->
  *              Stack
- *  Step 0      BigInteger('78215411554411000')
+ * 
+ *  Step 1      BigInteger('78215411554411000')
  *              Integer(45)
  * 
- *  Step 1      BigInteger(add result)
+ *              BigInteger(add result)
  * 
  *  Step 2      Integer(33)
  *              BigInteger(add result)
  * 
- *  Step 3      BigInteger(sub result)
- * 
- *  Step 4      BigInteger(9998215411554411000')
  *              BigInteger(sub result)
  * 
- *  Step 5      BigInteger(div result)
+ *  Step 3      BigInteger(9998215411554411000')
+ *              BigInteger(sub result)
  * 
- *  Step 6      ---
+ *              BigInteger(div result)
  * 
- *  VMProgramResult.value = BigInteger(div result)
+ * 
+ *  result = BigInteger(pop: div result)
  */
 export default class Program {
 	// ERRORS
@@ -71,7 +97,6 @@ export default class Program {
 
 	// BYTES INSTRUCTIONS
     private _instructions:Instructions;
-    private _cursor:i32 = 0;
 	
 	// VALUES REGISTERS
     private _value_registers:List;
@@ -90,18 +115,24 @@ export default class Program {
 	/**
 	 * Create a Program instance with given options.
 	 */
-    constructor(options: ProgramOptions){
+    constructor(instructions:Instructions, instructions_start:i32, instructions_size:i32, values:List, options: ProgramOptions){
+        // Init instructions
+        this._instructions = instructions;
+
         // Init values registers
-        this._value_registers = new List(options.registers ? options.registers: DEFAULT_REGISTERS_SIZE);
+        this._value_registers = values;
 
         // Init values registers stack
-        this._value_registers_stack = new Stack(options.stack ? options.stack : DEFAULT_REGISTERS_STACK_SIZE);
+        this._value_registers_stack = new Stack(options.stack_size ? options.stack_size : DEFAULT_REGISTERS_STACK_SIZE);
 
         // Init values stack
-        this._value_stack = new Stack(options.stack ? options.stack : DEFAULT_STACK_SIZE);
+        this._value_stack = new Stack(options.stack_size ? options.stack_size : DEFAULT_STACK_SIZE);
     }
 
-    // Error
+
+    /**
+     * Error Management.
+     */
     public has_error() : boolean { return this._has_error; }
     public get_error_message() : string { return this._error_message; }
     public get_error_cursor()  : i32 { return this._error_cursor; }
@@ -156,7 +187,7 @@ export default class Program {
         this._value_stack.push(value);
     }
 
-
+    
     /**
      * Push a value onto the stack.
      * @param value Boolean value to put on the stack.
@@ -168,7 +199,8 @@ export default class Program {
             return;
         }
 
-        this._value_stack.push( new Boolean( u8(value ? 1 : 0) ) );
+        const v:Value = new Boolean( (value ? 1 : 0) );
+        this._value_stack.push(v);
     }
 
 
@@ -189,9 +221,9 @@ export default class Program {
 
     /**
      * Push a value onto the stack.
-     * @param value Boolean value to put on the stack.
+     * @param value f64 value to put on the stack.
      */
-    push_float(value:f32):void{
+    push_float(value:f64):void{
         if ( this._value_stack.is_full() )
         {
             this.error_stack_overflow();
@@ -203,10 +235,11 @@ export default class Program {
 
 
     /**
-     * Push a value onto the stack.
-     * @param value Boolean value to put on the stack.
+     * Push a complex value onto the stack.
+     * @param real value f64.
+     * @param imaginary value f64.
      */
-    push_complex(re:f32, im:f32):void{
+    push_complex(re:f64, im:f64):void{
         if ( this._value_stack.is_full() )
         {
             this.error_stack_overflow();
@@ -225,7 +258,7 @@ export default class Program {
         
         return this._value_stack.pop();
     }
-
+    
     pop_value_available(): boolean {
         return ! this._value_stack.is_empty();
     }
@@ -249,7 +282,7 @@ export default class Program {
 
 
     // Registers
-    // unregister_value(index:u32):void {
+    // unregister_value(index:i32):void {
     //     if (index < 0 || index >= this._registers_size)
     //     {
     //         this.error_bad_register_index(index);
@@ -264,7 +297,7 @@ export default class Program {
     //     this._registers[index] = new Null();
     // }
 
-    set_register_value(index:u32, value:Value):void {
+    set_register_value(index:i32, value:Value):void {
         if ( ! this._value_registers.is_valid_index(index) )
         {
             this.error_bad_register_index(index);
@@ -284,7 +317,7 @@ export default class Program {
         this._value_registers.set(index, value);
     }
 
-    get_register_value(index:u32):Value {
+    get_register_value(index:i32):Value {
         if ( ! this._value_registers.is_valid_index(index) )
         {
             return this.error_bad_register_index(index);
@@ -293,7 +326,7 @@ export default class Program {
         return this._value_registers.get(index);
     }
 
-    // push_register_value(index:u32):void {
+    // push_register_value(index:i32):void {
     //     if (index < 0 || index >= this._registers_size)
     //     {
     //         this.error_bad_register_index(index);
@@ -305,49 +338,20 @@ export default class Program {
 
 
     // VALUES
-    free_value(value:Value) {
+    free_value(value:Value):void {
         // TODO ...
     }
 
-
+    
     // INSTRUCTIONS
-	get_instructions() {
+	get_instructions():Instructions {
 		return this._instructions;
 	}
 
 
 	// CURSOR
-    get_entry_point() : i32 {
-        return 0;
-    }
-
-    set_cursor(index:i32):void {
-        if (index < 0 || index >= this._instructions. .size())
-        {
-            this.error_bad_instructions_index(index);
-            return;
-        }
-
-        this._cursor = index;
-    }
-
-    get_cursor():i32 {
-        return this._cursor;
-    }
-
-    move_cursor(index:i32):void {
-        const new_cursor = this._cursor + index
-        if (new_cursor < 0 || i32(new_cursor) >= this._scope.instructions.length)
-        {
-            this.error_bad_instructions_index(new_cursor);
-            return;
-        }
-
-        this._cursor = new_cursor;
-    }
-
-    move_next_unsafe():void {
-        this._cursor++;
+    get_entry_point():i32 {
+        return 8;
     }
 	
 
@@ -362,68 +366,66 @@ export default class Program {
 
 
     is_running():boolean {
-        return this._is_running && (this._cursor < this.instructions.bytesLength);
+        return this._is_running && (this._instructions.get_cursor() < this._instructions.get_size());
     }
 
     
     // ERRORS
     error_stack_overflow() {
         this._has_error = true;
-        this._error_cursor = this._cursor;
-        this._error_message = 'stack overflow: actual size=';
-        // this._error_message = 'stack overflow: actual size=[' + this._stack.size() + ']';
+        this._error_cursor = this._instructions.get_cursor();
+        this._error_message = 'stack overflow: actual size=[' + this._value_stack.size() + ']';
         return new Error(this._error_cursor, this._error_message);
     }
 
     error_stack_underflow():Error {
         this._has_error = true;
-        this._error_cursor = this._cursor;
-        this._error_message = 'stack underflow: actual size=';
-        // this._error_message = 'stack underflow: actual size=[' + this._stack.size() + ']';
+        this._error_cursor = this._instructions.get_cursor();
+        this._error_message = 'stack underflow: actual size=[' + this._value_stack.size() + ']';
         return new Error(this._error_cursor, this._error_message);
     }
 
     error_registers_stack_overflow():Error {
         this._has_error = true;
-        this._error_cursor = this._cursor;
-        this._error_message = 'registers stack overflow: actual size=';
-        // this._error_message = 'registers stack overflow: actual size=[' + this._registers_stack.size() + ']';
+        this._error_cursor = this._instructions.get_cursor();
+        this._error_message = 'registers stack overflow: actual size=[' + this._value_registers_stack.size() + ']';
         return new Error(this._error_cursor, this._error_message);
     }
 
     error_registers_stack_underflow():Error {
         this._has_error = true;
-        this._error_cursor = this._cursor;
-        this._error_message = 'registers stack underflow: actual size=';
-        // this._error_message = 'registers stack underflow: actual size=[' + this._registers_stack.size() + ']';
+        this._error_cursor = this._instructions.get_cursor();
+        this._error_message = 'registers stack underflow: actual size=[' + this._value_registers_stack.size() + ']';
         return new Error(this._error_cursor, this._error_message);
     }
 
     error_stack_bad_value():Error {
         this._has_error = true;
-        this._error_cursor = this._cursor;
+        this._error_cursor = this._instructions.get_cursor();
         this._error_message = 'program want to push on the stack a bad value';
         return new Error(this._error_cursor, this._error_message);
     }
 
     error_register_bad_value():Error {
         this._has_error = true;
-        this._error_cursor = this._cursor;
+        this._error_cursor = this._instructions.get_cursor();
         this._error_message = 'program want to register a bad value';
         return new Error(this._error_cursor, this._error_message);
     }
 
-    error_bad_register_index(index:u32):Error {
+    error_bad_register_index(index:i32):Error {
         this._has_error = true;
-        this._error_cursor = this._cursor;
-        this._error_message = 'bad register index';
+        this._error_index = index;
+        this._error_cursor = this._instructions.get_cursor();
+        this._error_message = 'bad register index [' + index + ']';
         return new Error(this._error_cursor, this._error_message);
     }
 
-    error_bad_instructions_index(index:u32):Error {
+    error_bad_instructions_index(index:i32):Error {
         this._has_error = true;
-        this._error_cursor = this._cursor;
-        this._error_message = 'bad instruction index';
+        this._error_index = index;
+        this._error_cursor = this._instructions.get_cursor();
+        this._error_message = 'bad instruction index [' + index + ']';
         return new Error(this._error_cursor, this._error_message);
     }
 }

@@ -6,13 +6,22 @@ import OPCODES from './opcodes'
 
 
 
-const DEFAULT_INSTRUCTIONS_SIZE:i32 = 50;
+const DEFAULT_SIZE_IN_BYTES:i32 = 50;
+export const MAGIC:i32 = 987456123;
+// export const EMPTY_OPERAND_I32:i32 = 0;
+
 
 /**
  * Instructions contains all opcodes of a program.
  * 
  * API:
- *   constructor(size:i32 = DEFAULT_INSTRUCTIONS_SIZE
+ *   constructor(buffer:ArrayBuffer|undefined = undefined, start:i32 = 0, size:i32 = 0)
+ *   
+ *   get_magic():i32
+ *   get_version_major():u8
+ *   get_version_minor():u8
+ *   get_version_patch():u8
+ *   get_version_custom():u8
  *   
  *   get_cursor():i32
  *   set_cursor(cursor:i32):void
@@ -70,22 +79,129 @@ const DEFAULT_INSTRUCTIONS_SIZE:i32 = 50;
  *
  */
 export default class Instructions {
-    private _cursor:i32 = 0;
+    private _cursor:i32 = 8;
 	
     private _buffer:ArrayBuffer;
-    private _view:DataView;
+	private _view:DataView;
+	
+    private _magic:i32 = 0;
+    private _version_major:u8 = 0;
+    private _version_minor:u8 = 0;
+    private _version_patch:u8 = 0;
+    private _version_custom:u8 = 0;
     
 
 	/**
 	 * Create an Instructions instance.
 	 
-	 * @param i32		instructions size
+	 * @param instructions buffer or undefined
+	 * @param instructions buffer offset (0 by default)
+	 * @param instructions size in bytes (provides 0 to take the buffer length)
 	 */
-    constructor(size:i32 = DEFAULT_INSTRUCTIONS_SIZE){
-		this._buffer = new ArrayBuffer(size);
-		this._view = new DataView(this._buffer);
-    }
+    constructor(buffer:ArrayBuffer|undefined = undefined, start:i32 = 0, size:i32 = 0){
+		this._buffer = buffer ? buffer : new ArrayBuffer(size ? size : DEFAULT_SIZE_IN_BYTES);
+		this._view = new DataView(this._buffer, start, size ? size : this._buffer.byteLength);
+
+		this._magic = this._view.getInt32(0);
+		this._version_major = this._view.getUint8(4);
+		this._version_minor = this._view.getUint8(5);
+		this._version_patch = this._view.getUint8(6);
+		this._version_custom = this._view.getUint8(7);
+	}
 	
+
+	/**
+	 * Dump to output for debug.
+	 */
+	dump(){
+		let i:i32;
+		for(i=0 ; i < this._view.byteLength ; i++){
+			console.log('buffer at [' + i + ']', this._view.getUint8(i));
+		}
+	}
+
+	
+	/**
+	 * Init buffer with magic code and version.
+	 * 
+	 * @param version major u8
+	 * @param version minor u8
+	 * @param version patch u8
+	 * @param version custom u8
+	 */
+	init(major:u8, minor:u8, patch:u8, custom:u8):void {
+		this._magic = MAGIC;
+		this._version_major = major;
+		this._version_minor = minor;
+		this._version_patch = patch;
+		this._version_custom = custom;
+
+		this._view.setInt32(0, this._magic);
+		this._view.setUint8(4, this._version_major);
+		this._view.setUint8(5, this._version_minor);
+		this._view.setUint8(6, this._version_patch);
+		this._view.setUint8(7, this._version_custom);
+	}
+
+	
+	/**
+	 * Get magic code.
+	 * @returns i32
+	 */
+	get_magic():i32 {
+		return this._magic;
+	}
+	
+	/**
+	 * Get version major.
+	 * @returns u8
+	 */
+	get_version_major():u8 {
+		return this._version_major;
+	}
+	
+	/**
+	 * Get version minor.
+	 * @returns u8
+	 */
+	get_version_minor():u8 {
+		return this._version_minor;
+	}
+	
+	/**
+	 * Get version patch.
+	 * @returns u8
+	 */
+	get_version_patch():u8 {
+		return this._version_patch;
+	}
+	
+	/**
+	 * Get version custom.
+	 * @returns u8
+	 */
+	get_version_custom():u8 {
+		return this._version_custom;
+	}
+	
+	/**
+	 * Get bytes count.
+	 * @returns u32
+	 */
+	get_size():u32 {
+		return this._view.byteLength;
+	}
+
+	
+	/**
+	 * Get first instruction cursor.
+	 *
+	 * @return cursor i32
+	 */
+	get_first_instruction_cursor():i32 {
+		return 8;
+	}
+
 	
 	/**
 	 * Get current cursor value.
@@ -532,6 +648,59 @@ export default class Instructions {
 	
 	
 	/**
+	 * Append an EXIT instruction.
+	 * 
+	 * @param optype u8 result type
+	 * @returns this
+	 */
+	append_exit(optype:u8):Instructions {
+		this._view.setUint8(this._cursor, OPCODES.EXIT);
+		this._cursor++;
+		this._view.setUint8(this._cursor, optype);
+		this._cursor++;
+		this._view.setUint8(this._cursor, OPCODES.EMPTY);
+		this._cursor++;
+		this._view.setUint8(this._cursor, OPCODES.EMPTY);
+		this._cursor++;
+		
+		return this;
+	}
+	
+	
+	/**
+	 * Append a TRAP instruction.
+	 * 
+	 * @param trap_code u8 trap code
+	 * @returns this
+	 */
+	append_trap(trap_code:u8):Instructions {
+		this._view.setUint8(this._cursor, OPCODES.TRAP);
+		this._cursor++;
+		this._view.setUint8(this._cursor, Value.INTEGER);
+		this._cursor++;
+		this._view.setUint8(this._cursor, trap_code);
+		this._cursor++;
+		this._view.setUint8(this._cursor, OPCODES.EMPTY);
+		this._cursor++;
+		
+		return this;
+	}
+	
+	
+	/**
+	 * Append an operation on integers.
+	 * @param optype		u8 result type
+	 * @param reg_index		i32
+	 * @returns this
+	 */
+	push_value_reg(optype:u8, reg_index:i32):Instructions {
+		this.append_instruction_i32(OPCODES.PUSH_VALUE_REG, optype, OPCODES.LIMIT_OPD_INLINE, OPCODES.EMPTY, reg_index);
+		return this;
+	}
+
+	
+	
+	/**
 	 * Append an operation on integers.
 	 * @param opcode		u8 instruction code
 	 * @param operand_1		u8 operand 1
@@ -542,11 +711,25 @@ export default class Instructions {
 	 */
 	i_ops(opcode:u8, operand_1:u8, operand_2:u8, value_1:i32=0, value_2:i32=0):Instructions {
 		this.append_instruction(opcode, Value.INTEGER, operand_1, operand_2);
+
 		if (operand_1 == OPCODES.LIMIT_OPD_INLINE) {
 			this._view.setInt32(this._cursor, value_1);
 			this._cursor += 4;
+		} else if (operand_1 == OPCODES.LIMIT_OPD_REGISTER) {
+			this._view.setInt32(this._cursor, value_1);
+			this._cursor += 4;
+		} else if (operand_1 == OPCODES.LIMIT_OPD_MEMORY) {
+			this._view.setInt32(this._cursor, value_1);
+			this._cursor += 4;
 		}
+
 		if (operand_2 == OPCODES.LIMIT_OPD_INLINE) {
+			this._view.setInt32(this._cursor, value_2);
+			this._cursor += 4;
+		} else if (operand_2 == OPCODES.LIMIT_OPD_INLINE) {
+			this._view.setInt32(this._cursor, value_2);
+			this._cursor += 4;
+		} else if (operand_2 == OPCODES.LIMIT_OPD_MEMORY) {
 			this._view.setInt32(this._cursor, value_2);
 			this._cursor += 4;
 		}
@@ -565,14 +748,29 @@ export default class Instructions {
 	 */
 	i_ops_comp(opcode:u8, operand_1:u8, operand_2:u8, value_1:i32=0, value_2:i32=0):Instructions {
 		this.append_instruction(opcode, Value.BOOLEAN, operand_1, operand_2);
+		
 		if (operand_1 == OPCODES.LIMIT_OPD_INLINE) {
 			this._view.setInt32(this._cursor, value_1);
 			this._cursor += 4;
+		} else if (operand_1 == OPCODES.LIMIT_OPD_REGISTER) {
+			this._view.setInt32(this._cursor, value_1);
+			this._cursor += 4;
+		} else if (operand_1 == OPCODES.LIMIT_OPD_MEMORY) {
+			this._view.setInt32(this._cursor, value_1);
+			this._cursor += 4;
 		}
+
 		if (operand_2 == OPCODES.LIMIT_OPD_INLINE) {
 			this._view.setInt32(this._cursor, value_2);
 			this._cursor += 4;
+		} else if (operand_2 == OPCODES.LIMIT_OPD_INLINE) {
+			this._view.setInt32(this._cursor, value_2);
+			this._cursor += 4;
+		} else if (operand_2 == OPCODES.LIMIT_OPD_MEMORY) {
+			this._view.setInt32(this._cursor, value_2);
+			this._cursor += 4;
 		}
+
 		return this;
 	}
 	
@@ -661,7 +859,7 @@ export default class Instructions {
 	 * @param value_1		i32
 	 * @returns this
 	 */
-	i_is_true(operand_1:u8, operand_2:u8, value_1:i32=0):Instructions {
+	i_is_true(operand_1:u8, value_1:i32=0):Instructions {
 		return this.i_ops_comp(OPCODES.I_IS_TRUE, operand_1, OPCODES.EMPTY, value_1, 0);
 	}
 	
@@ -672,7 +870,7 @@ export default class Instructions {
 	 * @param value_1		i32
 	 * @returns this
 	 */
-	i_is_positive(operand_1:u8, operand_2:u8, value_1:i32=0):Instructions {
+	i_is_positive(operand_1:u8, value_1:i32=0):Instructions {
 		return this.i_ops_comp(OPCODES.I_IS_POSITIVE, operand_1, OPCODES.EMPTY, value_1, 0);
 	}
 	
@@ -683,7 +881,7 @@ export default class Instructions {
 	 * @param value_1		i32
 	 * @returns this
 	 */
-	i_is_zero(operand_1:u8, operand_2:u8, value_1:i32=0):Instructions {
+	i_is_zero(operand_1:u8, value_1:i32=0):Instructions {
 		return this.i_ops_comp(OPCODES.I_IS_ZERO, operand_1, OPCODES.EMPTY, value_1, 0);
 	}
 }

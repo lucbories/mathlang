@@ -99,6 +99,24 @@ export class Float extends Simple<f64> {
     }
 }
 
+export class Complex extends Simple2<f64> {
+    constructor(v1:f64, v2:f64) {
+        super(v1, v2, Value.FLOAT, 16);
+    }
+}
+
+export class BigInteger extends Simple<i32> { // TODO
+    constructor(v:i32) {
+        super(v, Value.INTEGER, 4);
+    }
+}
+
+export class BigFloat extends Simple<f64> { // TODO
+    constructor(v:f64) {
+        super(v, Value.FLOAT, 8);
+    }
+}
+
 export class Text extends Simple<string> {
     constructor(v:string) {
         super(v, Value.STRING, 1 + v.length * 2);
@@ -111,10 +129,10 @@ export class List extends Value {
         super(Value.LIST, 4);
         this._values = new Array<Value>(size);
     }
-    public get(index:u32):Value {
+    public get(index:i32):Value {
         return this._values[index];
     }
-    public set(index:u32, v:Value):void {
+    public set(index:i32, v:Value):void {
         this._values[index] = v;
     }
     public set_all(values:Value[]):void {
@@ -126,20 +144,20 @@ export class List extends Value {
     public bytes_size():u32 {
         return 4 + this._values.length * 4;
     }
-    public is_valid_index(index:u32):boolean {
-        return index >= 0 && i32(index) < this._values.length;
+    public is_valid_index(index:i32):boolean {
+        return index >= 0 && index < this._values.length;
     }
     public is_true():boolean { return true; }
 }
 
 export class Stack extends Value {
     private _values:Value[];
-    private _top:u32 = -1;
+    private _top:i32 = -1;
     constructor(size:u32) {
         super(Value.STACK, 4);
         this._values = new Array<Value>(size);
     }
-    public get(index:u32):Value {
+    public get(index:i32):Value {
         return this._values[index];
     }
     public pop():Value {
@@ -153,7 +171,7 @@ export class Stack extends Value {
     public size():u32 {
         return this._values.length;
     }
-    public top():u32 {
+    public top():i32 {
         return this._top;
     }
     public bytes_size():u32 {

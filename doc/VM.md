@@ -1,3 +1,31 @@
+MathLang is a language for mathematical and science uses.
+
+It provide many usefull features in its core.
+
+It is a compiled language as it targets many runtimes: WebAssembly virtual machine in browser, Typescript/Javascript on nodejs (with platforms optimization).
+
+So MathLang compiler produces an intermediate code which and then a bytecode program.
+
+The bytecode program is run in a virtual machine runtime developped in AssemblyScript: the same runtime can run with Typescript/Javascript or with WebAssembly.
+
+
+The Virtual Machine capabilities are:
+ * buil-in common operations
+ * all values inherits a Value class
+ * runable in WebAssembly and TypeScript
+ * unlimited number of Value registers
+ * simple values are inlined into the instructions bytecode
+
+The Virtual Machine has a running loop with a Program as input which consists of:
+ * an array of instructions and inline simple values (instructions)
+ * an array of mutable values (registers)
+ * a stack of calls contexts (context stack)
+ * a stack of values for operations (values stack)
+
+The Program registers values are initialized with a binary memory structure (for WebAssembly target) or a List of values.
+
+
+
 Bytecode
 
 Instructions: u32 array
