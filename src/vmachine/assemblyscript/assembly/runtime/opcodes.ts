@@ -42,10 +42,12 @@ enum OPCODES {
     CALL            = 12,
     JUMP            = 13,
     JUMP_IF_TRUE    = 14,
+    JUMP_IF_EQUAL   = 15,
 
     POP_VALUE       = 20,
     PUSH_VALUE_REG  = 21,
     PUSH_VALUE_MEM  = 22,
+    PUSH_VALUE      = 23,
 
     REG_VALUE_GET   = 30,
     REG_VALUE_SET   = 31,

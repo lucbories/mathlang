@@ -184,6 +184,28 @@ export class Stack extends Value {
         return this._top < 0;
     }
     public is_true():boolean { return true; }
+    public dump():string{
+        let str:string = 'dump Stack:';
+        str += '\nsize=' + this.size();
+        str += '\ntop=' + this.top();
+        str += '\nbytes_size=' + this.bytes_size();
+        str += '\nis_full=' + this.is_full();
+        str += '\nis_empty=' + this.is_empty();
+        
+        let i:i32 = 0;
+        let v:Value;
+        while(i <= this._top){
+            v = this._values[i];
+            str += '\n i=[' + i + '] =>type=[' + v.type + ']';
+            if (v instanceof Simple){
+                str += 'value=[' + v.value + ']';
+            }
+            ++i;
+        }
+
+        str += '\n';
+        return str;
+    }
 }
 
 export class Error extends Value {

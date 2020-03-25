@@ -280,6 +280,10 @@ export default class Program {
         return values;
     }
 
+    dump_stack():string{
+        return this._value_stack.dump();
+    }
+
 
     // Registers
     // unregister_value(index:i32):void {

@@ -4,8 +4,7 @@
   "description": "test math vm",
   "main": "dest/mathlang.js",
   "dependencies": {
-    "@stdlib/stdlib": "0.0.90",
-    "@types/node": "^11.12.1",
+    "@types/node": "^11.15.7",
     "big-integer": "^1.6.43",
     "chevrotain": "^4.3.1",
     "convert-units": "^2.3.4",

@@ -688,13 +688,37 @@ export default class Instructions {
 	
 	
 	/**
-	 * Append an operation on integers.
+	 * Push a registers value to the stack.
 	 * @param optype		u8 result type
 	 * @param reg_index		i32
 	 * @returns this
 	 */
 	push_value_reg(optype:u8, reg_index:i32):Instructions {
 		this.append_instruction_i32(OPCODES.PUSH_VALUE_REG, optype, OPCODES.LIMIT_OPD_INLINE, OPCODES.EMPTY, reg_index);
+		return this;
+	}
+	
+	
+	/**
+	 * Push a value to the stack.
+	 * @param optype		u8 result type
+	 * @param reg_index		i32
+	 * @returns this
+	 */
+	push_value(optype:u8, operand_1:u8, value_1:i32=0):Instructions {
+		this.append_instruction(OPCODES.PUSH_VALUE, optype, operand_1, OPCODES.EMPTY);
+
+		if (operand_1 == OPCODES.LIMIT_OPD_INLINE) {
+			this._view.setInt32(this._cursor, value_1);
+			this._cursor += 4;
+		} else if (operand_1 == OPCODES.LIMIT_OPD_REGISTER) {
+			this._view.setInt32(this._cursor, value_1);
+			this._cursor += 4;
+		} else if (operand_1 == OPCODES.LIMIT_OPD_MEMORY) {
+			this._view.setInt32(this._cursor, value_1);
+			this._cursor += 4;
+		}
+
 		return this;
 	}
 
@@ -747,7 +771,7 @@ export default class Instructions {
 	 * @returns this
 	 */
 	i_ops_comp(opcode:u8, operand_1:u8, operand_2:u8, value_1:i32=0, value_2:i32=0):Instructions {
-		this.append_instruction(opcode, Value.BOOLEAN, operand_1, operand_2);
+		this.append_instruction(opcode, Value.INTEGER, operand_1, operand_2);
 		
 		if (operand_1 == OPCODES.LIMIT_OPD_INLINE) {
 			this._view.setInt32(this._cursor, value_1);
