@@ -14,7 +14,7 @@ import OPCODES from '../../../vmachine/assemblyscript/assembly/runtime/opcodes';
 
 
 
-describe('VM run test: programs 1', () => {
+describe('VM run test: integer operations', () => {
 	const INSTRUCTIONS_BYTES:i32 = 100;
     const vm = new VM('vm1');
 

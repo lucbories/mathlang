@@ -108,7 +108,7 @@ export default class VirtualMachine {
         program.start();
 
         const ds:Function = ()=>{
-            return program.dump_stack;
+            return program.dump_stack();
         }
 
         while(running) {
@@ -267,21 +267,25 @@ export default class VirtualMachine {
 
                 // ********** CODE CONTROL **********
                 case OPCODES.CALL:{
+                    trace('main-loop:CALL', 'call, push context');
                     program.push_context();
                     break;
                 }
 
                 case OPCODES.RETURN:{
+                    trace('main-loop:RETURN', 'return, pop context');
                     program.pop_context();
                     break;
                 }
 
                 case OPCODES.JUMP:{
-                    cursor_next = cursor_tmp_i32_2;
+                    cursor_next = cursor_tmp_i32_1;
+                    trace('main-loop:JUMP', 'cursor next after jump', cursor_next);
                     break;
                 }
 
                 case OPCODES.JUMP_IF_TRUE:{
+                    trace('main-loop:JUMP_IF_TRUE', 'jump if true');
                     if (cursor_tmp_value_1 instanceof Simple) {
                         if (! cursor_tmp_value_1.is_true()) {
                             break;
@@ -293,6 +297,7 @@ export default class VirtualMachine {
                 }
 
                 case OPCODES.JUMP_IF_EQUAL:{
+                    trace('main-loop:JUMP_IF_EQUAL', 'jump if equal');
                     if (cursor_tmp_value_1 instanceof Simple) {
                         if (! cursor_tmp_value_1.is_true()) {
                             break;
@@ -306,12 +311,13 @@ export default class VirtualMachine {
                 
                 // ********** VALUES STACK OPS **********
                 case OPCODES.POP_VALUE:{
+                    trace('main-loop:POP_VALUE', 'pop value');
                     cursor_tmp_value_1 = program.pop_value(); // unused value, free ?
                     break;
                 }
 
                 case OPCODES.PUSH_VALUE_REG:{
-                    // cursor_tmp_i32 = i32(cursor_opd1) < OPCODES.LIMIT_OPD_INLINE ? i32(cursor_opd1) : instructions.get_i32_unsafe(cursor_next);
+                    trace('main-loop:PUSH_VALUE_REG', 'push value from register');
                     cursor_tmp_value_2 = program.get_register_value(cursor_tmp_i32_1);
                     program.push_value(cursor_tmp_value_2);
                     break;

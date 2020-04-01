@@ -688,6 +688,45 @@ export default class Instructions {
 	
 	
 	/**
+	 * Jump to an instruction.
+	 * @param instr_index		i32
+	 * @returns this
+	 */
+	append_jump(instr_index:i32=0):Instructions {
+		if (instr_index < OPCODES.LIMIT_OPD_INLINE) {
+			this.append_instruction(OPCODES.JUMP, Value.INTEGER, instr_index, OPCODES.EMPTY);
+		} else {
+			this.append_instruction_i32(OPCODES.JUMP, Value.INTEGER, OPCODES.LIMIT_OPD_INLINE, OPCODES.EMPTY, instr_index);
+			this._cursor += 4;
+		}
+
+		return this;
+	}
+	
+	
+	/**
+	 * Call a sub routine.
+	 * @param optype		u8 result type
+	 * @returns this
+	 */
+	append_call(optype:u8):Instructions {
+		this.append_instruction(OPCODES.CALL, optype, OPCODES.EMPTY, OPCODES.EMPTY);
+		return this;
+	}
+	
+	
+	/**
+	 * Return from a call.
+	 * @param optype		u8 result type
+	 * @returns this
+	 */
+	append_return(optype:u8):Instructions {
+		this.append_instruction(OPCODES.RETURN, optype, OPCODES.EMPTY, OPCODES.EMPTY);
+		return this;
+	}
+	
+	
+	/**
 	 * Push a registers value to the stack.
 	 * @param optype		u8 result type
 	 * @param reg_index		i32
