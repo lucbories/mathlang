@@ -19,7 +19,7 @@
     "assemblyscript": "^0.8.1",
     "chai": "^4.2.0",
     "fetch": "^1.1.0",
-    "mocha": "^5.2.0",
+    "mocha": "^10.2.0",
     "ts-node": "^8.0.3",
     "typescript": "^3.4.1"
   },
